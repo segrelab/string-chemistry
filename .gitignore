@@ -1,0 +1,5 @@
+lib/
+bin/
+__pycache__/
+share/
+stoich_mat.dat
