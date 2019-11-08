@@ -309,6 +309,7 @@ def random_prune(cobra_model, bm_rxn):
     solution = cobra_net.optimize()
     # get list of all reactions with nonzero flux
     flux_bearer_names = solution.fluxes[solution.fluxes != 0].index
+    print(flux_bearer_names)
     # exclude the biomass reaction, since we know we want to keep that
     flux_bearers = [
         rxn for rxn in cobra_net.reactions 
@@ -326,3 +327,16 @@ def random_prune(cobra_model, bm_rxn):
         for rxn in flux_bearers:
             # try to remove the reaction from the model
             cobra_net.remove_reactions([rxn])
+
+# given a model containing all possible reactions and a pruned model only
+# containing some subset of those reactions, make a bitstring indicating which
+# reactions are present in the pruned model
+def make_bitstring(full_model, pruned_model):
+    all_reactions = full_model.reactions
+    # make sure the reactions are in the same order so we can directly compare
+    # multiple bitstrings from multiple different networks derived from the
+    # same parent network
+    all_reactions.sort()
+    bits = [1 if rxn in pruned_model.reactions else 0 for rxn in all_reactions]
+    bitstring = ''.join([str(bit) for bit in bits])
+    return(bitstring)
