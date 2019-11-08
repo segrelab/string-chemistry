@@ -274,7 +274,6 @@ def reverse_rxns(model, n):
     # all of these modifications are happening in-place, so we don't actually
     # need to return anything
     return(None)
-<<<<<<< HEAD
 
 # iteratively remove all reactions with zero flux and then the reaction with
 # the smallest flux until you make the network unsolvable
