@@ -15,8 +15,7 @@
 import string_chem_net as scn
 import random
 import re
-import matplotlib.pyplot as plt
-import sys
+import pandas as pd
 
 # iteratively remove all reactions with zero flux and then the reaction with
 # the smallest flux until you make the network unsolvable
@@ -72,20 +71,15 @@ def random_prune(cobra_model, bm_rxn):
             cobra_net.remove_reactions([rxn])
             # see if you can solve the model
             solution = cobra_net.optimize()
-            # turns out all the fluxes sometimes get really small without 
-            # actually reaching zero, but might as well be zero, so we are
-            # setting a lower bound instead of actually checking for zeros
-            if solution.status == 'infeasible' or (solution.fluxes < 10e-10).all():
+            # sometimes "feasible" solutions have extremely small fluxes
+            # through the biomass reaction
+            bm_rxn_flux = solution.fluxes.get(key = bm_rxn.id)
+            if solution.status == 'infeasible' or bm_rxn_flux < 10e-10:
                 # keep track of how many times we've gotten a bad solution
                 infeas_count += 1
                 # put this reaction back and get the old solution object back
                 cobra_net.add_reactions([rxn])
                 solution = cobra_net.optimize()
-                end = (solution.fluxes < 10e-10).all()
-                if start != end:
-                    print(rxn)
-                    print(original.fluxes[original.fluxes != 0])
-                    sys.exit()
             else:
                 # recreate flux_bearers and restart the while loop and reset
                 # infeas_count
@@ -168,15 +162,11 @@ for i in range(1,100):
     # this network before
     random_pruned_counts.append(len(pruned_net.reactions))
 
-# output section
-print(f'Total number of possible reactions: {len(cobra_model.reactions)}')
-print(f'Number of reactions left after min flux pruning: {min_flux_count}')
-plt.hist(random_pruned_counts)
-plt.axvline(min_flux_count)
-plt.xlabel('Number of reactions')
-plt.ylabel('Number of pruned networks')
-plt.title('Results of 1000 Random Prunes')
-plt.show()
-print('Number of times each network was observed:')
-for key in random_pruned_dict.keys():
-    print(f'{key} ({sum([int(x) for x in key])}): {random_pruned_dict[key]}')
+# make a dataframe of all the bitstrings we've generated
+# turn the dictionary into a list of lists before coercion
+bitstring_df = pd.DataFrame(list(map(list, random_pruned_dict.items())))
+# add the bitstring from the min flux prune
+bitstring_df = bitstring_df.append(
+    pd.Series([min_flux_bitstring, 'mf']), ignore_index = True
+)
+bitstring_df.to_csv('bitstrings.csv')

@@ -274,6 +274,7 @@ def reverse_rxns(model, n):
     # all of these modifications are happening in-place, so we don't actually
     # need to return anything
     return(None)
+<<<<<<< HEAD
 
 # iteratively remove all reactions with zero flux and then the reaction with
 # the smallest flux until you make the network unsolvable
@@ -308,7 +309,6 @@ def random_prune(cobra_model, bm_rxn):
     solution = cobra_net.optimize()
     # get list of all reactions with nonzero flux
     flux_bearer_names = solution.fluxes[solution.fluxes != 0].index
-    print(flux_bearer_names)
     # exclude the biomass reaction, since we know we want to keep that
     flux_bearers = [
         rxn for rxn in cobra_net.reactions 
@@ -324,8 +324,32 @@ def random_prune(cobra_model, bm_rxn):
     infeas_count = 0
     while infeas_count < len(flux_bearers):
         for rxn in flux_bearers:
+            original = cobra_net.optimize()
+            start = (original.fluxes < 10e-10).all()
             # try to remove the reaction from the model
             cobra_net.remove_reactions([rxn])
+            # see if you can solve the model
+            solution = cobra_net.optimize()
+            # sometimes "feasible" solutions have extremely small fluxes
+            # through the biomass reaction
+            bm_rxn_flux = solution.fluxes.get(key = bm_rxn.id)
+            if solution.status == 'infeasible' or bm_rxn_flux < 10e-10:
+                # keep track of how many times we've gotten a bad solution
+                infeas_count += 1
+                # put this reaction back and get the old solution object back
+                cobra_net.add_reactions([rxn])
+                solution = cobra_net.optimize()
+            else:
+                # recreate flux_bearers and restart the while loop and reset
+                # infeas_count
+                flux_bearer_names = solution.fluxes[solution.fluxes != 0].index
+                flux_bearers = [
+                    rxn for rxn in cobra_net.reactions
+                    if rxn.id in flux_bearer_names and rxn.id != bm_rxn.id
+                ]
+                infeas_count = 0
+                break
+    return(cobra_net)
 
 # given a model containing all possible reactions and a pruned model only
 # containing some subset of those reactions, make a bitstring indicating which
