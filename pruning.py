@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 # pruning.py
 # take a network made by string_chem_net, designate some input and output
 # metabolites, do fba to find reaction fluxes, drop all reactions with no flux,
@@ -19,8 +18,6 @@ import re
 import matplotlib.pyplot as plt
 import sys
 
-<<<<<<< HEAD
-=======
 # iteratively remove all reactions with zero flux and then the reaction with
 # the smallest flux until you make the network unsolvable
 def min_flux_prune(cobra_model):
@@ -117,13 +114,6 @@ def make_bitstring(full_model, pruned_model):
     bitstring = ''.join(bitstring_list)
     return(bitstring)
 
-# somewhat of a blend of the above two functions; randomly choose a reaction to
-# remove during each iteration, but if it can be removed, remove all reactions
-# with zero flux after its removal before choosing another reaction to remove
-def random_zero_prune(cobra_model, bm_rxn):
-    return(cobra_net)
-
->>>>>>> parent of 7ab3f62... Pruning.py outputs csv files; pruning functions now in string_chem_net.py
 SCN = scn.CreateNetwork('ab', 5)
 cobra_model = scn.make_cobra_model(SCN.met_list, SCN.rxn_list)
 scn.reverse_rxns(cobra_model, len(cobra_model.reactions))
@@ -146,10 +136,6 @@ while solution.status == 'infeasible' or (solution.fluxes == 0).all():
 
 min_flux_pruned = scn.min_flux_prune(cobra_model)
 min_flux_count = len(min_flux_pruned.reactions)
-<<<<<<< HEAD
-min_flux_bitstring = scn.make_bitstring(cobra_model, min_flux_pruned)
-=======
->>>>>>> parent of 7ab3f62... Pruning.py outputs csv files; pruning functions now in string_chem_net.py
 
 # will hold number of reactions in each network after 1000 runs of random_prune
 random_pruned_counts = list()

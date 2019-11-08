@@ -8,7 +8,6 @@ import numpy as np
 import random
 import cobra
 import re
-import time
 
 class CreateNetwork():
     # given a set of monomers and a max polymer length, generate a network
@@ -275,7 +274,6 @@ def reverse_rxns(model, n):
     # all of these modifications are happening in-place, so we don't actually
     # need to return anything
     return(None)
-<<<<<<< HEAD
 
 # iteratively remove all reactions with zero flux and then the reaction with
 # the smallest flux until you make the network unsolvable
@@ -341,5 +339,3 @@ def make_bitstring(full_model, pruned_model):
     bits = [1 if rxn in pruned_model.reactions else 0 for rxn in all_reactions]
     bitstring = ''.join([str(bit) for bit in bits])
     return(bitstring)
-=======
->>>>>>> parent of 7ab3f62... Pruning.py outputs csv files; pruning functions now in string_chem_net.py
