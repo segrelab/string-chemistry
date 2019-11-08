@@ -99,6 +99,28 @@ def random_prune(cobra_model, bm_rxn):
                 break
     return(cobra_net)
 
+# given a pruned network and the network it was pruned from, make a bitstring
+# representation of the pruned network incidating which reactions are in it
+def make_bitstring(full_model, pruned_model):
+    # start by sorting the full model reaction list so that all bitstrings
+    # from this network are in the same order
+    full_rxn_list = full_model.reactions
+    full_rxn_list.sort()
+    bitstring_list = list()
+    for rxn in full_rxn_list:
+        if rxn in pruned_model.reactions:
+            bitstring_list.append('1')
+        else:
+            bitstring_list.append('0')
+    bitstring = ''.join(bitstring_list)
+    return(bitstring)
+
+# somewhat of a blend of the above two functions; randomly choose a reaction to
+# remove during each iteration, but if it can be removed, remove all reactions
+# with zero flux after its removal before choosing another reaction to remove
+def random_zero_prune(cobra_model, bm_rxn):
+    return(cobra_net)
+
 SCN = scn.CreateNetwork('ab', 5)
 cobra_model = scn.make_cobra_model(SCN.met_list, SCN.rxn_list)
 scn.reverse_rxns(cobra_model, len(cobra_model.reactions))
@@ -124,33 +146,29 @@ min_flux_count = len(min_flux_pruned.reactions)
 
 # will hold number of reactions in each network after 1000 runs of random_prune
 random_pruned_counts = list()
-# will hold unique reaction lists from randomly pruned networks because no two
-# cobrapy models are ever equal, so we have to compare their lists
-# will also be a dict so we can record how many times each list came up
-random_pruned_net_rxns = dict()
+# will hold bitstrings of all unique reactions and the count of times each one
+# came up
+random_pruned_dict = dict()
 # will hold all the unique networks found by random_prune after 1000 runs
 random_pruned_nets = list()
-for i in range(1,1000):
+for i in range(1,100):
     pruned_net = random_prune(cobra_model, bm_rxn)
     # in order to know whether we've seen this model before, we can't just 
     # compare models, since no two models are ever 'equal', so we'll compare
-    # reaction lists. But if we want to keep track of how many times we see
-    # each model, we'll want a dict, but we can't use the models as keys and we
-    # can't use the reaction lists as keys (since lists aren't hashable) so we
-    # need to turn the reaction list into a string to make it a key
+    # reaction presence bitstrings. 
+    # We also want to keep track of how many times we see each model, so we 
+    # will make a dict with the bitstrings as keys
     # sort is in-place
-    rxn_list = pruned_net.reactions
-    rxn_list.sort()
-    rxn_list_string = ' '.join([rxn.id for rxn in rxn_list])
-    if rxn_list_string not in random_pruned_net_rxns.keys():
+    bitstring = make_bitstring(cobra_model, pruned_net)
+    if bitstring not in random_pruned_dict.keys():
         # make sure all reaction lists are sorted so that all isomorphic
         # networks have the same reaction list
-        random_pruned_net_rxns[rxn_list_string] = 1
+        random_pruned_dict[bitstring] = 1
         random_pruned_nets.append(pruned_net)
     else:
         # if we already found this network once, then increment the counter
         # in random_pruned_nets by 1
-        random_pruned_net_rxns[rxn_list_string] += 1
+        random_pruned_dict[bitstring] += 1
     # so that we can see the distribution of network sizes, record the length
     # of the reaction list each time, regardless of whether or not we've seen
     # this network before
@@ -166,6 +184,5 @@ plt.ylabel('Number of pruned networks')
 plt.title('Results of 1000 Random Prunes')
 plt.show()
 print('Number of times each network was observed:')
-for key in random_pruned_net_rxns.keys():
-    rxn_count = len(re.split(' ', key))
-    print(f'Network with {rxn_count} reactions: {random_pruned_net_rxns[key]}')
+for key in random_pruned_dict.keys():
+    print(f'{key} ({sum([int(x) for x in key])}): {random_pruned_dict[key]}')
