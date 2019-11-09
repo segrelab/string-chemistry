@@ -38,7 +38,7 @@ while solution.status == 'infeasible' or (solution.fluxes == 0).all():
     solution = cobra_model.optimize()
 
 min_flux_pruned = scn.min_flux_prune(cobra_model)
-min_flux_count = len(min_flux_pruned.reactions)
+min_flux_bitstring = scn.make_bitstring(cobra_model, min_flux_pruned)
 
 # will hold number of reactions in each network after 1000 runs of random_prune
 random_pruned_counts = list()
@@ -47,8 +47,9 @@ random_pruned_counts = list()
 random_pruned_dict = dict()
 # will hold all the unique networks found by random_prune after 1000 runs
 random_pruned_nets = list()
-for i in range(1,100):
-    print(i)
+for i in range(1,1000):
+    if i % 100 == 0:
+        print(i)
     pruned_net = scn.random_prune(cobra_model, bm_rxn)
     # in order to know whether we've seen this model before, we can't just 
     # compare models, since no two models are ever 'equal', so we'll compare
@@ -76,6 +77,7 @@ for i in range(1,100):
 bitstring_df = pd.DataFrame(list(map(list, random_pruned_dict.items())))
 # add the bitstring from the min flux prune
 bitstring_df = bitstring_df.append(
-    pd.Series([min_flux_bitstring, 'mf']), ignore_index = True
+    pd.Series([min_flux_bitstring, 1]), ignore_index = True
 )
+bitstring_df.columns = ['bitstring', 'occurences']
 bitstring_df.to_csv('bitstrings.csv')
