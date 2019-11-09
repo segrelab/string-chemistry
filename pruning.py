@@ -17,6 +17,14 @@ import random
 import re
 import pandas as pd
 
+# count number of 1s in a bitstring
+def count_bitstring(bitstring):
+    count = 0
+    for bit in [int(bit) for bit in list(bitstring)]:
+        if bit == 1:
+            count += 1
+    return(count)
+
 SCN = scn.CreateNetwork('ab', 5)
 cobra_model = scn.make_cobra_model(SCN.met_list, SCN.rxn_list)
 scn.reverse_rxns(cobra_model, len(cobra_model.reactions))
@@ -38,6 +46,7 @@ while solution.status == 'infeasible' or (solution.fluxes == 0).all():
     solution = cobra_model.optimize()
 
 min_flux_pruned = scn.min_flux_prune(cobra_model)
+min_flux_count = len(min_flux_pruned.reactions)
 min_flux_bitstring = scn.make_bitstring(cobra_model, min_flux_pruned)
 
 # will hold number of reactions in each network after 1000 runs of random_prune
@@ -80,4 +89,6 @@ bitstring_df = bitstring_df.append(
     pd.Series([min_flux_bitstring, 1]), ignore_index = True
 )
 bitstring_df.columns = ['bitstring', 'occurences']
-bitstring_df.to_csv('bitstrings.csv')
+# add in a column for the number of reactions in each network 
+bitstring_df['rxn_counts'] = list(map(count_bitstring, bitstring_df.bitstring))
+bitstring_df.to_csv('bitstrings.csv', index = False)

@@ -17,11 +17,13 @@ pca_ready = bits_as_cols.iloc[:,1:-1].astype('int32')
 pca = PCA(n_components = 2)
 pcs = pca.fit_transform(pca_ready)
 pc_df = pd.DataFrame(data = pcs, columns = ['PC1', 'PC2'])
-pca_results = pd.concat([
-    pc_df, 
-    bitstring_df[['bitstring', 'occurences']]],
-    axis = 1
-)
+pca_results = pd.concat([pc_df, bitstring_df], axis = 1)
 # now make a scatterplot
-plt.scatter(pca_results.PC1, pca_results.PC2, s = pca_results.occurences)
+plt.figure(figsize = (20,22))
+plt.scatter(
+    pca_results.PC1, pca_results.PC2,
+    s = pca_results.occurences, # size according to number of observations
+    c = pca_results.rxn_counts # color according to number of reactions
+)
+plt.colorbar()
 plt.show()
