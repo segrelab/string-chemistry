@@ -1,0 +1,25 @@
+---
+title: "AAAAAAAAAAAAA"
+author: "Devlin Moyer"
+date: "13 11 2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+```
+
+```{r fig.width=10}
+bitstrings_df <- read.csv("bitstrings.csv", colClasses = c("factor", "numeric", "numeric"))
+ggplot(bitstrings_df, aes(x = rxn_count, y = occurences)) + geom_bar(position = "dodge", stat = "identity", aes(fill = bitstring)) + theme_bw() + theme(legend.position = "none") +
+  labs(x = "Number of Reactions", y = "Number of Times Network Was Observed", title = "Results of 1000 Random Prunes of Network with 161 Reactions")
+```
+
+```{r}
+bitstrings_df$bitstring
+```
+

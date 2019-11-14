@@ -5,6 +5,7 @@
 import pandas as pd
 from sklearn.decomposition import PCA
 import matplotlib.pyplot as plt
+import plotly.graph_objects as go
 
 # get reaction inclusion bitstrings from output of pruning.py
 bitstring_df = pd.read_csv('bitstrings.csv')
@@ -13,17 +14,26 @@ bitstring_df = pd.read_csv('bitstrings.csv')
 bits_as_cols = bitstring_df['bitstring'].str.split('', expand = True)
 # first and last columns will be empty and all columns will be strings
 pca_ready = bits_as_cols.iloc[:,1:-1].astype('int32')
+
 # do PCA with scikit-learn
 pca = PCA(n_components = 2)
 pcs = pca.fit_transform(pca_ready)
 pc_df = pd.DataFrame(data = pcs, columns = ['PC1', 'PC2'])
 pca_results = pd.concat([pc_df, bitstring_df], axis = 1)
+
 # now make a scatterplot
+pca_results.occurences = [10*x for x in pca_results.occurences]
 plt.figure(figsize = (20,22))
 plt.scatter(
     pca_results.PC1, pca_results.PC2,
     s = pca_results.occurences, # size according to number of observations
-    c = pca_results.rxn_counts # color according to number of reactions
+    c = pca_results.rxn_count # color according to number of reactions
 )
 plt.colorbar()
+
+# also make a bar chart showing how many times each network was found and how
+# many reactions each network has
+pd.pivot_table(
+    bitstring_df, index = 'rxn_count', columns = 'bitstring',
+    values = 'occurences').plot(kind = 'bar', legend = False, width = 10)
 plt.show()

@@ -90,5 +90,5 @@ bitstring_df = bitstring_df.append(
 )
 bitstring_df.columns = ['bitstring', 'occurences']
 # add in a column for the number of reactions in each network 
-bitstring_df['rxn_counts'] = list(map(count_bitstring, bitstring_df.bitstring))
+bitstring_df['rxn_count'] = list(map(count_bitstring, bitstring_df.bitstring))
 bitstring_df.to_csv('bitstrings.csv', index = False)
