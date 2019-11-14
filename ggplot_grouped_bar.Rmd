@@ -1,5 +1,5 @@
 ---
-title: "AAAAAAAAAAAAA"
+title: "ggplot Grouped Bar Chart"
 author: "Devlin Moyer"
 date: "13 11 2019"
 output: html_document

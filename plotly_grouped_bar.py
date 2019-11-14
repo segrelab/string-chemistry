@@ -1,4 +1,5 @@
-#!/usr/bin/env
+# plotly_grouped_bar.py
+# uses plotly to make a grouped bar chart
 
 import cufflinks as cf
 import plotly.express as px
