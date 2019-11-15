@@ -32,13 +32,15 @@ cobra_model = scn.make_cobra_model(SCN.met_list, SCN.rxn_list)
 scn.reverse_rxns(cobra_model, len(cobra_model.reactions))
 scn.choose_inputs(cobra_model, int(ins))
 bm_rxn = scn.choose_bm_mets(cobra_model, int(outs))
+print(f'Biomass reaction: {bm_rxn.id}')
 cobra_model.objective = bm_rxn
 
 i = 0
+food_mets = list()
 # use a while loop and not a for loop so we can go back on occasion
 while i < int(big_reps):
     i = i + 1
-    print(f'On set {i} of food sources')
+    print(f'Food source group {i}: {[met.id for met in cobra_model.boundary]}')
     # choose some new food sources (remove existing ones)
     cobra_model.remove_reactions(cobra_model.boundary)
     scn.choose_inputs(cobra_model, int(ins))
@@ -50,7 +52,9 @@ while i < int(big_reps):
         # redo this iteration of the loop
         i = i - 1
         continue
-    # if there's at least one feasible solution, proceed with the pruning
+    # record the metabolites that worked before proceeding
+    else:
+        food_mets.append([met.id for met in cobra_model.boundary])
 
     # will hold bitstrings of all unique reactions and the count of times each
     # one came up
@@ -59,7 +63,7 @@ while i < int(big_reps):
     random_pruned_nets = list()
     for j in range(1, int(reps)):
         if j % 100 == 0:
-            print(j)
+            print(f'Pruned {j} times')
         pruned_net = scn.random_prune(cobra_model, bm_rxn)
         # in order to know whether we've seen this model before, we can't just 
         # compare models, since no two models are ever 'equal', so we'll compare
@@ -113,3 +117,7 @@ while i < int(big_reps):
     plt.savefig(
         f'{monos}_{max_pol}_{ins}ins_{outs}outs_{i}of{big_reps}reps.png'
     )
+# write the list of food sources that were tried to a file
+with open('foods.csv', 'w') as out:
+    output = '\n'.join([','.join(sublist) for sublist in food_mets])
+    out.write(output)

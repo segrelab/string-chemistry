@@ -231,9 +231,14 @@ def make_cobra_model(met_list, rxn_list):
 
 # choose n metabolites at random to create exchange reactions that are
 # constrained to irreversibly produce that metabolite from nothing
-def choose_inputs(model, n):
-    # add exchange reactions
-    in_mets = random.sample(model.metabolites, n)
+def choose_inputs(model, bm_rxn=cobra.Reaction(), n):
+    # make sure we don't choose any metabolites in the biomass reaction but
+    # also set an empty reaction as the default biomass reaction just in case
+    # we're setting food sources before biomass precursors
+    in_mets = random.sample(
+        [met in model.metabolites if met not in bm_rxn.metabolites],
+        n
+    )
     for met in in_mets:
         in_rxn = cobra.Reaction(
             '->' + met.id,
