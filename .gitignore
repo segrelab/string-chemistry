@@ -5,4 +5,4 @@ share/
 stoich_mat.dat
 .Rproj.user
 etc/
-*.png
+./*.png
