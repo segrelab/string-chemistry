@@ -1,7 +1,7 @@
 # pruning.py
 # take a network made by string_chem_net, designate some input and output
 # metabolites, do fba to find reaction fluxes, drop all reactions with no flux,
-# and then do one of two things:
+# and then do two things:
 #
 # 1. remove the smallest flux, make sure that doesn't render the solution
 # infeasible, and then iterating this process until you can't remove a reaction
@@ -10,12 +10,17 @@
 # infeasible, then repeat until you can't remove a reaction
 # 
 # note that the first method will always give the same result while the second
-# is liable to give a range of results in many (but not all) cases
+# is liable to give a range of results in many (but not all) cases, so this
+# script does the second approach a bunch of times but only does the first one
+# once per call
 
+import sys
 import string_chem_net as scn
 import random
 import re
 import pandas as pd
+import matplotlib.pyplot as plt
+import numpy as np
 
 # count number of 1s in a bitstring
 def count_bitstring(bitstring):
@@ -25,11 +30,18 @@ def count_bitstring(bitstring):
             count += 1
     return(count)
 
-SCN = scn.CreateNetwork('ab', 5)
+# get command-line arguments
+try:
+    (monos, max_pol, ins, outs, reps) = sys.argv[1:]
+except ValueError:
+    sys.exit('Arguments: monomers, max polymer length, number of food sources, \
+number of biomass precursors, number of times to prune each network.'
+    )
+SCN = scn.CreateNetwork(monos, int(max_pol))
 cobra_model = scn.make_cobra_model(SCN.met_list, SCN.rxn_list)
 scn.reverse_rxns(cobra_model, len(cobra_model.reactions))
-scn.choose_inputs(cobra_model, 2)
-bm_rxn = scn.choose_bm_mets(cobra_model, 5)
+scn.choose_inputs(cobra_model, int(ins))
+bm_rxn = scn.choose_bm_mets(cobra_model, int(outs))
 cobra_model.objective = bm_rxn
 
 # make sure that there's at least one feasible solution before trying to prune
@@ -49,14 +61,14 @@ min_flux_pruned = scn.min_flux_prune(cobra_model)
 min_flux_count = len(min_flux_pruned.reactions)
 min_flux_bitstring = scn.make_bitstring(cobra_model, min_flux_pruned)
 
-# will hold number of reactions in each network after 1000 runs of random_prune
+# will hold number of reactions in each network after reps runs of random_prune
 random_pruned_counts = list()
 # will hold bitstrings of all unique reactions and the count of times each one
 # came up
 random_pruned_dict = dict()
-# will hold all the unique networks found by random_prune after 1000 runs
+# will hold all the unique networks found by random_prune after reps runs
 random_pruned_nets = list()
-for i in range(1,1000):
+for i in range(1, int(reps)):
     if i % 100 == 0:
         print(i)
     pruned_net = scn.random_prune(cobra_model, bm_rxn)
@@ -88,7 +100,28 @@ bitstring_df = pd.DataFrame(list(map(list, random_pruned_dict.items())))
 bitstring_df = bitstring_df.append(
     pd.Series([min_flux_bitstring, 1]), ignore_index = True
 )
-bitstring_df.columns = ['bitstring', 'occurences']
+bitstring_df.columns = ['bitstring', 'occurrences']
 # add in a column for the number of reactions in each network 
 bitstring_df['rxn_count'] = list(map(count_bitstring, bitstring_df.bitstring))
-bitstring_df.to_csv('bitstrings.csv', index = False)
+
+# make a bar chart showing how many times each network was found with the 
+# networks ordered by commonness and colored by reaction count
+# start by making a column ranking the networks by frequency
+bitstring_df['freq_rank'] = bitstring_df['occurrences'].rank(ascending = False)
+# then sort the dataframe by those ranks
+bitstring_df.sort_values('freq_rank', inplace = True)
+
+# then make the bar plot
+bitstring_df.plot.bar(
+    x = 'freq_rank', y = 'occurrences', legend = False
+)
+# print the number of reactions in each network on top of each bar
+xlocs, xlabs = plt.xticks()
+for i,v in enumerate(bitstring_df['occurrences']):
+    plt.text(xlocs[i] - 0.1, v + 0.025, str(bitstring_df['rxn_count'].iloc[i]))
+
+# label things
+plt.title(f'Frequency of Observing Each Network After {reps} Prunes')
+plt.xlabel('Rank of Network by Number of Times It Was Seen')
+plt.ylabel('Number of Times Network Was Seen')
+plt.show()

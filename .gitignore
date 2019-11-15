@@ -4,3 +4,4 @@ __pycache__/
 share/
 stoich_mat.dat
 .Rproj.user
+etc/

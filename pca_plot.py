@@ -1,11 +1,10 @@
-# pruning_plots.py
+# pca_plot.py
 # make some plots to compare the results of multiple rounds of random pruning
 # of a network
 
 import pandas as pd
 from sklearn.decomposition import PCA
 import matplotlib.pyplot as plt
-import plotly.graph_objects as go
 
 # get reaction inclusion bitstrings from output of pruning.py
 bitstring_df = pd.read_csv('bitstrings.csv')
@@ -31,9 +30,3 @@ plt.scatter(
 )
 plt.colorbar()
 
-# also make a bar chart showing how many times each network was found and how
-# many reactions each network has
-pd.pivot_table(
-    bitstring_df, index = 'rxn_count', columns = 'bitstring',
-    values = 'occurences').plot(kind = 'bar', legend = False, width = 10)
-plt.show()
