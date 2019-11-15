@@ -42,13 +42,11 @@ for i in range(int(big_reps)):
     # see if this choice of metabolites can produce the biomass on this network
     solution = cobra_model.optimize()
     bm_rxn_flux = solution.fluxes.get(key = bm_rxn.id)
-    if solution.status == 'infeasible' or bm_rxn_flux < 10e-10:
+    if solution.status == 'infeasible' or bm_rxn_flux < 1e-10:
         print('There were no feasible solutions.')
-        next
+        continue
     # if there's at least one feasible solution, proceed with the pruning
 
-    # will hold number of reactions in each network after reps prunes
-    random_pruned_counts = list()
     # will hold bitstrings of all unique reactions and the count of times each
     # one came up
     random_pruned_dict = dict()
@@ -63,7 +61,6 @@ for i in range(int(big_reps)):
         # reaction presence bitstrings. 
         # We also want to keep track of how many times we see each model, so we 
         # will make a dict with the bitstrings as keys
-        # sort is in-place
         bitstring = scn.make_bitstring(cobra_model, pruned_net)
         if bitstring not in random_pruned_dict.keys():
             # make sure all reaction lists are sorted so that all isomorphic
@@ -71,13 +68,9 @@ for i in range(int(big_reps)):
             random_pruned_dict[bitstring] = 1
             random_pruned_nets.append(pruned_net)
         else:
-            # if we already found this network once, then increment the counter
-            # in random_pruned_nets by 1
+            # if we already found this network once, then increment the
+            # appropriate counter by 1
             random_pruned_dict[bitstring] += 1
-        # so that we can see the distribution of network sizes, record the 
-        # length of the reaction list each time, regardless of whether or not 
-        # we've seen this network before
-        random_pruned_counts.append(len(pruned_net.reactions))
 
     # make a dataframe of all the bitstrings we've generated
     # turn the dictionary into a list of lists before coercion
