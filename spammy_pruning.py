@@ -34,7 +34,10 @@ scn.choose_inputs(cobra_model, int(ins))
 bm_rxn = scn.choose_bm_mets(cobra_model, int(outs))
 cobra_model.objective = bm_rxn
 
-for i in range(int(big_reps)):
+i = 0
+# use a while loop and not a for loop so we can go back on occasion
+while i < int(big_reps):
+    i = i + 1
     print(f'On set {i} of food sources')
     # choose some new food sources (remove existing ones)
     cobra_model.remove_reactions(cobra_model.boundary)
@@ -43,7 +46,9 @@ for i in range(int(big_reps)):
     solution = cobra_model.optimize()
     bm_rxn_flux = solution.fluxes.get(key = bm_rxn.id)
     if solution.status == 'infeasible' or bm_rxn_flux < 1e-10:
-        print('There were no feasible solutions.')
+        print('There were no feasible solutions; reselecting food sources.')
+        # redo this iteration of the loop
+        i = i - 1
         continue
     # if there's at least one feasible solution, proceed with the pruning
 
