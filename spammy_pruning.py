@@ -7,7 +7,7 @@ import string_chem_net as scn
 import random
 import re
 import pandas as pd
-import scipy
+from scipy.stats import chisquare
 
 # count number of 1s in a bitstring
 def count_bitstring(bitstring):
@@ -96,7 +96,7 @@ while i < int(big_reps):
     bitstring_df.to_csv(
         f'data/{monos}_{max_pol}_{ins}ins_{outs}outs_{i}of{big_reps}bitstrings.csv'
     )
-    chisq_results = scipy.stats.chisquare(bitstring_df.occurrences)
+    chisq_results = chisquare(bitstring_df.occurrences)
     p_vals.append(chisq_results[1])
 # write the list of food sources that were tried to a file
 with open(f'data/{monos}_{max_pol}_{ins}ins_{outs}outs_foods.csv', 'w') as out:
