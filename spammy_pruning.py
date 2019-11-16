@@ -30,8 +30,8 @@ times to reselect food sources.')
 SCN = scn.CreateNetwork(monos, int(max_pol))
 cobra_model = scn.make_cobra_model(SCN.met_list, SCN.rxn_list)
 scn.reverse_rxns(cobra_model, len(cobra_model.reactions))
-scn.choose_inputs(cobra_model, int(ins))
-bm_rxn = scn.choose_bm_mets(cobra_model, int(outs))
+scn.choose_inputs(int(ins), cobra_model)
+bm_rxn = scn.choose_bm_mets(int(outs), cobra_model)
 print(f'Biomass reaction: {bm_rxn.id}')
 cobra_model.objective = bm_rxn
 
@@ -40,10 +40,11 @@ food_mets = list()
 # use a while loop and not a for loop so we can go back on occasion
 while i < int(big_reps):
     i = i + 1
-    print(f'Food source group {i}: {[met.id for met in cobra_model.boundary]}')
+    foods_string = ' '.join([met.id for met in cobra_model.boundary])
+    print(f'Food source group {i}: {foods_string}')
     # choose some new food sources (remove existing ones)
     cobra_model.remove_reactions(cobra_model.boundary)
-    scn.choose_inputs(cobra_model, int(ins))
+    scn.choose_inputs(int(ins), cobra_model, bm_rxn)
     # see if this choice of metabolites can produce the biomass on this network
     solution = cobra_model.optimize()
     bm_rxn_flux = solution.fluxes.get(key = bm_rxn.id)
