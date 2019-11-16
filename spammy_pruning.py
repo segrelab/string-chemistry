@@ -35,7 +35,11 @@ print(f'Biomass reaction: {bm_rxn.id}')
 cobra_model.objective = bm_rxn
 
 i = 0
+# record all of the food metabolites that were used
 food_mets = list()
+# record the p-values from chi-squared tests against the null hypothesis that
+# each network was equally likely to be observed
+p_vals = list()
 # use a while loop and not a for loop so we can go back on occasion
 while i < int(big_reps):
     i = i + 1
@@ -92,7 +96,16 @@ while i < int(big_reps):
     bitstring_df.to_csv(
         f'data/{monos}_{max_pol}_{ins}ins_{outs}outs_{i}of{big_reps}bitstrings.csv'
     )
+    chisq_results = scipy.stats.chisquare(bitstring_df.occurrences)
+    p_vals.append(chisq_results[1])
 # write the list of food sources that were tried to a file
 with open(f'data/{monos}_{max_pol}_{ins}ins_{outs}outs_foods.csv', 'w') as out:
-    output = '\n'.join([','.join(sublist) for sublist in food_mets])
+    # once all the lines are created, concatenate them with newline characters
+    output = '\n'.join([
+        # add the appropriate p-value to the concatenated food lists
+        ','.join([p_val].append(
+            # flatten all of the food source lists
+            ['-'.join(sublist) for sublist in food_mets]
+        )) for p_val in p_vals
+    ])
     out.write(output)
