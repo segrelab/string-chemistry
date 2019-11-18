@@ -27,7 +27,8 @@ for idx,v in enumerate(bitstring_df['occurrences']):
         v + 0.025, # y coord of label
         str(bitstring_df['rxn_count'].iloc[idx]) # label
     )
-plt.title(f'Frequency of Observing Each Network After {reps} Prunes')
+
+plt.title(sys.argv[1])
 plt.xlabel('Rank of Network by Number of Times It Was Seen')
 plt.ylabel('Number of Times Network Was Seen')
 plt.show()
