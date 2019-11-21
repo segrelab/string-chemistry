@@ -2,12 +2,14 @@
 # make some plots to compare the results of multiple rounds of random pruning
 # of a network
 
+import sys
 import pandas as pd
 from sklearn.decomposition import PCA
 import matplotlib.pyplot as plt
 
 # get reaction inclusion bitstrings from output of pruning.py
-bitstring_df = pd.read_csv('bitstrings.csv')
+filename = sys.argv[1]
+bitstring_df = pd.read_csv(filename)
 # want each reaction bit in its own column and need to not have the rxn_count
 # column in the dataframe we pass to the PCA function
 bits_as_cols = bitstring_df['bitstring'].str.split('', expand = True)
@@ -21,12 +23,12 @@ pc_df = pd.DataFrame(data = pcs, columns = ['PC1', 'PC2'])
 pca_results = pd.concat([pc_df, bitstring_df], axis = 1)
 
 # now make a scatterplot
-pca_results.occurences = [10*x for x in pca_results.occurences]
+#pca_results.occurences = [10*x for x in pca_results.occurences]
 plt.figure(figsize = (20,22))
 plt.scatter(
     pca_results.PC1, pca_results.PC2,
-    s = pca_results.occurences, # size according to number of observations
-    c = pca_results.rxn_count # color according to number of reactions
+#    s = pca_results.occurences, # size according to number of observations
+#    c = pca_results.rxn_count # color according to number of reactions
 )
-plt.colorbar()
-
+#plt.colorbar()
+plt.show()

@@ -6,6 +6,7 @@
 import sys
 import pandas as pd
 import matplotlib.pyplot as plt
+from scipy.stats import chisquare
 
 bitstring_df = pd.read_csv(sys.argv[1])
 
@@ -28,7 +29,10 @@ for idx,v in enumerate(bitstring_df['occurrences']):
         str(bitstring_df['rxn_count'].iloc[idx]) # label
     )
 
-plt.title(sys.argv[1])
-plt.xlabel('Rank of Network by Number of Times It Was Seen')
+# get p-value of chisquare test against null hypothesis that the networks are
+# all equally common
+p_val = chisquare(bitstring_df.occurrences)[1]
+plt.title(f'{sys.argv[1]}\n{p_val}')
+plt.xlabel('Rank of Network from Most Common to Least')
 plt.ylabel('Number of Times Network Was Seen')
 plt.show()
