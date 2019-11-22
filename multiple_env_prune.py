@@ -77,7 +77,10 @@ for met in food_groups[0]:
     in_rxn.add_metabolites({met: 1.0})
     cobra_model.add_reaction(in_rxn)
 
-print('Pruning full network on first set of input metabolites')
+print(
+    f'Pruning full {len(cobra_model.reactions)}-reaction network on first ' +
+    'environment'
+)
 # will hold bitstrings of all unique reactions and the count of times each
 # one came up
 pruned_dict = dict()
@@ -108,6 +111,7 @@ while i < int(reps):
         # appropriate counter by 1
         pruned_dict[bitstring] += 1
 
+print('Testing each pruned network on the other environments.')
 # now that we have (approximately, if reps was large) all of the networks that
 # the first food group worked on, see which of those networks also work with
 # the other food groups
@@ -120,6 +124,7 @@ for network in pruned_nets:
     usable_foods[bitstring] = [[met.id for met in food_groups[0]]]
 for group in food_groups[1:]:
     for network in pruned_nets:
+        network.remove_reactions(network.boundary)
         for met in group:
             in_rxn = cobra.Reaction(
                 '->' + met.id,
@@ -139,16 +144,23 @@ for group in food_groups[1:]:
             bitstring = scn.make_bitstring(cobra_model, network)
             usable_foods[bitstring].append([met.id for met in group])
 
-for network in usable_foods.keys():
-    rxn_count = count_bitstring(network)
-    print(network)
-    print(
-        f'This {rxn_count}-reaction network showed up ' +
-        f'{pruned_dict[network]} times'
-    )
-    print(
-        f'This network could produce biomass in these ' +
-        f'{len(usable_foods[network])} environments:'
-    )
-    for foods in usable_foods[network]:
-        print(','.join(foods))
+# print a bunch of info but also write it out to a tsv
+with open(
+        f'data/{monos}_{max_pol}_{in_groups}of{ins}ins_{outs}outs.tsv', 'w'
+    ) as out:
+    out.write('bitstring\trxn_count\toccurrences\tenv_count\tviable_envs\n')
+    for network in usable_foods.keys():
+        rxn_count = count_bitstring(network)
+        print(
+            f'A {rxn_count}-reaction network showed up ' +
+            f'{pruned_dict[network]} times and could produce biomass in ' +
+            f'these {len(usable_foods[network])} environments:'
+        )
+        for foods in usable_foods[network]:
+            print(','.join(foods))
+        out_row = '\t'.join([
+            network, str(rxn_count), str(pruned_dict[network]),
+            str(len(usable_foods[network])), 
+            ';'.join([','.join(foods) for foods in usable_foods[network]])
+        ])
+        out.write(out_row + '\n')
