@@ -5,7 +5,6 @@
 import sys
 import string_chem_net as scn
 import random
-import re
 import pandas as pd
 from scipy.stats import chisquare
 
