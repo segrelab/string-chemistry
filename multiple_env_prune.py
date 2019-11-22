@@ -133,15 +133,17 @@ for group in food_groups[1:]:
         bm_rxn_flux = solution.fluxes.get(key = bm_rxn.id)
         if solution.status != 'infeasible' and bm_rxn_flux > 10e-10:
             # if the network grew using this food group, add it to the
-            # appropriate list in usable_foods
+            # appropriate list in usable_foods (but remove the input reactions
+            # first, since those will change from iteration to iteration)
+            network.remove_reactions(network.boundary)
             bitstring = scn.make_bitstring(cobra_model, network)
             usable_foods[bitstring].append([met.id for met in group])
 
 for network in usable_foods.keys():
     print(network)
     print(f'This network showed up {pruned_dict[network]} times')
-    print('This network could produce biomass in these environments:' + 
-        ','.join([
+    final_out = ','.join([
             '(' + ','.join(foods) + ')' for foods in usable_foods[network]
-        ]
-    )
+        ])
+    print('This network could produce biomass in these environments: ' +
+        final_out)

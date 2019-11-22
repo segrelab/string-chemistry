@@ -359,6 +359,13 @@ def random_prune(cobra_model, bm_rxn):
 # containing some subset of those reactions, make a bitstring indicating which
 # reactions are present in the pruned model
 def make_bitstring(full_model, pruned_model):
+    # make sure the pruned network is actually a subnetwork of the full one
+    for rxn in pruned_model.reactions:
+        if rxn not in full_model.reactions:
+            raise Exception(
+                'Could not construct bitstrings because second network was ' +
+                'not a subnetwork of the full network.\n' +
+                f'Problematic reaction: {rxn.id}')
     all_reactions = full_model.reactions
     # make sure the reactions are in the same order so we can directly compare
     # multiple bitstrings from multiple different networks derived from the
