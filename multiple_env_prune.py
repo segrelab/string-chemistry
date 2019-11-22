@@ -117,7 +117,7 @@ usable_foods = dict()
 for network in pruned_nets:
     bitstring = scn.make_bitstring(cobra_model, network)
     # we already determined that they all grow when given the first food group
-    usable_foods[bitstring] = [met.id for met in food_groups[0]]
+    usable_foods[bitstring] = [[met.id for met in food_groups[0]]]
 for group in food_groups[1:]:
     for network in pruned_nets:
         for met in group:
@@ -140,10 +140,15 @@ for group in food_groups[1:]:
             usable_foods[bitstring].append([met.id for met in group])
 
 for network in usable_foods.keys():
+    rxn_count = count_bitstring(network)
     print(network)
-    print(f'This network showed up {pruned_dict[network]} times')
-    final_out = ','.join([
-            '(' + ','.join(foods) + ')' for foods in usable_foods[network]
-        ])
-    print('This network could produce biomass in these environments: ' +
-        final_out)
+    print(
+        f'This {rxn_count}-reaction network showed up ' +
+        f'{pruned_dict[network]} times'
+    )
+    print(
+        f'This network could produce biomass in these ' +
+        f'{len(usable_foods[network])} environments:'
+    )
+    for foods in usable_foods[network]:
+        print(','.join(foods))
