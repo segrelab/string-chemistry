@@ -93,7 +93,7 @@ while i < int(big_reps):
         count_bitstring, bitstring_df.bitstring
     ))
     bitstring_df.to_csv(
-        f'data/{monos}_{max_pol}_{ins}ins_{outs}outs_{i}of{big_reps}bitstrings.csv'
+        f'data/{monos}_{max_pol}_{ins}ins_{outs}outs_{i}of{big_reps}.csv'
     )
     chisq_results = chisquare(bitstring_df.occurrences)
     p_vals.append(chisq_results[1])

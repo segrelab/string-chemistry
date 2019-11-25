@@ -53,5 +53,5 @@ while i < int(reps):
 bitstring_df = pd.DataFrame(list(zip(food_mets, bitstrings)))
 bitstring_df.columns = ['inputs','bitstring']
 bitstring_df.to_csv(
-    f'data/{monos}_{max_pol}_{reps}x{ins}ins_{outs}outs_bitstrings.csv'
+    f'data/{monos}_{max_pol}_{reps}x{ins}ins_{outs}outs.csv'
 )
