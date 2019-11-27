@@ -32,11 +32,13 @@ bitstrings = list()
 j = 0
 # use a while loop and not a for loop so we can go back on occasion
 while i < int(reps):
-    i +=  1
-    foods_string = ' '.join([met.id for met in cobra_model.boundary])    
+    i +=  1 
     # choose some new food sources (remove existing ones)
     cobra_model.remove_reactions(cobra_model.boundary)
     scn.choose_inputs(int(ins), cobra_model, bm_rxn)
+    foods_string = ' '.join([
+        met.id for rxn in cobra_model.boundary for met in rxn.metabolites
+    ])
     # see if this choice of metabolites can produce the biomass on this network
     solution = cobra_model.optimize()
     bm_rxn_flux = solution.fluxes.get(key = bm_rxn.id)
@@ -54,7 +56,11 @@ while i < int(reps):
         )
         # reset the reselection counter
         j = 0
-        food_mets.append('-'.join([met.id for met in cobra_model.boundary]))
+        food_mets.append('-'.join([
+            met.id 
+            for rxn in cobra_model.boundary 
+            for met in rxn.metabolites
+        ]))
         pruned_net = scn.min_flux_prune(cobra_model)
         bitstring = scn.make_bitstring(cobra_model, pruned_net)
         bitstrings.append(bitstring)
