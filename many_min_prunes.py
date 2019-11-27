@@ -10,8 +10,9 @@ import pandas as pd
 try:
     (monos, max_pol, ins, outs, reps) = sys.argv[1:]
 except ValueError:
-    sys.exit('Arguments: monomers, max polymer length, number of food sources, \
-number of biomass precursors, number of times to reselect food sources.')
+    sys.exit('Arguments:\nmonomers\nmax polymer length\n' +
+        'number of food sources\nnumber of biomass precursors\n' +
+        'number of times to reselect food sources')
 
 # create the reference network and pick some food sources and a biomass rxn
 SCN = scn.CreateNetwork(monos, int(max_pol))
@@ -26,11 +27,13 @@ i = 0
 # record all of the food metabolites that were used
 food_mets = list()
 bitstrings = list()
+# counter for how many times it had to reselct the environment to get a
+# feasible solution with the full network
+j = 0
 # use a while loop and not a for loop so we can go back on occasion
 while i < int(reps):
-    i = i + 1
-    foods_string = ' '.join([met.id for met in cobra_model.boundary])
-    print(f'Food source group {i}: {foods_string}')
+    i +=  1
+    foods_string = ' '.join([met.id for met in cobra_model.boundary])    
     # choose some new food sources (remove existing ones)
     cobra_model.remove_reactions(cobra_model.boundary)
     scn.choose_inputs(int(ins), cobra_model, bm_rxn)
@@ -38,12 +41,19 @@ while i < int(reps):
     solution = cobra_model.optimize()
     bm_rxn_flux = solution.fluxes.get(key = bm_rxn.id)
     if solution.status == 'infeasible' or bm_rxn_flux < 1e-10:
-        print('There were no feasible solutions; reselecting food sources.')
         # redo this iteration of the loop
-        i = i - 1
+        i -= 1
+        # increment the counter of redos
+        j += 1 
         continue
     # record the metabolites that worked and prune the network
     else:
+        print(
+            f'Environment {i}: {foods_string} ' + 
+            f'Reselected environment {j} times to get this'
+        )
+        # reset the reselection counter
+        j = 0
         food_mets.append('-'.join([met.id for met in cobra_model.boundary]))
         pruned_net = scn.min_flux_prune(cobra_model)
         bitstring = scn.make_bitstring(cobra_model, pruned_net)

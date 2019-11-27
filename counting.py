@@ -13,7 +13,8 @@ met_count = 0
 rxn_count = 0
 for i in range(1,int(l)+1):
     new_mets = len(list(it.product(chars, repeat = i)))
+    print(f'{new_mets} metabolites of length {i}')
     met_count += new_mets
     rxn_count += new_mets * (i-1)
-print(f'Metabolites: {met_count}')
+print(f'Total Metabolites: {met_count}')
 print(f'Reactions: {rxn_count}')
