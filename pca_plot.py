@@ -30,6 +30,7 @@ pca_results = pd.concat([pc_df, bitstring_df], axis = 1)
 # if coloring by unique biomass reactions, make a colormap
 cdict = {v: k for k, v in enumerate(np.unique(pca_results.biomass))}
 cvals = [cdict[c] for c in pca_results.biomass]
+print(cdict)
 # make the figure large
 plt.figure(figsize = (20,22))
 plt.scatter(
@@ -39,5 +40,4 @@ plt.scatter(
     c = cvals, # color by biomass reaction
     s = 100 # make points big
 )
-#plt.colorbar()
 plt.show()
