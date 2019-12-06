@@ -214,7 +214,7 @@ with open(
         f'{outs}outs.tsv', 'w'
     ) as out:
     out.write('bitstring\trxn_count\toccurrences\tyes_count\tyes_envs\t' +
-        'no_count\tno_envs\n')
+        'no_count\tno_envs\tbiomass\n')
     for network in usable_foods.keys():
         rxn_count = count_bitstring(network)
         print(
@@ -235,6 +235,7 @@ with open(
             str(len(usable_foods[network])), 
             ';'.join([','.join(foods) for foods in usable_foods[network]]),
             str(len(unusable_foods[network])),
-            ';'.join([','.join(foods) for foods in unusable_foods[network]])
+            ';'.join([','.join(foods) for foods in unusable_foods[network]]),
+            bm_rxn.id
         ])
         out.write(out_row + '\n')

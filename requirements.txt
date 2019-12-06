@@ -11,6 +11,7 @@ cycler==0.10.0
 decorator==4.4.1
 defusedxml==0.6.0
 depinfo==1.5.1
+editdistance==0.5.3
 entrypoints==0.3
 future==0.18.2
 idna==2.8

@@ -5,6 +5,7 @@
 import sys
 import string_chem_net as scn
 import pandas as pd
+import itertools as it
 
 # get command-line arguments
 try:
@@ -68,6 +69,11 @@ while i < int(reps):
 # make a dataframe out of the two lists
 bitstring_df = pd.DataFrame(list(zip(food_mets, bitstrings)))
 bitstring_df.columns = ['inputs','bitstring']
+# add a column with the biomass components
+bitstring_df['biomass'] = list(it.repeat(
+    '-'.join([met.id for met in bm_rxn.metabolites]),
+    len(food_mets)
+)) 
 bitstring_df.to_csv(
     f'data/{monos}_{max_pol}_{reps}x{ins}ins_{outs}outs.csv'
 )
