@@ -30,16 +30,16 @@ pca_results = pd.concat([pc_df, bitstring_df], axis = 1)
 #pca_results.occurences = [10*x for x in pca_results.occurences]
 
 # if coloring by unique biomass reactions, make a colormap
-cdict = {v: k for k, v in enumerate(np.unique(pca_results.biomass))}
-cvals = [cdict[c] for c in pca_results.biomass]
+#cdict = {v: k for k, v in enumerate(np.unique(pca_results.biomass))}
+#cvals = [cdict[c] for c in pca_results.biomass]
 
 # if coloring by input metabolites, make a colormap
 # start by getting the column of input metabolites, splitting it into a list of
 # lists, then pasting the sublists together so that there's one string to use
 # for making the colormap
-#in_groups = ['-'.join(sorted(ins.split('-'))) for ins in pca_results.inputs]
-#cdict = {v: k for k, v in enumerate(np.unique(in_groups))}
-#cvals = [cdict[c] for c in in_groups]
+in_groups = ['-'.join(sorted(ins.split('-'))) for ins in pca_results.inputs]
+cdict = {v: k for k, v in enumerate(np.unique(in_groups))}
+cvals = [cdict[c] for c in in_groups]
 
 # make the figure large
 plt.figure(figsize = (20,22))
