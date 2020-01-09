@@ -1,27 +1,46 @@
 # prune_universal_network.py
-# adds a glucose import reaction and the E. coli biomnass reaction to the
-# universal biochemical reaction network from KEGG and prunes it
+# prunes the universal BIGG model using the E. coli environment and biomass
+# reaction from iJO1336
 
 import cobra
 import string_chem_net as scn
+import sys
 
 # need to load both the universal model and an E. coli model to get the biomass
 # reaction
-e_coli_model = cobra.io.read_sbml_model('data/ecoli_core_model.xml')
-u_model = cobra.io.load_json_model('data/full_kegg_cobra_model.json')
+print('Loading COBRA models')
+e_coli_model = cobra.io.load_json_model('data/iJO1366.json')
+u_model = cobra.io.load_json_model('data/bigg_universal_model.json')
 
-# make a glucose-supplying reaction
-glc_in_rxn = cobra.Reaction()
-glucose_met = u_model.metabolites.get_by_id('D-Glucose')
-glc_in_rxn.add_metabolites({glucose_met : 1.0})
+# remove all exchange reactions from the unviersal model
+print('Removing non-E. coli exchange reactions from universal model')
+u_model.remove_reactions(u_model.boundary)
 
-# get biomass reaction for E. coli
-bm_rxn = e_coli_model.reactions.get_by_id('Biomass_Ecoli_core_w_GAM')
+# add each remaining reaction in the universal model to the E. coli model
+# one at a time
+print(
+    'Testing remaining reactions to see if adding them to E. coli model ' +
+    'breaks the model.'
+)
+i = 0
+bad = 0
+for rxn in u_model.reactions:
+    i += 1
+    if i % 100 == 0:
+        print(f'On reaction {i}; {bad} reactions were not added.')
+    # skip reactions already in the E. coli model
+    if rxn not in e_coli_model.reactions:
+        e_coli_model.add_reactions([rxn])
+    else:
+        next
+    try:
+        e_coli_model.medium
+    except AttributeError:
+        bad += 1
+        e_coli_model.remove_reactions([rxn])
 
-# add these to the universal model and set the objective
-u_model.add_reactions([glc_in_rxn, bm_rxn])
-u_model.objective = bm_rxn
+print(f'Added {i - bad} of {i} possible reactions.')
 
-# see if the network is viable
-solution = u_model.optimize()
-print(solution.summary())
+# optimize the expanded E. coli model
+solution = e_coli_model.optimize()
+print(e_coli_model.summary())
