@@ -19,8 +19,6 @@ import string_chem_net as scn
 import random
 import re
 import pandas as pd
-import matplotlib.pyplot as plt
-import numpy as np
 
 # count number of 1s in a bitstring
 def count_bitstring(bitstring):
@@ -37,11 +35,13 @@ except ValueError:
     sys.exit('Arguments: monomers, max polymer length, number of food sources, \
 number of biomass precursors, number of times to prune each network.'
     )
+
+print('Creating universal string chemistry network.')
 SCN = scn.CreateNetwork(monos, int(max_pol))
 cobra_model = scn.make_cobra_model(SCN.met_list, SCN.rxn_list)
 scn.reverse_rxns(cobra_model, len(cobra_model.reactions))
-scn.choose_inputs(cobra_model, int(ins))
-bm_rxn = scn.choose_bm_mets(cobra_model, int(outs))
+scn.choose_inputs(int(ins), cobra_model)
+bm_rxn = scn.choose_bm_mets(int(outs), cobra_model)
 cobra_model.objective = bm_rxn
 
 # make sure that there's at least one feasible solution before trying to prune
@@ -52,11 +52,12 @@ while solution.status == 'infeasible' or (solution.fluxes == 0).all():
     cobra_model.remove_reactions([bm_rxn])
     cobra_model.remove_reactions(cobra_model.boundary)
     # choose new ones and see if those yield a solvable network
-    scn.choose_inputs(cobra_model, 5)
-    bm_rxn = scn.choose_bm_mets(cobra_model, 5)
+    scn.choose_inputs(int(ins), cobra_model)
+    bm_rxn = scn.choose_bm_mets(int(outs), cobra_model)
     cobra_model.objective = bm_rxn
     solution = cobra_model.optimize()
 
+print('Pruning network.')
 min_flux_pruned = scn.min_flux_prune(cobra_model)
 min_flux_count = len(min_flux_pruned.reactions)
 min_flux_bitstring = scn.make_bitstring(cobra_model, min_flux_pruned)
@@ -70,7 +71,7 @@ random_pruned_dict = dict()
 random_pruned_nets = list()
 for i in range(1, int(reps)):
     if i % 100 == 0:
-        print(i)
+        print(f'On random prune {i}.')
     pruned_net = scn.random_prune(cobra_model, bm_rxn)
     # in order to know whether we've seen this model before, we can't just 
     # compare models, since no two models are ever 'equal', so we'll compare
@@ -93,6 +94,7 @@ for i in range(1, int(reps)):
     # this network before
     random_pruned_counts.append(len(pruned_net.reactions))
 
+print('Preparing output.')
 # make a dataframe of all the bitstrings we've generated
 # turn the dictionary into a list of lists before coercion
 bitstring_df = pd.DataFrame(list(map(list, random_pruned_dict.items())))
@@ -100,28 +102,11 @@ bitstring_df = pd.DataFrame(list(map(list, random_pruned_dict.items())))
 bitstring_df = bitstring_df.append(
     pd.Series([min_flux_bitstring, 1]), ignore_index = True
 )
+# name columns
 bitstring_df.columns = ['bitstring', 'occurrences']
 # add in a column for the number of reactions in each network 
 bitstring_df['rxn_count'] = list(map(count_bitstring, bitstring_df.bitstring))
-
-# make a bar chart showing how many times each network was found with the 
-# networks ordered by commonness and colored by reaction count
-# start by making a column ranking the networks by frequency
-bitstring_df['freq_rank'] = bitstring_df['occurrences'].rank(ascending = False)
-# then sort the dataframe by those ranks
-bitstring_df.sort_values('freq_rank', inplace = True)
-
-# then make the bar plot
-bitstring_df.plot.bar(
-    x = 'freq_rank', y = 'occurrences', legend = False
+# write output
+bitstring_df.to_csv(
+    f'data/{monos}_{max_pol}_{ins}ins_{outs}outs_{reps}reps.csv'
 )
-# print the number of reactions in each network on top of each bar
-xlocs, xlabs = plt.xticks()
-for i,v in enumerate(bitstring_df['occurrences']):
-    plt.text(xlocs[i] - 0.1, v + 0.025, str(bitstring_df['rxn_count'].iloc[i]))
-
-# label things
-plt.title(f'Frequency of Observing Each Network After {reps} Prunes')
-plt.xlabel('Rank of Network by Number of Times It Was Seen')
-plt.ylabel('Number of Times Network Was Seen')
-plt.show()
