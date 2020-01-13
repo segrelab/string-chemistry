@@ -6,6 +6,7 @@ import sys
 import pandas as pd
 from sklearn.decomposition import PCA
 import matplotlib.pyplot as plt
+import matplotlib
 import numpy as np
 
 # get reaction inclusion bitstrings
@@ -27,7 +28,7 @@ pca_results = pd.concat([pc_df, bitstring_df], axis = 1)
 
 # if sizing by number of occurrences, multiply all values by 10 so the points
 # are visible
-#pca_results.occurences = [10*x for x in pca_results.occurences]
+#pca_results.occurrences = [10*x for x in pca_results.occurrences]
 
 # if coloring by unique biomass reactions, make a colormap
 #cdict = {v: k for k, v in enumerate(np.unique(pca_results.biomass))}
@@ -44,11 +45,19 @@ cvals = [cdict[c] for c in in_groups]
 # make the figure large
 plt.figure(figsize = (20,22))
 
+# make the text legible
+matplotlib.rcParams.update({
+    'font.size': 18, 'xtick.labelsize': 18, 'ytick.labelsize': 18,
+    'axes.labelsize': 18
+})
+
+# actually make the plot
 plt.scatter(
     pca_results.PC1, pca_results.PC2,
-#    s = pca_results.occurences, # size according to number of observations
+#    s = pca_results.occurrences, # size according to number of observations
 #    c = pca_results.rxn_count, # color according to number of reactions
     c = cvals, cmap = 'gist_ncar',  # color by biomass reaction
     s = 100 # make points big
 )
+plt.title('20 Biomass Reactions Pruned on 100 2-Metabolite Environments Each')
 plt.show()

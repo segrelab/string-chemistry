@@ -1,14 +1,15 @@
 # plotly_grouped_bar.py
 # uses plotly to make a grouped bar chart
 
+import sys
 import cufflinks as cf
 import plotly.express as px
 import pandas as pd
 import numpy as np
 
-filepath="/home/dermoi/Schreibtisch/Segre_Rotation/"
-duke=pd.read_csv(filepath+"bitstrings.csv")
-fig=px.bar(duke, x='rxn_count',y='occurences',color='bitstring')
+data = pd.read_csv(sys.argv[1])
+fig = px.bar(data, x = 'rxn_count', y = 'occurrences', color = 'bitstring')
 
-fig.update_layout(barmode='group',showlegend=True, legend_orientation='h')
+fig.update_layout(
+    barmode = 'group', showlegend = True, legend_orientation = 'h')
 fig.show()
