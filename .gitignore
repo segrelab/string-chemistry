@@ -3,7 +3,7 @@ bin/
 __pycache__/
 share/
 stoich_mat.dat
-.Rproj.user
+.R*
 etc/
 *.png
 *.sh

@@ -188,9 +188,6 @@ def remove_random_rxns(more_rxns, S, prob):
     smaller_S = S[indices,]
     return(less_rxns, smaller_S)
 
-def make_cobra_reactions(rxn, met_dict):
-    c_mets = [met_dict[met] for met in rxn_dict[rxn.id]]
-
 # make a COBRA model using these metbolites and reactants so you can do FBA
 def make_cobra_model(met_list, rxn_list):
     model = cobra.Model('string_chem')
