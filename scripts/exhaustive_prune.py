@@ -38,7 +38,6 @@ except ValueError:
     sys.exit('Arguments: monomers, max polymer length, number of food sources, \
 number of biomass precursors.')
 
-
 # create the reference network and pick a biomass rxn
 SCN = scn.CreateNetwork(monos, int(max_pol))
 cobra_model = scn.make_cobra_model(SCN.met_list, SCN.rxn_list)

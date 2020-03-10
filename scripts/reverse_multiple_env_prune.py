@@ -60,7 +60,7 @@ while i < int(reps):
 
 # print a bunch of info but also write it out to a tsv
 with open(
-        f'data/{monos}_{max_pol}_{ins}env_{reps}x{outs}outs.tsv', 'w'
+        f'../data/{monos}_{max_pol}_{ins}env_{reps}x{outs}outs.tsv', 'w'
     ) as out:
     out.write('bitstring\trxn_count\tbiomass\n')
     for network in pruned_nets.keys():

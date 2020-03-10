@@ -93,12 +93,12 @@ while i < int(big_reps):
         count_bitstring, bitstring_df.bitstring
     ))
     bitstring_df.to_csv(
-        f'data/{monos}_{max_pol}_{ins}ins_{outs}outs_{i}of{big_reps}.csv'
+        f'../data/{monos}_{max_pol}_{ins}ins_{outs}outs_{i}of{big_reps}.csv'
     )
     chisq_results = chisquare(bitstring_df.occurrences)
     p_vals.append(chisq_results[1])
 # write the list of food sources that were tried to a file
-with open(f'data/{monos}_{max_pol}_{ins}ins_{outs}outs_foods.csv', 'w') as out:
+with open(f'../data/{monos}_{max_pol}_{ins}ins_{outs}outs_foods.csv', 'w') as out:
     # once all the lines are created, concatenate them with newline characters
     output = '\n'.join([
         # add the appropriate p-value to the concatenated food lists

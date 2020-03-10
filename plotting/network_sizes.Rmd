@@ -1,0 +1,42 @@
+---
+title: "Network Sizes"
+author: "Devlin Moyer"
+date: "1/18/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+```
+
+```{r}
+counts <- read.csv(
+  "many_counts.csv", header = F,
+  col.names = c("monos", "max_l", "mets", "rxns")
+)
+
+counts %>%
+  mutate(monos = as.factor(monos)) %>%
+  ggplot(aes(x = max_l, y = mets)) + geom_line(aes(color = monos)) + 
+  theme_bw() + scale_x_continuous(breaks = c(2,4,6,8,10)) +
+  scale_y_continuous(trans = "log10") +
+  labs(
+    x = "Maximum Polymer Length", y = "Number of Metabolites", 
+    color = "Types of Monomers", 
+    title = "Network Sizes By Metabolite Count"
+  )
+
+counts %>%
+  mutate(monos = as.factor(monos)) %>%
+  filter(rxns > 0) %>%
+  ggplot(aes(x = max_l, y = rxns)) + geom_line(aes(color = monos)) + 
+  theme_bw() + scale_x_continuous(breaks = c(2,4,6,8,10)) +
+  scale_y_continuous(trans = "log10") +
+  labs(
+    x = "Maximum Polymer Length", y = "Number of Reactions", 
+    color = "Types of Monomers", 
+    title = "Network Sizes By Reaction Count"
+  )
+```
+

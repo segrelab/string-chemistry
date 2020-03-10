@@ -1,18 +1,21 @@
 # pruning.py
-# take a network made by string_chem_net, designate some input and output
-# metabolites, do fba to find reaction fluxes, drop all reactions with no flux,
-# and then do two things:
-#
-# 1. remove the smallest flux, make sure that doesn't render the solution
-# infeasible, and then iterating this process until you can't remove a reaction
-#
-# 2. remove a reaction at random, make sure that doesn't render the solution
-# infeasible, then repeat until you can't remove a reaction
-# 
-# note that the first method will always give the same result while the second
-# is liable to give a range of results in many (but not all) cases, so this
-# script does the second approach a bunch of times but only does the first one
-# once per call
+
+''' 
+take a network made by string_chem_net, designate some input and output
+metabolites, do fba to find reaction fluxes, drop all reactions with no flux,
+and then do two things:
+
+1. remove the smallest flux, make sure that doesn't render the solution
+infeasible, and then iterating this process until you can't remove a reaction
+
+2. remove a reaction at random, make sure that doesn't render the solution
+infeasible, then repeat until you can't remove a reaction
+ 
+note that the first method will always give the same result while the second
+is liable to give a range of results in many (but not all) cases, so this
+script does the second approach a bunch of times but only does the first one
+once per call
+'''
 
 import sys
 import string_chem_net as scn
@@ -108,5 +111,5 @@ bitstring_df.columns = ['bitstring', 'occurrences']
 bitstring_df['rxn_count'] = list(map(count_bitstring, bitstring_df.bitstring))
 # write output
 bitstring_df.to_csv(
-    f'data/{monos}_{max_pol}_{ins}ins_{outs}outs_{reps}reps.csv'
+    f'../data/{monos}_{max_pol}_{ins}ins_{outs}outs_{reps}reps.csv'
 )

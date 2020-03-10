@@ -210,7 +210,7 @@ for group in no_envs:
 
 # print a bunch of info but also write it out to a tsv
 with open(
-        f'data/{monos}_{max_pol}_{yes_groups}yes_{no_groups}no_{ins}_' +
+        f'../data/{monos}_{max_pol}_{yes_groups}yes_{no_groups}no_{ins}_' +
         f'{outs}outs.tsv', 'w'
     ) as out:
     out.write('bitstring\trxn_count\toccurrences\tyes_count\tyes_envs\t' +

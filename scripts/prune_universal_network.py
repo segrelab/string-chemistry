@@ -9,8 +9,8 @@ import sys
 # need to load both the universal model and an E. coli model to get the biomass
 # reaction
 print('Loading COBRA models')
-e_coli_model = cobra.io.load_json_model('data/iJO1366.json')
-u_model = cobra.io.load_json_model('data/bigg_universal_model.json')
+e_coli_model = cobra.io.load_json_model('../data/iJO1366.json')
+u_model = cobra.io.load_json_model('../data/bigg_universal_model.json')
 
 # remove all exchange reactions from the unviersal model
 print('Removing non-E. coli exchange reactions from universal model')

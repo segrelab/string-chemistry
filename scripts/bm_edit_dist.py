@@ -44,7 +44,7 @@ def make_ed_mat(met_list_list):
 
 # coerce to set to remove some duplicates
 bms_with_dups = list(set(
-    pd.read_csv('data/ab_5_100x2ins_5outs.tsv', sep = '\t').biomass
+    pd.read_csv('../data/ab_5_100x2ins_5outs.tsv', sep = '\t').biomass
 ))
 
 # might have same metabolites in different orders; need to remove those dups

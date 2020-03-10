@@ -75,5 +75,5 @@ bitstring_df['biomass'] = list(it.repeat(
     len(food_mets)
 )) 
 bitstring_df.to_csv(
-    f'data/{monos}_{max_pol}_{reps}x{ins}ins_{outs}outs.csv'
+    f'../data/{monos}_{max_pol}_{reps}x{ins}ins_{outs}outs.csv'
 )
