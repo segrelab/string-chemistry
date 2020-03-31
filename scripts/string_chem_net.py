@@ -157,9 +157,13 @@ def make_edgelist(rxn_list, rxns_as_nodes = True):
             reac = rxn_dict[rxn][0]
             prod1 = rxn_dict[rxn][1]
             prod2 = rxn_dict[rxn][2]
-            edgelist.append([rxn, reac])
+            # put reaction after reactant and before product in case you want a
+            # directed graph
+            edgelist.append([reac, rxn])
             edgelist.append([rxn, prod1])
-            edgelist.append([rxn, prod2])
+            # presumably, most of the time you don't want duplicate edges
+            if prod1 != prod2:
+                edgelist.append([rxn, prod2])
     elif rxns_as_nodes is False:
         for rxn in rxn_list:
             # could use less code but this is easier to interpret for humans

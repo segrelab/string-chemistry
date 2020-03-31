@@ -8,35 +8,63 @@ output: html_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
+
+theme_set(theme_bw())
 ```
 
 ```{r}
 counts <- read.csv(
-  "many_counts.csv", header = F,
+  "../data/many_counts.csv", header = F,
   col.names = c("monos", "max_l", "mets", "rxns")
-)
+) %>%
+  mutate(monos = as.factor(monos)) %>%
+  filter(rxns > 0)
+
+ecoli_mets <- 1805
+ecoli_rxns <- 2583
+kegg_mets <- 18686
+kegg_rxns <- 11395
 
 counts %>%
-  mutate(monos = as.factor(monos)) %>%
   ggplot(aes(x = max_l, y = mets)) + geom_line(aes(color = monos)) + 
-  theme_bw() + scale_x_continuous(breaks = c(2,4,6,8,10)) +
-  scale_y_continuous(trans = "log10") +
-  labs(
-    x = "Maximum Polymer Length", y = "Number of Metabolites", 
-    color = "Types of Monomers", 
-    title = "Network Sizes By Metabolite Count"
-  )
+    scale_x_continuous(breaks = c(2,4,6,8,10)) +
+    scale_y_continuous(trans = "log10") +
+    geom_hline(aes(yintercept = ecoli_mets)) +
+    annotate("text", x = 3, y = 2700, label = "E. coli Metabolites") +
+    geom_hline(aes(yintercept = kegg_mets)) +
+    annotate("text", x = 3, y = 30000, label = "KEGG Metabolites") +
+    labs(
+      x = "Maximum String Length", y = "Number of Metabolites", 
+      color = "Types of Monomers", 
+      title = "Network Sizes By Metabolite Count"
+    )
 
 counts %>%
-  mutate(monos = as.factor(monos)) %>%
-  filter(rxns > 0) %>%
   ggplot(aes(x = max_l, y = rxns)) + geom_line(aes(color = monos)) + 
-  theme_bw() + scale_x_continuous(breaks = c(2,4,6,8,10)) +
-  scale_y_continuous(trans = "log10") +
-  labs(
-    x = "Maximum Polymer Length", y = "Number of Reactions", 
-    color = "Types of Monomers", 
-    title = "Network Sizes By Reaction Count"
-  )
+    scale_x_continuous(breaks = c(2,4,6,8,10)) +
+    scale_y_continuous(trans = "log10") +
+    geom_hline(aes(yintercept = ecoli_rxns)) +
+    annotate("text", x = 3, y = 4000, label = "E. coli Reactions") +
+    geom_hline(aes(yintercept = kegg_rxns)) +
+    annotate("text", x = 3, y = 20000, label = "KEGG Reactions") +
+    labs(
+      x = "Maximum String Length", y = "Number of Reactions", 
+      color = "Types of Monomers", 
+      title = "Network Sizes By Reaction Count"
+    )
+
+counts %>%
+  mutate(ratio = rxns / mets) %>%
+  ggplot(aes(x = max_l, y = ratio)) + geom_line(aes(color = monos)) + 
+    scale_x_continuous(breaks = c(2,4,6,8,10)) +
+    geom_hline(aes(yintercept = ecoli_rxns/ecoli_mets)) +
+    annotate("text", x = 8, y = 1.75, label = "E. coli Ratio") +
+    geom_hline(aes(yintercept = kegg_rxns/kegg_mets)) +
+    annotate("text", x = 8, y = 0.9, label = "KEGG Ratio") +
+    labs(
+      x = "Maximum String Length", y = "Number of Reactinos / Number of Metabolites", 
+      color = "Types of Monomers", 
+      title = "Network Sizes By Ratio of Reaction Count to Metabolite Count"
+    )
 ```
 
