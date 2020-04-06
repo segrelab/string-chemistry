@@ -6,6 +6,7 @@ import string_chem_net as scn
 import random
 import pandas as pd
 import pygraphviz as gv
+import numpy as np
 
 # count number of 1s in a bitstring
 def count_bitstring(bitstring):
@@ -53,7 +54,8 @@ except ValueError:
     )
 
 print('Creating universal string chemistry network.')
-SCN = scn.CreateNetwork(monos, int(max_pol))
+# make the stoichiometric matrix just so we have it around
+SCN = scn.CreateNetwork(monos, int(max_pol), make_stoich = True)
 cobra_model = scn.make_cobra_model(SCN.met_list, SCN.rxn_list)
 scn.reverse_rxns(cobra_model, len(cobra_model.reactions))
 bm_rxn = scn.choose_bm_mets(int(outs), cobra_model)
@@ -154,3 +156,11 @@ viz_pruned_net(min_flux_pruned, cobra_model, full_graph, i)
 for random_pruned in random_pruned_nets:
     i += 1
     viz_pruned_net(random_pruned, cobra_model, full_graph, i)
+
+# save the S matrix and vector of fluxes for the full network just so we have
+# them around (for the figure, I guess)
+np.savetext(
+    f'data/{monos}_{max_pol}_{ins}ins_{outs}outs_full_S.csv', 
+    SCN.S, delimiter = ','
+)
+
