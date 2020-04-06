@@ -2,7 +2,7 @@
 # makes the three example string chemistry graphs shown in figure 1 of the 
 # paper
 
-import graphviz as gv
+import pygraphviz as gv
 import string_chem_net as scn
 
 figure = gv.Digraph('Figure 1')

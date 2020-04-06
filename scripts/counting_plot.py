@@ -28,6 +28,6 @@ for n in range(1, 6):
         list_o_lists.append([str(x) for x in row_list])
 
 out_list = [','.join(row) for row in list_o_lists]
-with open('../data/many_counts.csv', 'w') as out:
+with open('data/many_counts.csv', 'w') as out:
     for row in out_list:
         out.write(row + '\n')

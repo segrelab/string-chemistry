@@ -1,27 +1,11 @@
-# pruning.py
-
-''' 
-take a network made by string_chem_net, designate some input and output
-metabolites, do fba to find reaction fluxes, drop all reactions with no flux,
-and then do two things:
-
-1. remove the smallest flux, make sure that doesn't render the solution
-infeasible, and then iterating this process until you can't remove a reaction
-
-2. remove a reaction at random, make sure that doesn't render the solution
-infeasible, then repeat until you can't remove a reaction
- 
-note that the first method will always give the same result while the second
-is liable to give a range of results in many (but not all) cases, so this
-script does the second approach a bunch of times but only does the first one
-once per call
-'''
+# fig_pruning.py
+# make a figure to show the results of pruning a network
 
 import sys
 import string_chem_net as scn
 import random
-import re
 import pandas as pd
+import pygraphviz as gv
 
 # count number of 1s in a bitstring
 def count_bitstring(bitstring):
@@ -31,20 +15,49 @@ def count_bitstring(bitstring):
             count += 1
     return(count)
 
+# visualize effects of pruning
+def viz_pruned_net(pruned_net, full_net, full_graph, i):
+    # make a copy with differently-colored edges indicating where it was pruned
+    # (use copy so full_graph isn't modified and we can do this many times)
+    pruned_graph = full_graph.copy()
+    # now change the colors of the reaction nodes/edges that were pruned
+    for rxn in full_net.reactions:
+        if rxn not in pruned_net.reactions:
+            # change color of that reaction's node
+            rxn_node = pruned_graph.get_node(rxn.id)
+            rxn_node.attr['color'] = 'grey'
+            # change color of all attached edges
+            for met in rxn.metabolites:
+                dropped_edge = pruned_graph.get_edge(met.id, rxn.id)
+                dropped_edge.attr['color'] = 'grey'
+
+    # now change the colors of the metabolites that are now dropped
+    for met in full_net.metabolites:
+        if met not in pruned_net.metabolites:
+            met_node = pruned_graph.get_node(met.id)
+            met_node.attr['color'] = 'grey'
+
+    # draw the graph
+    pruned_graph.draw(
+        f'data/{monos}_{max_pol}_{ins}ins_{outs}outs_{i}.png', prog = 'fdp'
+    )
+    # return nothing; that file is the only necessary output
+
 # get command-line arguments
 try:
     (monos, max_pol, ins, outs, reps) = sys.argv[1:]
 except ValueError:
-    sys.exit('Arguments: monomers, max polymer length, number of food sources, \
-number of biomass precursors, number of times to prune each network.'
+    sys.exit(
+        'Arguments: monomers, max polymer length, number of food sources, ' +
+        'number of biomass precursors, number of times to radnomly prune.'
     )
 
 print('Creating universal string chemistry network.')
 SCN = scn.CreateNetwork(monos, int(max_pol))
 cobra_model = scn.make_cobra_model(SCN.met_list, SCN.rxn_list)
 scn.reverse_rxns(cobra_model, len(cobra_model.reactions))
-scn.choose_inputs(int(ins), cobra_model)
 bm_rxn = scn.choose_bm_mets(int(outs), cobra_model)
+scn.choose_inputs(int(ins), cobra_model, bm_rxn)
 cobra_model.objective = bm_rxn
 
 # make sure that there's at least one feasible solution before trying to prune
@@ -55,8 +68,8 @@ while solution.status == 'infeasible' or (solution.fluxes == 0).all():
     cobra_model.remove_reactions([bm_rxn])
     cobra_model.remove_reactions(cobra_model.boundary)
     # choose new ones and see if those yield a solvable network
-    scn.choose_inputs(int(ins), cobra_model)
     bm_rxn = scn.choose_bm_mets(int(outs), cobra_model)
+    scn.choose_inputs(int(ins), cobra_model, bm_rxn)
     cobra_model.objective = bm_rxn
     solution = cobra_model.optimize()
 
@@ -111,5 +124,33 @@ bitstring_df.columns = ['bitstring', 'occurrences']
 bitstring_df['rxn_count'] = list(map(count_bitstring, bitstring_df.bitstring))
 # write output
 bitstring_df.to_csv(
-    f'../data/{monos}_{max_pol}_{ins}ins_{outs}outs_{reps}reps.csv'
+    f'data/{monos}_{max_pol}_{ins}ins_{outs}outs_{reps}reps.csv'
 )
+
+# make a graphviz object for the initial network
+full_graph = gv.AGraph(splines = 'true')
+
+# distinguish metabolite and reaction nodes by shape
+for met in cobra_model.metabolites:
+    full_graph.add_node(met.id, shape = 'box')
+for rxn in cobra_model.reactions:
+    full_graph.add_node(rxn.id, shape = 'oval')
+    # distinguish exchange fluxes with colored edges
+    if rxn == bm_rxn or rxn in cobra_model.boundary:
+        for met in rxn.metabolites:
+            full_graph.add_edge([met.id, rxn.id], color = 'red')
+    else:
+        for met in rxn.metabolites:
+            full_graph.add_edge([met.id, rxn.id])
+
+full_graph.draw(
+    f'data/{monos}_{max_pol}_{ins}ins_{outs}outs_full.png', prog = 'fdp'
+)
+
+# visualize pruned networks
+# have a counter so there can be unique filenames
+i = 0
+viz_pruned_net(min_flux_pruned, cobra_model, full_graph, i)
+for random_pruned in random_pruned_nets:
+    i += 1
+    viz_pruned_net(random_pruned, cobra_model, full_graph, i)

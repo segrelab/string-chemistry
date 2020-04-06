@@ -2,7 +2,7 @@
 # draw a relatively big network with input and output reactions to show what
 # that looks like
 
-from scripts import string_chem_net as scn
+import string_chem_net as scn
 import random
 import pygraphviz as gv
 
@@ -38,4 +38,4 @@ for out in outs:
     graph.add_edge([out, ' + '.join(outs) + ' ->'], color = 'red')
 
 # draw the graph
-graph.draw('../data/ins_and_outs.png', prog = 'fdp')
+graph.draw('data/ins_and_outs.png', prog = 'fdp')
