@@ -118,7 +118,7 @@ class CreateNetwork():
     # at each position within the matrix
     def make_stoich_mat(self, rxn_list, met_list):
         # since these can get very large, we need to use a memory-mapped object
-        print(f'Dimensions of matrix: {len(rxn_list)}, {len(met_list)}')
+        #print(f'Dimensions of matrix: {len(rxn_list)}, {len(met_list)}')
         S = np.memmap('stoich_mat.dat', dtype = np.float32, mode = 'w+',
             shape = (len(rxn_list), len(met_list)))
         # fill the array with 0s

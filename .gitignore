@@ -8,3 +8,4 @@ etc/
 *.png
 *.sh
 data/
+.Rproj.user
