@@ -1,4 +1,4 @@
-# fig_pruning.py
+# figure_4.py
 # make a figure to show the results of pruning a network
 
 import sys
@@ -131,7 +131,14 @@ bitstring_df.to_csv(
 )
 
 # make a graphviz object for the initial network
-full_graph = gv.AGraph(splines = 'true')
+full_graph = gv.AGraph(
+    size = '5,5', 
+    dpi = '400', 
+    splines = 'true'
+)
+
+# visualize reaction fluxes with edge weights
+solution = cobra_model.optimize()
 
 # distinguish metabolite and reaction nodes by shape
 for met in cobra_model.metabolites:
@@ -141,10 +148,18 @@ for rxn in cobra_model.reactions:
     # distinguish exchange fluxes with colored edges
     if rxn == bm_rxn or rxn in cobra_model.boundary:
         for met in rxn.metabolites:
-            full_graph.add_edge([met.id, rxn.id], color = 'red')
+            full_graph.add_edge(
+                [met.id, rxn.id],
+                color = 'red',
+                # use reaction fluxes as edge weights
+                weight = solution.fluxes.loc[rxn.id]
+            )
     else:
         for met in rxn.metabolites:
-            full_graph.add_edge([met.id, rxn.id])
+            full_graph.add_edge(
+                [met.id, rxn.id],
+                weight = solution.fluxes.loc[rxn.id]
+            )
 
 full_graph.draw(
     f'data/{monos}_{max_pol}_{ins}ins_{outs}outs_full.png', prog = 'fdp'
@@ -165,8 +180,3 @@ np.savetxt(
     delimiter = ','
 )
 
-# save the vector of fluxes after doing FBA on the full network
-solution = cobra_model.optimize()
-solution.fluxes.to_csv(
-    f'data/{monos}_{max_pol}_{ins}ins_{outs}outs_full_fluxes.csv'
-)

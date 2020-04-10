@@ -5,7 +5,11 @@
 import pygraphviz as gv
 import string_chem_net as scn
 
-figure = gv.AGraph(splines = 'true')
+figure = gv.AGraph(
+    size = '8,2', # set size of output image
+    dpi = '400', # set resolution of output image
+    splines = 'true' # make sure nodes aren't overlapping with each other
+)
 
 # least complex graph will have one kind of monomer and a maximum length of two
 least = figure.add_subgraph()
