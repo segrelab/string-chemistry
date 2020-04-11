@@ -1,11 +1,10 @@
 # multiple_env_prune.py
-# makes one network, picks one biomass reaction, picks some groups of n input
-# metabolites that the resulting network should grow on, picks some groups of n
-# metabolites that the resulting network(s) should not grow on, prunes one 
-# network using one of those grow groups a lot of times to get several networks
-# that work with that group of metabolites, and then filters those networks 
-# based on whether or not they still grow when supplied with all the other 
-# groups of metabolites
+# does random pruning on a single universal scale network and then tests
+# whether or not each of the unique randomly-pruned networks can grow in a 
+# specified number of environments
+# the environments are separated into environments you expect growth in and
+# environments you don't expect growth in to simulate what you might do with
+# real metabolic networks if you had growth data for a real organism
 
 import sys
 import string_chem_net as scn

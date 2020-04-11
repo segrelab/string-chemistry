@@ -65,7 +65,6 @@ cobra_model.objective = bm_rxn
 
 # make sure that there's at least one feasible solution before trying to prune
 solution = cobra_model.optimize()
-i = 0
 while solution.status == 'infeasible' or (solution.fluxes == 0).all():
     # remove existing biomass and input reactions
     cobra_model.remove_reactions([bm_rxn])
