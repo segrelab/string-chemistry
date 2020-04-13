@@ -49,7 +49,7 @@ for bm_trial in range(int(bm_count)):
     bm_string = '+'.join([met.id for met in bm_rxn.metabolites])
 
     # do min flux pruning
-    min_flux_pruned = scn.min_flux_prune(cobra_model)
+    min_flux_pruned = scn.min_flux_prune(cobra_model, bm_rxn)
 
     # get growth flux in as many environments as specified
     for env in range(int(env_count)):

@@ -6,25 +6,90 @@ output: html_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE, comment = NA)
+options(max.print = 50)
 ```
 
-## R Markdown
+# Setup
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+```{r warning=F}
+# for a better logistic regression function than the one in base R
+library(rms)
+# mostly for plotting aesthetics
+library(tidyverse)
+theme_set(theme_bw())
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+# load data from simulations
+data <- read.csv("../data/ab_5_2ins_5outs_10000envs_10orgs.csv", row.names = 1)
 
-```{r cars}
-summary(cars)
+# make some minor tweaks
+data <- data %>%
+  # environment is a built-in R object/function/something or other
+  rename(Environment = environment) %>%
+  # because I wrote the simulation script poorly, it did a lot of biomass-environment pairs multiple times
+  unique(.) %>%
+  # since so many growth fluxes were 0, make an indicator of growth variable to do logistic regression on
+  mutate(binary_growth = ifelse(growth == 0, 0, 1))
 ```
 
-## Including Plots
+# Look at the Data
 
-You can also embed plots, for example:
-
-```{r pressure, echo=FALSE}
-plot(pressure)
+```{r}
+ggplot(data, aes(sample = growth)) + geom_qq() + geom_qq_line(col = "red") + 
+  labs(title = "Normal Q-Q Plot of Growth Fluxes")
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+When doing linear regression, it is generally assumed that the outcome variable is normally distributed. That is clearly not the case here, mostly due to the preponderance of 0s. The 0s are also problematic because the usual workaround to non-normally distributed outcomes is transforming the variable, e.g. squaring all values or taking the logarithm, but none of those will help with the 0 problem. I think a good response to the large number of 0 values is to instead predict growth/no growth using logistic regression, ignoring the values of the nonzero growth fluxes. The nonzero values look like they follow the normal distribution line reasonably well, so perhaps one could also try predicting growth only for outcomes that are nonzero using linear regression.
+
+# Linear Regression to Predict Growth Flux
+
+## Predicting Growth with Environment
+
+```{r}
+env_fit <- lm(growth ~ Environment, data = data)
+summary(env_fit)
+par(mfrow = c(2,2))
+plot(env_fit)
+```
+
+A few environments seem to be significant predictors of growth, but the model only explains 14% of variation in growth fluxes, so it's not great. Several basic assumptions of linear regression appear to be at least a little violated: the outcome variable is strictly positive, so there are clear patterns in the residuals vs fitted plot. The residuals are also substantially not normally distributed, which is almost certainly because the growth fluxes aren't normally distributed to begin with. The scale-location plot shows that the variance of growth fluxes is not constant, which is also a problem. There don't seem to be any issues with leverage, so at least this model has that going for it.
+
+## Predicting Growth with Biomass
+
+```{r}
+bm_fit <- lm(growth ~ biomass, data = data)
+summary(bm_fit)
+par(mfrow = c(2,2))
+plot(bm_fit)
+```
+
+All biomass reactions are significant predictors of growth, which is nice, but this model still only accounts for 24% of variation in growth fluxes. The regression diagnostic plots are a bit hard to interpret since we're using one categorical predictor, but the distribution of residuals seems much more normal than the previous model. There's still an issue with non-constant variance of the residuals, to about the extent there was in the previous model.
+
+# Logistic Regression to Predict Growth/No Growth
+
+As previously mentioned, it might improve matters to make a this a binary classifcation model where we're just trying to predict if there will be growth or not.
+
+## Predicting Growth with Environment
+
+```{r}
+logistic_env_model <- lrm(binary_growth ~ Environment, data = data, x = T, y = T, maxit = 1000)
+logistic_env_model
+```
+
+The Nagelkerke R-squared value for this model is only 0.33, which is mediocre (a Nagelkerke R-squared of 0 corresponds to a model that predicts the mean outcome for all samples; the maximum possible nageklerke R-squared is 1). The C-statistic (AUC) is 0.779, which is also mediocre. I abbreviated the output here, but trust me when I say that none of the environments was even a remotely good predictor, as was the case with the linear model.
+
+## Predicting Growth with Biomass
+
+```{r}
+logistic_bm_model <- lrm(binary_growth ~ biomass, data = data, x = T, y = T)
+logistic_bm_model
+```
+
+Most of the biomass predictions are significant predictors of growth, except one. Not sure what to make of that. The Nagelkerke R-squared and C-statistic for this model are nearly identical to the values we saw for the previous model, so despite having much more significant predictors, it's still not explaining the outcome very well.
+
+# Conclusions
+
+Neither the environmental composition nor the biomass reaction is a particularly good predictor of growth flux for an arbitrary pruned string chemsitry network. It seems that the best model that can be made for this data is a logistic regression model that just predicts whether or not there will be growth based only on the biomass reaction.
+
+
+

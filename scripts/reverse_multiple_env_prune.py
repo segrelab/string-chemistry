@@ -46,7 +46,7 @@ while i < int(reps):
         i += 1
         print(f'On biomass reaction {i}')
         # run the minimum flux pruner
-        pruned_net = scn.min_flux_prune(cobra_model)
+        pruned_net = scn.min_flux_prune(cobra_model, bm_rxn)
         # remove the biomass reaction before making the reaction bitstring
         # can't just remove the reaction because somehow in the pruning process
         # the biomass reaction became different in some subtle way
