@@ -49,12 +49,14 @@ while bm_trial < int(bm_count):
         # get an environment and do FBA
         scn.choose_inputs(int(ins), cobra_model, bm_rxn)
         solution = cobra_model.optimize()
+        bm_rxn_flux = solution.fluxes.get(key = bm_rxn.id)
         # don't bother pruning if there is no feasible solution on the full net
-        if solution.status == 'infeasible' or (solution.fluxes == 0).all():
+        if solution.status == 'infeasible' or bm_rxn_flux < 10e-10:
             # but also don't count this run
             env -= 1
             infeas_count += 1
         else:
+            #print(solution.fluxes.get(key = bm_rxn.id))
             # do min flux pruning and get reaction to metabolite ratio
             pruned = scn.min_flux_prune(cobra_model, bm_rxn)
             ratio = len(pruned.reactions)/len(pruned.metabolites)
@@ -67,7 +69,7 @@ while bm_trial < int(bm_count):
             bm_trial -= 1
             break
 
-output = '\n'.join(ratios) + '\n'
+output = '\n'.join([str(x) for x in ratios]) + '\n'
 with open(f'data/{monos}_{max_pol}_{ins}ins_{outs}outs_{env_count}envs_' + 
     '{bm_count}orgs_ratios.csv') as out:
     out.write(output)

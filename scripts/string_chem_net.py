@@ -289,13 +289,16 @@ def min_flux_prune(cobra_model, bm_rxn):
     cobra_net = cobra_model.copy()
     # assign reaction fluxes to everything before starting the loop
     solution = cobra_net.optimize()
+    bm_rxn_flux = solution.fluxes.get(key = bm_rxn.id)
     while True:
         # remove all reactions with no flux
         flux_bearers = solution.fluxes[solution.fluxes != 0]
         min_flux_rxn = flux_bearers.abs().idxmin()
-        bm_rxn_flux = solution.fluxes.get(key = bm_rxn.id)
         # find reaction with smallest remaining flux and remove it
         min_flux_rxn = cobra_net.reactions.get_by_id(min_flux_rxn)
+        # if this reaction is the biomass reaction, we're clearly done pruning
+        if min_flux_rxn.id == bm_rxn.id:
+            break
         cobra_net.remove_reactions([min_flux_rxn])
         # see if that made the network unsolvable; if so, add the reaction back
         # and exit the while loop
@@ -304,7 +307,8 @@ def min_flux_prune(cobra_model, bm_rxn):
         # biomass reaction will be some absurdly small number and then if you
         # do FBA on the same network again you won't get a feasible solution
         # so can't just check to see if the flux is 0
-        if solution.status == 'infeasible' or bm_rxn_clus < 10e-10:
+        bm_rxn_flux = solution.fluxes.get(key = bm_rxn.id)
+        if solution.status == 'infeasible' or bm_rxn_flux < 10e-10:
             cobra_net.add_reaction(min_flux_rxn)
             break
     return(cobra_net)
