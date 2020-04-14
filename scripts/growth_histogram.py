@@ -1,5 +1,6 @@
-# regression_plot.py
-# plot describing the regression model for predicting growth from envrionment
+# growth_histogram.py
+# histogram of growth fluxes for many networks pruned with different biomass
+# reactions in different environments
 
 import pandas as pd
 import plotly.express as px

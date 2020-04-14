@@ -1,4 +1,4 @@
-# tsne_plot.py
+# pruning_comparison_tsne.py
 # make a t-SNE plot to compare bitstrings from many different networks
 
 import sys

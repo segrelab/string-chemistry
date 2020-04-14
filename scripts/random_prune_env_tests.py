@@ -1,4 +1,4 @@
-# multiple_env_prune.py
+# random_prune_env_tests.py
 # does random pruning on a single universal scale network and then tests
 # whether or not each of the unique randomly-pruned networks can grow in a 
 # specified number of environments

@@ -1,6 +1,6 @@
-# many_min_prunes.py
-# runs the minimum flux pruning algorithm on a bunch of networks and 
-# compares the results
+# multiple_env_min_prune.py
+# runs the minimum flux pruning algorithm many times on the same universal
+# network with the same biomass reaction but many different environments
 
 import sys
 import string_chem_net as scn

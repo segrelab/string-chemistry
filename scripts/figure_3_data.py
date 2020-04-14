@@ -1,4 +1,4 @@
-# counting_plot.py
+# figure_3_data.py
 # counts number of reactions and metabolites in networks with up to 5 kinds of 
 # monomers and polymers of up to length 10
 # network_sizes.Rmd makes a plot using this data

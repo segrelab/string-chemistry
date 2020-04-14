@@ -136,7 +136,7 @@ full_graph = gv.AGraph(
     splines = 'true'
 )
 
-# visualize reaction fluxes with edge weights
+# visualize reaction fluxes with edge thickness (penwidth)
 solution = cobra_model.optimize()
 
 # distinguish metabolite and reaction nodes by shape
@@ -150,15 +150,21 @@ for rxn in cobra_model.reactions:
             full_graph.add_edge(
                 [met.id, rxn.id],
                 color = 'red',
-                # use reaction fluxes as edge weights
-                weight = solution.fluxes.loc[rxn.id]
             )
     else:
         for met in rxn.metabolites:
-            full_graph.add_edge(
-                [met.id, rxn.id],
-                weight = solution.fluxes.loc[rxn.id]
-            )
+            # make reactions with no flux have grey edges
+            if solution.fluxes.loc[rxn.id] == 0:
+                full_graph.add_edge(
+                    [met.id, rxn.id],
+                    color = 'grey'
+                )
+            # make reactions with flux have bolded edges
+            else:
+                full_graph.add_edge(
+                    [met.id, rxn.id],
+                    penwidth = 2
+                )
 
 full_graph.draw(
     f'data/{monos}_{max_pol}_{ins}ins_{outs}outs_full.png', prog = 'fdp'

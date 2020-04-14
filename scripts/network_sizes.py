@@ -1,4 +1,7 @@
-# counting.py
+# network_sizes.py
+# counts the number of metabolites and reactions that would be in a string
+# chemistry network with the specified number of unique monomers and maximum
+# string length
 
 import itertools as it
 import sys

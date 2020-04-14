@@ -63,13 +63,13 @@ while bm_trial < int(bm_count):
             ratios.append(ratio)
         # remove input reactions in preparation for next round of pruning
         cobra_model.remove_reactions(cobra_model.boundary)
-        # if env_count environments have not produced growth with this biomass
+        # if 1000 environments have not produced growth with this biomass
         # reaction it's garbage get a new one
-        if infeas_count > int(env_count):
+        if infeas_count > 1000:
             bm_trial -= 1
             break
 
 output = '\n'.join([str(x) for x in ratios]) + '\n'
 with open(f'data/{monos}_{max_pol}_{ins}ins_{outs}outs_{env_count}envs_' + 
-    '{bm_count}orgs_ratios.csv') as out:
+    f'{bm_count}orgs_ratios.csv', 'w') as out:
     out.write(output)

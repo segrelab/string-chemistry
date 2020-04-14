@@ -1,4 +1,4 @@
-# pca_plot.py
+# pruning_comparison_pca.py
 # make some plots to compare the reaction inclusion bitstrings of several
 # networks
 

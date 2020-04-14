@@ -1,5 +1,5 @@
 ---
-title: "Network Sizes"
+title: "Figure 3"
 author: "Devlin Moyer"
 date: "1/18/2020"
 output: html_document

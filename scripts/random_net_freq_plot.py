@@ -1,4 +1,4 @@
-# matplotlib_bar.py
+# random_net_freq_plot.py
 # make a bar chart showing how many times each network was found with the 
 # networks ordered by commonness and colored by reaction count
 # start by making a column ranking the networks by frequency

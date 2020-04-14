@@ -1,4 +1,4 @@
-# reverse_multiple_env_prune.py
+# multiple_bm_prune.py
 # makes one network, picks one environment, and sees if that environment can
 # support growth for many different randomly-chosen biomass reactions
 
