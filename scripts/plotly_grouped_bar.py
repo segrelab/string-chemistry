@@ -2,7 +2,6 @@
 # uses plotly to make a grouped bar chart
 
 import sys
-import cufflinks as cf
 import plotly.express as px
 import pandas as pd
 import numpy as np

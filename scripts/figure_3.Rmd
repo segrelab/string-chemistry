@@ -62,7 +62,7 @@ counts %>%
     geom_hline(aes(yintercept = kegg_rxns/kegg_mets)) +
     annotate("text", x = 8, y = 0.9, label = "KEGG Ratio") +
     labs(
-      x = "Maximum String Length", y = "Number of Reactinos / Number of Metabolites", 
+      x = "Maximum String Length", y = "Number of Reactions / Number of Metabolites", 
       color = "Types of Monomers", 
       title = "Network Sizes By Ratio of Reaction Count to Metabolite Count"
     )
