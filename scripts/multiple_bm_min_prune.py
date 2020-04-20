@@ -1,6 +1,7 @@
-# multiple_bm_prune.py
-# makes one network, picks one environment, and sees if that environment can
-# support growth for many different randomly-chosen biomass reactions
+# multiple_bm_min_prune.py
+# makes one network, picks one environment, and prunes the universal network
+# with that environment and many randomly-chosen biomass reactions using the
+# minimum flux pruner
 
 import sys
 import string_chem_net as scn

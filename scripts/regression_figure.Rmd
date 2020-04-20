@@ -20,50 +20,48 @@ library(tidyverse)
 theme_set(theme_bw())
 
 # load data from simulations
-data <- read.csv("../data/ab_5_2ins_5outs_10000envs_10orgs.csv", row.names = 1)
+data <- read.table(
+  "../data/ab_5_5ins_3outs_10000envs_10bms.tsv",
+  sep = "\t",
+  col.names = c("Biomass", "Environment", "Growth")
+)
 
-# make some minor tweaks
 data <- data %>%
-  # environment is a built-in R object/function/something or other
-  rename(Environment = environment) %>%
-  # because I wrote the simulation script poorly, it did a lot of biomass-environment pairs multiple times
-  unique(.) %>%
   # since so many growth fluxes were 0, make an indicator of growth variable to do logistic regression on
-  mutate(binary_growth = ifelse(growth == 0, 0, 1))
+  mutate(binary_growth = ifelse(Growth == 0, 0, 1))
 ```
 
 # Look at the Data
 
 ```{r}
-ggplot(data, aes(sample = growth)) + geom_qq() + geom_qq_line(col = "red") + 
+ggplot(data, aes(sample = Growth)) + geom_qq() + geom_qq_line(col = "red") + 
   labs(title = "Normal Q-Q Plot of Growth Fluxes")
 ```
 
-When doing linear regression, it is generally assumed that the outcome variable is normally distributed. That is clearly not the case here, mostly due to the preponderance of 0s. The 0s are also problematic because the usual workaround to non-normally distributed outcomes is transforming the variable, e.g. squaring all values or taking the logarithm, but none of those will help with the 0 problem. I think a good response to the large number of 0 values is to instead predict growth/no growth using logistic regression, ignoring the values of the nonzero growth fluxes. The nonzero values look like they follow the normal distribution line reasonably well, so perhaps one could also try predicting growth only for outcomes that are nonzero using linear regression.
-
+When doing linear regression, it is generally assumed that the outcome variable is normally distributed. That is clearly not the case here, mostly due to the preponderance of 0s. The 0s are also problematic because the usual workaround to non-normally distributed outcomes is transforming the variable, e.g. squaring all values or taking the logarithm, but none of those will help with the 0 problem. I think a good response to the large number of 0 values is to instead predict growth/no growth using logistic regression, ignoring the values of the nonzero growth fluxes. 
 # Linear Regression to Predict Growth Flux
 
 ## Predicting Growth with Environment
 
 ```{r}
-env_fit <- lm(growth ~ Environment, data = data)
+env_fit <- lm(Growth ~ Environment, data = data)
 summary(env_fit)
 par(mfrow = c(2,2))
 plot(env_fit)
 ```
 
-A few environments seem to be significant predictors of growth, but the model only explains 14% of variation in growth fluxes, so it's not great. Several basic assumptions of linear regression appear to be at least a little violated: the outcome variable is strictly positive, so there are clear patterns in the residuals vs fitted plot. The residuals are also substantially not normally distributed, which is almost certainly because the growth fluxes aren't normally distributed to begin with. The scale-location plot shows that the variance of growth fluxes is not constant, which is also a problem. There don't seem to be any issues with leverage, so at least this model has that going for it.
+The adjusted R-squared value for this model is negative, which means it is aprroximately as bad as it can possibly be. The regression diagnostic plots indicate that the model is bad because: none of the true outcome points are negative, the large proportion of outcomes that are 0, and non-constant variance in the residuals.
 
 ## Predicting Growth with Biomass
 
 ```{r}
-bm_fit <- lm(growth ~ biomass, data = data)
+bm_fit <- lm(Growth ~ Biomass, data = data)
 summary(bm_fit)
 par(mfrow = c(2,2))
 plot(bm_fit)
 ```
 
-All biomass reactions are significant predictors of growth, which is nice, but this model still only accounts for 24% of variation in growth fluxes. The regression diagnostic plots are a bit hard to interpret since we're using one categorical predictor, but the distribution of residuals seems much more normal than the previous model. There's still an issue with non-constant variance of the residuals, to about the extent there was in the previous model.
+Most biomass reactions are significant predictors of growth, which is nice, but this model still only accounts for about 36% of variation in growth fluxes. The regression diagnostic plots are a bit hard to interpret since we're using one categorical predictor, but it generally seems to have all the same problems as the environment model.
 
 # Logistic Regression to Predict Growth/No Growth
 
@@ -76,16 +74,16 @@ logistic_env_model <- lrm(binary_growth ~ Environment, data = data, x = T, y = T
 logistic_env_model
 ```
 
-The Nagelkerke R-squared value for this model is only 0.33, which is mediocre (a Nagelkerke R-squared of 0 corresponds to a model that predicts the mean outcome for all samples; the maximum possible nageklerke R-squared is 1). The C-statistic (AUC) is 0.779, which is also mediocre. I abbreviated the output here, but trust me when I say that none of the environments was even a remotely good predictor, as was the case with the linear model.
+The Nagelkerke R-squared value for this model is only 0.18, which is pretty bad (a Nagelkerke R-squared of 0 corresponds to a model that predicts the mean outcome for all samples; the maximum possible nageklerke R-squared is 1). The C-statistic (AUC) is 0.769, which is also mediocre. I abbreviated the output here, but trust me when I say that none of the environments was even a remotely good predictor, as was the case with the linear model.
 
 ## Predicting Growth with Biomass
 
 ```{r}
-logistic_bm_model <- lrm(binary_growth ~ biomass, data = data, x = T, y = T)
+logistic_bm_model <- lrm(binary_growth ~ Biomass, data = data, x = T, y = T)
 logistic_bm_model
 ```
 
-Most of the biomass predictions are significant predictors of growth, except one. Not sure what to make of that. The Nagelkerke R-squared and C-statistic for this model are nearly identical to the values we saw for the previous model, so despite having much more significant predictors, it's still not explaining the outcome very well.
+Most of the biomass predictions are significant predictors of growth, but those that weren't were very far from being significant. The Nagelkerke R-squared and C-statistic for this model are noticeably better than from the previous model: an R-squared of 0.39 is still pretty bad, but an AUC of 0.856 is actually okay.
 
 # Conclusions
 

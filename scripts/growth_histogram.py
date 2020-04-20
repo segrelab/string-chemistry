@@ -6,8 +6,9 @@ import pandas as pd
 import plotly.express as px
 
 env_growth_df = pd.read_csv(
-    'data/ab_5_5ins_3outs_10000envs_10orgs.csv',
-    index_col = 0
+    'data/ab_5_5ins_3outs_10000envs_10bms.tsv',
+    index_col = 0,
+    sep = '\t'
 ) 
 
 fig = px.histogram(
