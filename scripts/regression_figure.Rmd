@@ -46,22 +46,18 @@ When doing linear regression, it is generally assumed that the outcome variable 
 ```{r}
 env_fit <- lm(Growth ~ Environment, data = data)
 summary(env_fit)
-par(mfrow = c(2,2))
-plot(env_fit)
 ```
 
-The adjusted R-squared value for this model is negative, which means it is aprroximately as bad as it can possibly be. The regression diagnostic plots indicate that the model is bad because: none of the true outcome points are negative, the large proportion of outcomes that are 0, and non-constant variance in the residuals.
+The adjusted R-squared value for this model is negative, which means it is aprroximately as bad as it can possibly be.
 
 ## Predicting Growth with Biomass
 
 ```{r}
 bm_fit <- lm(Growth ~ Biomass, data = data)
 summary(bm_fit)
-par(mfrow = c(2,2))
-plot(bm_fit)
 ```
 
-Most biomass reactions are significant predictors of growth, which is nice, but this model still only accounts for about 36% of variation in growth fluxes. The regression diagnostic plots are a bit hard to interpret since we're using one categorical predictor, but it generally seems to have all the same problems as the environment model.
+Most biomass reactions are significant predictors of growth, which is nice, but this model still only accounts for about 36% of variation in growth fluxes. 
 
 # Logistic Regression to Predict Growth/No Growth
 
@@ -70,7 +66,7 @@ As previously mentioned, it might improve matters to make a this a binary classi
 ## Predicting Growth with Environment
 
 ```{r}
-logistic_env_model <- lrm(binary_growth ~ Environment, data = data, x = T, y = T, maxit = 1000)
+logistic_env_model <- lrm(binary_growth ~ Environment, data = data[1:10000,], x = T, y = T, maxit = 1000)
 logistic_env_model
 ```
 
@@ -83,11 +79,8 @@ logistic_bm_model <- lrm(binary_growth ~ Biomass, data = data, x = T, y = T)
 logistic_bm_model
 ```
 
-Most of the biomass predictions are significant predictors of growth, but those that weren't were very far from being significant. The Nagelkerke R-squared and C-statistic for this model are noticeably better than from the previous model: an R-squared of 0.39 is still pretty bad, but an AUC of 0.856 is actually okay.
+Each biomass reaction is a significant predictor of growth. The Nagelkerke R-squared and C-statistic for this model are noticeably better than from the previous model: an R-squared of 0.39 is still pretty bad, but an AUC of 0.856 is actually okay.
 
 # Conclusions
 
 Neither the environmental composition nor the biomass reaction is a particularly good predictor of growth flux for an arbitrary pruned string chemsitry network. It seems that the best model that can be made for this data is a logistic regression model that just predicts whether or not there will be growth based only on the biomass reaction.
-
-
-
