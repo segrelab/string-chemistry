@@ -5,15 +5,15 @@ Tools for creating string chemistry networks and doing flux-balance analysis on 
 ## Scripts That Make & Modify Networks
 
 ### exhaustive_prune.py
-    
-    Finds every possible way to prune a given network, i.e. every subnetwork that can still grow (i.e. have flux through the biomass reaction). Runs forever / crashes due to memory issues on all but the smallest of networks; was mostly created to see just how fast the number of possible pruned networks exploded beyond the point of computational feasibility.
 
-    Arguments:
+Finds every possible way to prune a given network, i.e. every subnetwork that can still grow (i.e. have flux through the biomass reaction). Runs forever / crashes due to memory issues on all but the smallest of networks; was mostly created to see just how fast the number of possible pruned networks exploded beyond the point of computational feasibility.
 
-    - `monos`: number of different kinds of monomers to include in the network
-    - `max_pol`: maximum length of a polymer in the network
-    - `ins`: number of input reactions to add to the network before pruning (i.e. "food" sources; randomly chosen)
-    - `outs`: number of biomass precursors (randomly chosen)
+Arguments:
+
+- `monos`: number of different kinds of monomers to include in the network
+- `max_pol`: maximum length of a polymer in the network
+- `ins`: number of input reactions to add to the network before pruning (i.e. "food" sources; randomly chosen)
+- `outs`: number of biomass precursors (randomly chosen)
 
 ### pruning.py
 
