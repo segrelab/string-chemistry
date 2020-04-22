@@ -36,29 +36,29 @@ CSV file with the following columns:
 
 ### string_chem_net.py
 
-The key script; contains a class for generating arbitrary string chemistry networks and several functions for maniuplating them and turning them into (COBRApy models)[https://cobrapy.readthedocs.io/en/latest/index.html] for FBA.
+The key script; contains a class for generating arbitrary string chemistry networks and several functions for maniuplating them and turning them into [COBRApy models](https://cobrapy.readthedocs.io/en/latest/index.html) for FBA.
 
 #### Classes:
 
 - CreateNetwork
 
-Generates all possible metabolites given the constraints and generates all possible bimolecular reactions involving only those metabolites.
+    Generates all possible metabolites given the constraints and generates all possible bimolecular reactions involving only those metabolites.
 
-Arguments:
+    Arguments:
 
-- `monos`: number of unique metabolites
-- `max_len`: maximum polymer length
-- `no_mirrors`: should mirror-image metabolites be removed? Default is False
-- `make_stoich`: should a stoichiometric matrix for the model be generated (as a numpy array)? Default is False
+    - `monos`: number of unique metabolites
+    - `max_len`: maximum polymer length
+    - `no_mirrors`: should mirror-image metabolites be removed? Default is False
+    - `make_stoich`: should a stoichiometric matrix for the model be generated (as a numpy array)? Default is False
 
-Returns:
+    Returns:
 
-An object with the following attributes:
+    An object with the following attributes:
 
-- `met_list`: list of all possible string metabolites given `monos` and `max_len`
-- `met_set`: set of all possible string metabolites given `monos` and `max_len`
-- `rxn_list`: list of all possible bimolecular reactions involving only those metabolites in `met_list`
-- `S`: stoichiometric matrix corresponding to the network of reactions in `rxn_list` (only defined if `make_stoich` is True)
+    - `met_list`: list of all possible string metabolites given `monos` and `max_len`
+    - `met_set`: set of all possible string metabolites given `monos` and `max_len`
+    - `rxn_list`: list of all possible bimolecular reactions involving only those metabolites in `met_list`
+    - `S`: stoichiometric matrix corresponding to the network of reactions in `rxn_list` (only defined if `make_stoich` is True)
 
 #### Functions:
 
