@@ -62,7 +62,7 @@ The key script; contains a class for generating arbitrary string chemistry netwo
 
 #### Functions:
 
-- choose\_bm\_mets
+- choose_bm_mets
 
     Randomly choose n metabolites (without replacement) from a given network and make an exchange reaction that consumes all of them (i.e. a biomass reaction)
     NOTE: Does not set the biomass reaction as the objective for the model; if you want to do FBA with this biomass reaction as the objective, you need to do that separately
@@ -75,7 +75,7 @@ The key script; contains a class for generating arbitrary string chemistry netwo
 
     - `bm_rxn`: the COBRApy reaction object corresponding to the newly-created biomass reaction, so you can set it as the objective for the model or just have it around for whatever purpose
 
-- choose\_inputs
+- choose_inputs
 
     Randomly choose n metabolites (without replacement) from a given network and make exchange reactions that produce them
 
@@ -88,7 +88,7 @@ The key script; contains a class for generating arbitrary string chemistry netwo
     Returns:
     None; COBRApy models are edited in-place
 
-- make\_bitstring
+- make_bitstring
 
     Given two COBRApy models where one is a subset of the other (e.g. the input and output from one of the pruning functions), makes a string of 1s and 0s representing which reactions in the larger model are present in the smaller one. Reactions from a particular COBRApy model are always output in the same order, so you can use this on multiple models pruned from the same initial model and get multiple comparable bitstrings (many of the plotting scripts depend on this)
 
@@ -101,7 +101,7 @@ The key script; contains a class for generating arbitrary string chemistry netwo
 
     A binary vector indicating which reactions in `full_model` are present in `pruned_model`
 
-- make\_cobra\_model
+- make_cobra_model
 
     Makes a COBRApy model so you can do FBA on a string chemistry network
 
@@ -112,9 +112,9 @@ The key script; contains a class for generating arbitrary string chemistry netwo
 
     Returns:
 
-    A [COBRApy model](lhttps://cobrapy.readthedocs.io/en/latest/index.html)
+    A [COBRApy model](https://cobrapy.readthedocs.io/en/latest/index.html)
 
-- make\_edgelist
+- make_edgelist
 
     Makes an edgelist to facilitate visualization of a network using, e.g. Cytoscape or graphviz
 
@@ -127,7 +127,7 @@ The key script; contains a class for generating arbitrary string chemistry netwo
 
     A list of lists where each sublist is two elements: the names of the pair of metabolites or the metabolite-reaction pair connected by that edge
 
-- min\_flux\_prune
+- min_flux_prune
 
     Removes reactions from a COBRApy model by:
     1. Doing FBA (the model has to have a reaction set as the objective and needs some input reactions)
@@ -146,7 +146,7 @@ The key script; contains a class for generating arbitrary string chemistry netwo
 
     A COBRApy model; it makes a copy of the input model so that the input model isn't modified
 
-- random\_prune
+- random_prune
 
     Removes reactions from a COBRApy model by:
     1. Doing FBA (the model has to have a reaction set as the objective and needs some input reactions)
@@ -166,7 +166,7 @@ The key script; contains a class for generating arbitrary string chemistry netwo
 
     A COBRApy model; it makes a copy of the input model so that the input model isn't modified
 
-- remove\_random\_rxns
+- remove_random_rxns
 
     Randomly removes reactions from a network given a removal probability.
 
@@ -183,7 +183,7 @@ The key script; contains a class for generating arbitrary string chemistry netwo
 
     At some point, I'll change this to make including S optional, since CreateNetwork no longer creates an S by default.
 
-- reverse\_rxns
+- reverse_rxns
 
     Makes n randomly-chosen (without replacement) reactions in a COBRApy model reversible (by setting their lower bounds to -100)
     Note that CreateNetwork makes all reactions irreversible by default, hence the existence of this function
@@ -193,25 +193,31 @@ The key script; contains a class for generating arbitrary string chemistry netwo
     - `model`: a COBRApy model
     - `n`: number of reactions to make reversible
 
+## Pruning Scripts
+
+Most of the scripts in this repo generate string chemistry networks and then prune them under a bunch of different circumstances.
+
 ## Plotting Scripts
+
+I've come up with a number of ways to visualize the results of pruning and compare results from multiple rounds of pruning, both just in general and for the specific figures used for the paper.
 
 ## Other Scripts
 
-    - bm\_edit\_dist.py
+- bm\_edit\_dist.py
+    
+    Looks at the output of multiple\_env\_prune.py, which has a set of food source metabolites and biomass precursors on each line, and calculates the average edit distance between every possible pair of either the food source metabolite lists or the biomass precursor lists. E.g.: line 1 has ab and bb as food source metabolites, while line 2 has aa and bc as food source metabolites. The average edit distance between the two sets of metabolites is (1 [ab <-> aa] + 2 [ab <-> bc] + 2 [bb <-> aa] + 1 [bb <-> bc]) / 4 = 1.5. This could concievably be helpful information when interpreting the results of multiple\_env\_prune.py, since you might expect networks with more similar input and output metabolites to get pruned into more similar networks, and this would be a way to quantify that.
+    I don't think I ever finished debugging this script so I doubt it works yet. 
+
+    Arguments:
         
-        Looks at the output of multiple\_env\_prune.py, which has a set of food source metabolites and biomass precursors on each line, and calculates the average edit distance between every possible pair of either the food source metabolite lists or the biomass precursor lists. E.g.: line 1 has ab and bb as food source metabolites, while line 2 has aa and bc as food source metabolites. The average edit distance between the two sets of metabolites is (1 [ab <-> aa] + 2 [ab <-> bc] + 2 [bb <-> aa] + 1 [bb <-> bc]) / 4 = 1.5. This could concievably be helpful information when interpreting the results of multiple\_env\_prune.py, since you might expect networks with more similar input and output metabolites to get pruned into more similar networks, and this would be a way to quantify that.
-        I don't think I ever finished debugging this script so I doubt it works yet. 
+    None; at the moment it is hard-coded to look at the default-named output file from multiple\_env\_prune.py. Eventually, it would be good if multiple_env_prune named its output files differently for each run and this script took a command-line argument specifying a target file, but that is not likely to happen soon.
 
-        Arguments:
-            
-        None; at the moment it is hard-coded to look at the default-named output file from multiple\_env\_prune.py. Eventually, it would be good if multiple_env_prune named its output files differently for each run and this script took a command-line argument specifying a target file, but that is not likely to happen soon.
+- counting.py
 
-    - counting.py
+    Prints number of metabolites and reactions in a string chemistry network with those parameters; does not actually generate that network.
 
-        Prints number of metabolites and reactions in a string chemistry network with those parameters; does not actually generate that network.
+    Arguments:
 
-        Arguments:
-
-        - n: number of unique metabolites
-        - l: maximum polymer length
+    - n: number of unique metabolites
+    - l: maximum polymer length
 
