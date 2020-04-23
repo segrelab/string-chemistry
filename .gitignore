@@ -3,7 +3,7 @@ bin/
 __pycache__/
 share/
 stoich_mat.dat
-*.RData
+*.RData*
 *.Rproj
 *.Rhistory
 etc/

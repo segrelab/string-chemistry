@@ -19,13 +19,13 @@ counts <- read.csv(
   mutate(ratio = rxns/mets)
 
 # find all ratios files
-all_files <- list.files("data/")
+all_files <- list.files("../data")
 ratio_files <- all_files[grepl("ratios.csv", all_files)]
 
 # parse information from all of those files into a nice dataframe
 parse_ratio_file <- function(ratio_file) {
   # get mean and standard deviation of reaction-to-metabolite ratios
-  ratio_dist <- read.csv(paste("data/", ratio_file, sep = ""), header = F)
+  ratio_dist <- read.csv(paste("../data/", ratio_file, sep = ""), header = F)
   mean_ratio <- mean(ratio_dist$V1)
   ratio_sd <- sd(ratio_dist$V1)
   # get number of monomers and max length used to generate the universal
@@ -40,10 +40,12 @@ ratio_df <- as.data.frame(t(sapply(ratio_files, parse_ratio_file)))
 # make the dataframe a bit easier to work with
 colnames(ratio_df) <- c("monos", "max_len", "mean_ratio", "ratio_sd")
 ratio_df <- ratio_df %>%
-  mutate_at(-monos, function(col) as.numeric(as.character(col))) %>%
+  mutate_at(vars(-monos), function(col) as.numeric(as.character(col))) %>%
   # for plotting purposes we only need to know how many monomers there were,
   # not exactly what they were
-  mutate(monos = nchar(as.character(monomers))
+  mutate(monos = nchar(as.character(monos))) %>%
+  # since we're using monos to separate lines in the plots, make it a factor
+  mutate(monos = as.factor(monos))
 
 # googled these so they're hard-coded
 ecoli_mets <- 1805
@@ -97,10 +99,10 @@ ggplot() +
   geom_errorbar(
     data = ratio_df, 
     aes(
-      x = max_len, y = ratio, color = monos,
+      x = max_len, y = mean_ratio, color = monos,
       ymin = mean_ratio-ratio_sd, ymax = mean_ratio+ratio_sd
     )
-  )
+  ) +
   # set x-axis tick spacing
   scale_x_continuous(breaks = c(2,4,6,8,10)) +
   # add horizontal line for E. coli ratio
