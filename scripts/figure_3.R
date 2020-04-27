@@ -11,7 +11,7 @@ theme_set(theme_bw())
 
 # read in data
 counts <- read.csv(
-  "../data/figure_3_data.csv", header = F,
+  "data/figure_3_data.csv", header = F,
   col.names = c("monos", "max_len", "mets", "rxns")
 ) %>%
   mutate(monos = as.factor(monos)) %>%
@@ -19,13 +19,13 @@ counts <- read.csv(
   mutate(ratio = rxns/mets)
 
 # find all ratios files
-all_files <- list.files("../data")
+all_files <- list.files("data")
 ratio_files <- all_files[grepl("ratios.csv", all_files)]
 
 # parse information from all of those files into a nice dataframe
 parse_ratio_file <- function(ratio_file) {
   # get mean and standard deviation of reaction-to-metabolite ratios
-  ratio_dist <- read.csv(paste("../data/", ratio_file, sep = ""), header = F)
+  ratio_dist <- read.csv(paste("data/", ratio_file, sep = ""), header = F)
   mean_ratio <- mean(ratio_dist$V1)
   ratio_sd <- sd(ratio_dist$V1)
   # get number of monomers and max length used to generate the universal
@@ -47,11 +47,16 @@ ratio_df <- ratio_df %>%
   # since we're using monos to separate lines in the plots, make it a factor
   mutate(monos = as.factor(monos))
 
-# googled these so they're hard-coded
+# got these numbers from BiGG
+# iJO1336
 ecoli_mets <- 1805
 ecoli_rxns <- 2583
-kegg_mets <- 18686
-kegg_rxns <- 11395
+# Recon3D
+human_mets <- 5835
+human_rxns <- 10600
+# iMM904
+yeast_mets <- 1226
+yeast_rxns <- 1577
 
 # metabolite count as a function of monomers and max length
 png("data/figure_3_met.png")
@@ -61,9 +66,11 @@ counts %>%
     scale_x_continuous(breaks = c(2,4,6,8,10)) +
     scale_y_continuous(trans = "log10") +
     geom_hline(aes(yintercept = ecoli_mets)) +
-    annotate("text", x = 3, y = 2700, label = "E. coli Metabolites") +
-    geom_hline(aes(yintercept = kegg_mets)) +
-    annotate("text", x = 3, y = 30000, label = "KEGG Metabolites") +
+    annotate("text", x = 3, y = 2700, label = "E. coli") +
+    geom_hline(aes(yintercept = human_mets)) +
+    annotate("text", x = 3, y = 9000, label = "Human") +
+    geom_hline(aes(yintercept = yeast_mets)) +
+    annotate("text", x = 3, y = 800, label = "S. cerevisiae") +
     labs(
       x = "Maximum String Length", y = "Number of Metabolites", 
       color = "Types of Monomers", 
@@ -79,9 +86,11 @@ counts %>%
     scale_x_continuous(breaks = c(2,4,6,8,10)) +
     scale_y_continuous(trans = "log10") +
     geom_hline(aes(yintercept = ecoli_rxns)) +
-    annotate("text", x = 3, y = 4000, label = "E. coli Reactions") +
-    geom_hline(aes(yintercept = kegg_rxns)) +
-    annotate("text", x = 3, y = 20000, label = "KEGG Reactions") +
+    annotate("text", x = 2.5, y = 4500, label = "E. coli") +
+    geom_hline(aes(yintercept = human_rxns)) +
+    annotate("text", x = 2.5, y = 20000, label = "Human") +
+    geom_hline(aes(yintercept = yeast_rxns)) +
+    annotate("text", x = 2.5, y = 800, label = "S. cerevisiae") +
     labs(
       x = "Maximum String Length", y = "Number of Reactions", 
       color = "Types of Monomers", 
@@ -94,23 +103,15 @@ png("data/figure_3_ratio.png")
 ggplot() +
   # plot ratios from universal networks
   geom_line(data = counts, aes(x = max_len, y = ratio, color = monos)) +
-  # plot ratios from pruned networks
-  geom_point(data = ratio_df, aes(x = max_len, y = mean_ratio, color = monos)) +
-  geom_errorbar(
-    data = ratio_df, 
-    aes(
-      x = max_len, y = mean_ratio, color = monos,
-      ymin = mean_ratio-ratio_sd, ymax = mean_ratio+ratio_sd
-    )
-  ) +
   # set x-axis tick spacing
   scale_x_continuous(breaks = c(2,4,6,8,10)) +
-  # add horizontal line for E. coli ratio
-  geom_hline(aes(yintercept = ecoli_rxns/ecoli_mets)) +
-  annotate("text", x = 8, y = 1.75, label = "E. coli Ratio") +
-  # add horizontal line for KEGG ratio
-  geom_hline(aes(yintercept = kegg_rxns/kegg_mets)) +
-  annotate("text", x = 8, y = 0.9, label = "KEGG Ratio") +
+  # add horizontal lines for real organisms
+  geom_hline(aes(yintercept = ecoli_rxns/ecoli_mets), col = "orange") +
+  annotate("text", x = 7, y = 1, label = "E. coli", col = "orange") +
+  geom_hline(aes(yintercept = human_rxns/human_mets)) +
+  annotate("text", x = 8, y = 2.1, label = "Human") +
+  geom_hline(aes(yintercept = yeast_rxns/yeast_mets), col = "purple") +
+  annotate("text", x = 9, y = 1, label = "S. cerevisiae", col = "purple") +
   labs(
     x = "Maximum String Length", 
     y = "Number of Reactions / Number of Metabolites", 
