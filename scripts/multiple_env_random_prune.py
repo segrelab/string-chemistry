@@ -27,7 +27,6 @@ times to reselect food sources.')
 # create the reference network and pick some food sources and a biomass rxn
 SCN = scn.CreateNetwork(monos, int(max_pol))
 cobra_model = scn.make_cobra_model(SCN.met_list, SCN.rxn_list)
-scn.reverse_rxns(cobra_model, len(cobra_model.reactions))
 scn.choose_inputs(int(ins), cobra_model)
 bm_rxn = scn.choose_bm_mets(int(outs), cobra_model)
 print(f'Biomass reaction: {bm_rxn.id}')

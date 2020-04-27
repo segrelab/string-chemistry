@@ -203,7 +203,8 @@ def make_cobra_model(met_list, rxn_list):
     met_dict = dict()
     for met in met_list:
         met_dict[met] = cobra.Metabolite(met, compartment = 'c')
-
+    
+    # start working on the reactions
     # start by making a dictionary to look up species involved in a reaction
     # using the string notation of that reaction
     rxn_dict = dict()
@@ -212,8 +213,8 @@ def make_cobra_model(met_list, rxn_list):
 
     # start by just making the COBRA reaction objects then add metabolites
     cobra_rxns = [
-        # make all reactions irreversible by default
-        cobra.Reaction(rxn, upper_bound = 100.0, lower_bound = 0)
+        # make all reactions reversible by default
+        cobra.Reaction(rxn, upper_bound = 100.0, lower_bound = -100.0)
         for rxn in rxn_list
     ]
     for rxn in cobra_rxns:
@@ -228,6 +229,9 @@ def make_cobra_model(met_list, rxn_list):
             rxn.add_metabolites({c_mets[1] : 1.0, c_mets[2] : 1.0})
         # now that the reaction is complete, we can just add it to the model
         model.add_reaction(rxn)
+
+    # real organisms are allowed to and often depend on being able to export
+    # waste products, so add an exchange reaction for every metabolite
     return(model)
 
 # choose n metabolites at random to create exchange reactions that are
@@ -248,8 +252,8 @@ def choose_inputs(n, model, bm_rxn=cobra.Reaction()):
         )
         in_rxn.add_metabolites({met: 1.0})
         model.add_reaction(in_rxn)
-    # all of these modifications are happening in-place, so we don't actually
-    # need to return anything
+    # all of these modifications are happening in-place, so we don't need to
+    # return the network
     return(None)
 
 # choose n metbaolites at random to create a reaction that consummes all of them
@@ -272,14 +276,6 @@ def choose_bm_mets(n, model):
     model.add_reaction(bm_rxn)
     # the model object is modified in-place, so there's no need to return it
     return(bm_rxn)
-
-def reverse_rxns(model, n):
-    rxns = random.sample(model.reactions, n)
-    for rxn in rxns:
-        rxn.lower_bound = -100
-    # all of these modifications are happening in-place, so we don't actually
-    # need to return anything
-    return(None)
 
 # iteratively remove all reactions with zero flux and then the reaction with
 # the smallest flux until you make the network unsolvable

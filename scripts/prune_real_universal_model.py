@@ -1,4 +1,4 @@
-# prune_universal_network.py
+# prune_real_universal_network.py
 # prunes the universal BIGG model using the E. coli environment and biomass
 # reaction from iJO1336
 

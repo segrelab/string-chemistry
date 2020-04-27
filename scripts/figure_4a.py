@@ -58,7 +58,6 @@ print('Creating universal string chemistry network.')
 # make the stoichiometric matrix just so we have it around
 SCN = scn.CreateNetwork(monos, int(max_pol))
 cobra_model = scn.make_cobra_model(SCN.met_list, SCN.rxn_list)
-scn.reverse_rxns(cobra_model, len(cobra_model.reactions))
 bm_rxn = scn.choose_bm_mets(int(outs), cobra_model)
 scn.choose_inputs(int(ins), cobra_model, bm_rxn)
 cobra_model.objective = bm_rxn

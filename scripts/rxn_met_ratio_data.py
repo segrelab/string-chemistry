@@ -21,7 +21,6 @@ except ValueError:
 # create the universal network
 SCN = scn.CreateNetwork(monos, int(max_pol))
 cobra_model = scn.make_cobra_model(SCN.met_list, SCN.rxn_list)
-scn.reverse_rxns(cobra_model, len(cobra_model.reactions))
 
 # generate all of the environments
 envs = list()

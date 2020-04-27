@@ -41,7 +41,6 @@ number of biomass precursors.')
 # create the reference network and pick a biomass rxn
 SCN = scn.CreateNetwork(monos, int(max_pol))
 cobra_model = scn.make_cobra_model(SCN.met_list, SCN.rxn_list)
-scn.reverse_rxns(cobra_model, len(cobra_model.reactions))
 bm_rxn = scn.choose_bm_mets(int(outs), cobra_model)
 cobra_model.objective = bm_rxn
 
