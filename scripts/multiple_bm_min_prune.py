@@ -18,7 +18,7 @@ def count_bitstring(bitstring):
 
 # get command-line arguments
 try:
-    (monos, max_pol, ins, outs, reps) = sys.argv[1:]
+    (monos, max_pol, ins, outs, bms) = sys.argv[1:]
 except ValueError:
     sys.exit('Arguments:\nmonomers\nmax polymer length\nnumber of food ' +
         'sources in environment\nnumber of biomass precursors\nnumber of ' + 
@@ -33,7 +33,7 @@ scn.choose_inputs(int(ins), cobra_model)
 # reaction bitstrings as keys, biomass components as values
 pruned_nets = dict()
 i = 0
-while i < int(reps):
+while i < int(bms):
     # pick a new biomass reaction and set it as the objective
     bm_rxn = scn.choose_bm_mets(int(outs), cobra_model)
     cobra_model.objective = bm_rxn
@@ -60,7 +60,8 @@ while i < int(reps):
 
 # print a bunch of info but also write it out to a tsv
 with open(
-        f'../data/{monos}_{max_pol}_{ins}env_{reps}x{outs}outs.tsv', 'w'
+        f'data/multiple_bm_min_prune_{monos}_{max_pol}_{ins}ins_' +
+        f'{outs}outs_{bms}_bms.tsv', 'w'
     ) as out:
     out.write('bitstring\trxn_count\tbiomass\n')
     for network in pruned_nets.keys():

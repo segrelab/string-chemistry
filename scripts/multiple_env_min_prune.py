@@ -9,7 +9,7 @@ import itertools as it
 
 # get command-line arguments
 try:
-    (monos, max_pol, ins, outs, reps) = sys.argv[1:]
+    (monos, max_pol, ins, outs, envs) = sys.argv[1:]
 except ValueError:
     sys.exit('Arguments:\nmonomers\nmax polymer length\n' +
         'number of food sources\nnumber of biomass precursors\n' +
@@ -31,13 +31,14 @@ bitstrings = list()
 # feasible solution with the full network
 j = 0
 # use a while loop and not a for loop so we can go back on occasion
-while i < int(reps):
+while i < int(envs):
     i +=  1 
     # choose some new food sources (remove existing ones)
-    cobra_model.remove_reactions(cobra_model.boundary)
+    in_rxns = [rxn for rxn in cobra_model.boundary if rxn.id.startswith('->')]
+    cobra_model.remove_reactions(in_rxns)
     scn.choose_inputs(int(ins), cobra_model, bm_rxn)
     foods_string = ' '.join([
-        met.id for rxn in cobra_model.boundary for met in rxn.metabolites
+        rxn.metabolites[0] for rxn in in_rxns
     ])
     # see if this choice of metabolites can produce the biomass on this network
     solution = cobra_model.optimize()
@@ -74,5 +75,6 @@ bitstring_df['biomass'] = list(it.repeat(
     len(food_mets)
 )) 
 bitstring_df.to_csv(
-    f'../data/{monos}_{max_pol}_{reps}x{ins}ins_{outs}outs.csv'
+    f'data/multiple_env_min_prune_{monos}_{max_pol}_{ins}ins_{envs}envs_' +
+    f'{outs}outs.csv'
 )

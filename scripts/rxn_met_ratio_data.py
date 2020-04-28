@@ -86,12 +86,15 @@ while bm_trial < int(bm_count):
             ratio = len(pruned.reactions)/len(pruned.metabolites)
             ratios.append(ratio)
         # remove input reactions in preparation for next round of pruning
-        cobra_model.remove_reactions(cobra_model.boundary)
+        in_rxns = [
+            rxn for rxn in cobra_model.boundary if rxn.id.startswith('->')
+        ]
+        cobra_model.remove_reactions(in_rxns)
     # just for fun, print how many times pruning was successful
     print(f'This biomass reaction could sustain growth in {prune_count} ' +
     f'out of {len(envs)} environments tested.')
 
 output = '\n'.join([str(x) for x in ratios]) + '\n'
-with open(f'data/{monos}_{max_pol}_{ins}ins_{outs}outs_{env_count}envs_' + 
-    f'{bm_count}orgs_ratios.csv', 'w') as out:
+with open(f'data/ratios_{monos}_{max_pol}_{ins}ins_{outs}outs_{env_count}envs_' + 
+    f'{bm_count}bms.csv', 'w') as out:
     out.write(output)

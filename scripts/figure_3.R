@@ -106,8 +106,8 @@ ggplot() +
   # set x-axis tick spacing
   scale_x_continuous(breaks = c(2,4,6,8,10)) +
   # add horizontal lines for real organisms
-  geom_hline(aes(yintercept = ecoli_rxns/ecoli_mets), col = "orange") +
-  annotate("text", x = 7, y = 1, label = "E. coli", col = "orange") +
+  geom_hline(aes(yintercept = ecoli_rxns/ecoli_mets), col = "deepskyblue") +
+  annotate("text", x = 7, y = 1, label = "E. coli", col = "deepskyblue") +
   geom_hline(aes(yintercept = human_rxns/human_mets)) +
   annotate("text", x = 8, y = 2.1, label = "Human") +
   geom_hline(aes(yintercept = yeast_rxns/yeast_mets), col = "purple") +
@@ -118,4 +118,4 @@ ggplot() +
     color = "Types of Monomers", 
     title = "Network Sizes By Ratio of Reaction Count to Metabolite Count"
   )
-dev.off()
+  dev.off()

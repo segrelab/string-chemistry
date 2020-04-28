@@ -63,7 +63,12 @@ while i < int(bm_count):
     bm_rxn_flux = solution.fluxes.get(key = bm_rxn.id)
     while solution.status == 'infeasible' or bm_rxn_flux < 10e-10:
         # if the solution isn't feasible, pick a different environment
-        universal_model.remove_reactions(universal_model.boundary)
+        in_rxns = [
+            # don't want to remove all boundary reactions because that would
+            # also remove all of the export reactions
+            rxn for rxn in pruned_model.boundary if rxn.id.startswith('->')
+        ]
+        pruned_model.remove_reactions(in_rxns)
         scn.choose_inputs(int(ins), universal_model, bm_rxn)
         solution = universal_model.optimize()
         bm_rxn_flux = solution.fluxes.get(key = bm_rxn.id)
@@ -73,7 +78,12 @@ while i < int(bm_count):
     # find growth in every environment
     for env in envs:
         # start by removing existing input reactions
-        pruned_model.remove_reactions(pruned_model.boundary)
+        in_rxns = [
+            # don't want to remove all boundary reactions because that would
+            # also remove all of the export reactions
+            rxn for rxn in pruned_model.boundary if rxn.id.startswith('->')
+        ]
+        pruned_model.remove_reactions(in_rxns)
         # create new input reactions
         for met in env:
             in_rxn = cobra.Reaction(
@@ -90,7 +100,7 @@ while i < int(bm_count):
         growth_lists.append([bm_rxn.id, env_string, growth])
 
 # write output
-with open(f'data/{monos}_{max_pol}_{ins}ins_{outs}outs_{env_count}envs_' +
-    f'{bm_count}bms.tsv', 'w') as out:
+with open(f'data/min_env_test_{monos}_{max_pol}_{ins}ins_{outs}outs_' +
+    f'{env_count}envs_{bm_count}bms.tsv', 'w') as out:
     out.write('\n'.join(['\t'.join(line) for line in growth_lists]) + '\n')
 

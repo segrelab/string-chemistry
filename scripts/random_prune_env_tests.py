@@ -67,7 +67,8 @@ while i < int(yes_groups):
     # counter
     # regardless of whether or not this was a valid choice of metabolites,
     # remove the input reactions that were added so that more can be tested
-    cobra_model.remove_reactions(cobra_model.boundary)
+    in_rxns = [rxn for rxn in cobra_model.boundary if rxn.id.startswith('->')]
+    cobra_model.remove_reactions(in_rxns)
 
 print('Generating random environments the networks should not grow in')
 # generate the specified number of environments that the network should not 
@@ -117,7 +118,8 @@ while i < int(reps):
     # will make a dict with the bitstrings as keys
     # remove the input reactions from this network so the next step (where we
     # change the input reactions) actually works
-    pruned_net.remove_reactions(pruned_net.boundary)
+    in_rxns = [rxn for rxn in pruned_net.boundary if rxn.id.startswith('->')]
+    pruned_net.remove_reactions(in_rxns)
     bitstring = scn.make_bitstring(cobra_model, pruned_net)
     if bitstring not in pruned_dict.keys():
         # make sure all reaction lists are sorted so that all isomorphic
@@ -158,15 +160,19 @@ for group in yes_envs[1:]:
         if solution.status != 'infeasible' and bm_rxn_flux > 10e-10:
             # if the network grew using this food group, add it to the
             # appropriate list in usable_foods
-            # drop the boundary reactions before making the bitstirng
+            # drop the input reactions before making the bitstirng
             # since those will vary
-            network.remove_reactions(network.boundary)
+            in_rxns = [
+                rxn for rxn in network.boundary if rxn.id.startwith('->')
+            ]
             bitstring = scn.make_bitstring(cobra_model, network)
             usable_foods[bitstring].append([met.id for met in group])
         else:
             # even if this group wasn't viable, remove these input reactions
             # so the next group can be tested separately
-            network.remove_reactions(network.boundary)
+            in_rxns = [
+                rxn for rxn in network.boundary if rxn.id.startwith('->')
+            ]
 
 print('Seeing which networks don\'t grow in the environments they shouldn\'t')
 # now see if each network doesn't grow on the food sources we don't want them
@@ -196,20 +202,26 @@ for group in no_envs:
         if solution.status == 'infeasible' or bm_rxn_flux < 10e-10:
             # if this network couldn't produce biomass, add it to the
             # appropriate list
-            # drop the boundary reactions before making the bitstring since 
-            # those will be variable
-            network.remove_reactions(network.boundary)
+            # drop the input reactions before making the bitstring since 
+            # those will change from round to round
+            in_rxns = [
+                rxn for rxn in network.boundary if rxn.id.startwith('->')
+            ]
+            network.remove_reactions(in_rxns)
             bitstring = scn.make_bitstring(cobra_model, network)
             unusable_foods[bitstring].append([met.id for met in group])
         else:
             # if we didn't add this to the list, drop the boundary reactions
             # so that they're not around for the next iteration
-            network.remove_reactions(network.boundary)
+            in_rxns = [
+                rxn for rxn in network.boundary if rxn.id.startwith('->')
+            ]
+            network.remove_reactions(in_rxns)
 
 # print a bunch of info but also write it out to a tsv
 with open(
-        f'../data/{monos}_{max_pol}_{yes_groups}yes_{no_groups}no_{ins}_' +
-        f'{outs}outs.tsv', 'w'
+        f'data/random_prune_env_tests_{monos}_{max_pol}_{yes_groups}yes_' +
+        f'{no_groups}no_{ins}_{outs}outs.tsv', 'w'
     ) as out:
     out.write('bitstring\trxn_count\toccurrences\tyes_count\tyes_envs\t' +
         'no_count\tno_envs\tbiomass\n')

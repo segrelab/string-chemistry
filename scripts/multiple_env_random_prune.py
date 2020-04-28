@@ -1,4 +1,4 @@
-# spammy_pruning.py
+# multiple_env_random_prune.py
 # makes one network, picks one biomass reaction, and then runs random_prune
 # for several different choices of n food source metabolites
 
@@ -18,11 +18,11 @@ def count_bitstring(bitstring):
 
 # get command-line arguments
 try:
-    (monos, max_pol, ins, outs, reps, big_reps) = sys.argv[1:]
+    (monos, max_pol, ins, envs, outs, reps) = sys.argv[1:]
 except ValueError:
-    sys.exit('Arguments: monomers, max polymer length, number of food sources, \
-number of biomass precursors, number of times to prune each network, number of \
-times to reselect food sources.')
+    sys.exit('Arguments: monomers, max polymer length, number of food ' +
+    'sources in each environment, number of environments, number of ' + 
+    'biomass precursors, number of times to prune each network')
 
 # create the reference network and pick some food sources and a biomass rxn
 SCN = scn.CreateNetwork(monos, int(max_pol))
@@ -39,12 +39,17 @@ food_mets = list()
 # each network was equally likely to be observed
 p_vals = list()
 # use a while loop and not a for loop so we can go back on occasion
-while i < int(big_reps):
+while i < int(envs):
     i = i + 1
-    foods_string = ' '.join([met.id for met in cobra_model.boundary])
+    in_rxns = [
+        rxn for rxn in cobra_model.boundary
+        # only get input reactions
+        if rxn.id.startswith('->')
+    ]
+    foods_string = ' '.join([rxn.metabolites[0] for rxn in in_rxns])
     print(f'Food source group {i}: {foods_string}')
     # choose some new food sources (remove existing ones)
-    cobra_model.remove_reactions(cobra_model.boundary)
+    cobra_model.remove_reactions(in_rxns)
     scn.choose_inputs(int(ins), cobra_model, bm_rxn)
     # see if this choice of metabolites can produce the biomass on this network
     solution = cobra_model.optimize()
@@ -92,12 +97,14 @@ while i < int(big_reps):
         count_bitstring, bitstring_df.bitstring
     ))
     bitstring_df.to_csv(
-        f'../data/{monos}_{max_pol}_{ins}ins_{outs}outs_{i}of{big_reps}.csv'
+        f'data/multiple_env_random_prune_{monos}_{max_pol}_{ins}ins_{outs}outs_{i}of{envs}.csv'
     )
     chisq_results = chisquare(bitstring_df.occurrences)
     p_vals.append(chisq_results[1])
+
 # write the list of food sources that were tried to a file
-with open(f'../data/{monos}_{max_pol}_{ins}ins_{outs}outs_foods.csv', 'w') as out:
+with open(f'data/multiple_env_random_prune{monos}_{max_pol}_{ins}ins_' + 
+    f'{outs}outs_foods.csv', 'w') as out:
     # once all the lines are created, concatenate them with newline characters
     output = '\n'.join([
         # add the appropriate p-value to the concatenated food lists
