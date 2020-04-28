@@ -237,9 +237,9 @@ def make_cobra_model(met_list, rxn_list):
         out_rxn = cobra.Reaction(
             met.id + '->',
             upper_bound = 0.0,
-            lower_bound = 100.0 # only allow exporting
+            lower_bound = -100.0 # only allow exporting
         )
-        in_rxn.add_metabolites({met: -1.0})
+        out_rxn.add_metabolites({met: -1.0})
         model.add_reaction(out_rxn)
     return(model)
 
