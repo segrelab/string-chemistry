@@ -235,7 +235,7 @@ def make_cobra_model(met_list, rxn_list):
     # can only export it
     for met in cobra_mets:
         out_rxn = cobra.Reaction(
-            met.id '->',
+            met.id + '->',
             upper_bound = 0.0,
             lower_bound = 100.0 # only allow exporting
         )

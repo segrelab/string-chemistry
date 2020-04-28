@@ -103,4 +103,3 @@ while i < int(bm_count):
 with open(f'data/min_env_test_{monos}_{max_pol}_{ins}ins_{outs}outs_' +
     f'{env_count}envs_{bm_count}bms.tsv', 'w') as out:
     out.write('\n'.join(['\t'.join(line) for line in growth_lists]) + '\n')
-
