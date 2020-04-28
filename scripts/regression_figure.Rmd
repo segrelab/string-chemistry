@@ -23,7 +23,7 @@ theme_set(theme_bw())
 
 # load data from simulations
 data <- read.table(
-  "../data/ab_5_5ins_3outs_10000envs_10bms.tsv",
+  "../data/min_env_test_ab_5_5ins_3outs_10000envs_10bms.tsv",
   sep = "\t",
   col.names = c("Biomass", "Environment", "Growth")
 )

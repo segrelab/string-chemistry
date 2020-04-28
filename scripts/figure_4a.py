@@ -67,7 +67,8 @@ solution = cobra_model.optimize()
 while solution.status == 'infeasible' or (solution.fluxes == 0).all():
     # remove existing biomass and input reactions
     cobra_model.remove_reactions([bm_rxn])
-    cobra_model.remove_reactions(cobra_model.boundary)
+    in_rxns = [rxn for rxn in pruned_model.boundary if rxn.id.startswith('->')]
+    cobra_model.remove_reactions(in_rxns)
     # choose new ones and see if those yield a solvable network
     bm_rxn = scn.choose_bm_mets(int(outs), cobra_model)
     scn.choose_inputs(int(ins), cobra_model, bm_rxn)
@@ -75,7 +76,7 @@ while solution.status == 'infeasible' or (solution.fluxes == 0).all():
     solution = cobra_model.optimize()
 
 print('Pruning network.')
-min_flux_pruned = scn.min_flux_prune(cobra_model)
+min_flux_pruned = scn.min_flux_prune(cobra_model, bm_rxn)
 min_flux_count = len(min_flux_pruned.reactions)
 min_flux_bitstring = scn.make_bitstring(cobra_model, min_flux_pruned)
 
@@ -183,4 +184,3 @@ np.savetxt(
     cobra.util.create_stoichiometric_matrix(cobra_model), 
     delimiter = ','
 )
-
