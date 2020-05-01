@@ -41,12 +41,13 @@ ggplot(data, aes(sample = Growth)) + geom_qq() + geom_qq_line(col = "red") +
 ```
 
 When doing linear regression, it is generally assumed that the outcome variable is normally distributed. That is clearly not the case here, mostly due to the preponderance of 0s. The 0s are also problematic because the usual workaround to non-normally distributed outcomes is transforming the variable, e.g. squaring all values or taking the logarithm, but none of those will help with the 0 problem. I think a good response to the large number of 0 values is to instead predict growth/no growth using logistic regression, ignoring the values of the nonzero growth fluxes. 
+
 # Linear Regression to Predict Growth Flux
 
 ## Predicting Growth with Environment
 
 ```{r}
-env_fit <- lm(Growth ~ Environment, data = data)
+env_fit <- lm(Growth ~ Environment, data = filter(data, Biomass == "baa+aaabb+aaba->"))
 summary(env_fit)
 ```
 
@@ -72,7 +73,7 @@ logistic_env_model <- lrm(binary_growth ~ Environment, data = data[1:10000,], x 
 logistic_env_model
 ```
 
-The Nagelkerke R-squared value for this model is only 0.18, which is pretty bad (a Nagelkerke R-squared of 0 corresponds to a model that predicts the mean outcome for all samples; the maximum possible nageklerke R-squared is 1). The C-statistic (AUC) is 0.769, which is also mediocre. I abbreviated the output here, but trust me when I say that none of the environments was even a remotely good predictor, as was the case with the linear model.
+The R-squared and AUC are both exactly 1, which is extremely suspcious. That's probably nonsense since the estimated coefficient of each environment is 0 with a massive standard error, so I think the model just completely failed.
 
 ## Predicting Growth with Biomass
 
@@ -81,7 +82,7 @@ logistic_bm_model <- lrm(binary_growth ~ Biomass, data = data, x = T, y = T)
 logistic_bm_model
 ```
 
-Each biomass reaction is a significant predictor of growth. The Nagelkerke R-squared and C-statistic for this model are noticeably better than from the previous model: an R-squared of 0.39 is still pretty bad, but an AUC of 0.856 is actually okay.
+Each biomass reaction is a significant predictor of growth. The Nagelkerke R-squared and C-statistic for this model are real values now, but they're both bad: 0.083 on a scale of 0 to 1 is terrible and an AUC of 0.773 is mediocre.
 
 # Conclusions
 

@@ -20,7 +20,6 @@ SCN = scn.CreateNetwork(monos, int(max_pol))
 cobra_model = scn.make_cobra_model(SCN.met_list, SCN.rxn_list)
 scn.choose_inputs(int(ins), cobra_model)
 bm_rxn = scn.choose_bm_mets(int(outs), cobra_model)
-print(f'Biomass reaction: {bm_rxn.id}')
 cobra_model.objective = bm_rxn
 
 i = 0
@@ -33,12 +32,15 @@ j = 0
 # use a while loop and not a for loop so we can go back on occasion
 while i < int(envs):
     i +=  1 
-    # choose some new food sources (remove existing ones)
+    # remove existing input reactions
     in_rxns = [rxn for rxn in cobra_model.boundary if rxn.id.startswith('->')]
     cobra_model.remove_reactions(in_rxns)
+    # choose new input reactions
     scn.choose_inputs(int(ins), cobra_model, bm_rxn)
+    in_rxns = [rxn for rxn in cobra_model.boundary if rxn.id.startswith('->')]
     foods_string = ' '.join([
-        rxn.metabolites[0] for rxn in in_rxns
+        # getting the metabolite IDs out of a reaction is annoying
+        list(rxn.metabolites.keys())[0].id for rxn in in_rxns
     ])
     # see if this choice of metabolites can produce the biomass on this network
     solution = cobra_model.optimize()
@@ -51,18 +53,17 @@ while i < int(envs):
         continue
     # record the metabolites that worked and prune the network
     else:
-        print(
-            f'Environment {i}: {foods_string} ' + 
-            f'Reselected environment {j} times to get this'
-        )
+        if i % 100 == 0:
+            print(f'On environment {i}')
         # reset the reselection counter
         j = 0
+        # get the list of food source metabolites
         food_mets.append('-'.join([
             met.id 
-            for rxn in cobra_model.boundary 
+            for rxn in in_rxns 
             for met in rxn.metabolites
         ]))
-        pruned_net = scn.min_flux_prune(cobra_model)
+        pruned_net = scn.min_flux_prune(cobra_model, bm_rxn)
         bitstring = scn.make_bitstring(cobra_model, pruned_net)
         bitstrings.append(bitstring)
 
@@ -73,8 +74,8 @@ bitstring_df.columns = ['inputs','bitstring']
 bitstring_df['biomass'] = list(it.repeat(
     '-'.join([met.id for met in bm_rxn.metabolites]),
     len(food_mets)
-)) 
+))
 bitstring_df.to_csv(
     f'data/multiple_env_min_prune_{monos}_{max_pol}_{ins}ins_{envs}envs_' +
-    f'{outs}outs.csv'
+    f'{outs}outs.csv', mode = 'a', index = False
 )

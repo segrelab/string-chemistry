@@ -27,8 +27,8 @@ plotting_df = pd.concat([tsne_df, bitstring_df], axis = 1)
 # make a scatterplot
 
 # if coloring by unique biomass reactions, make a colormap
-#cdict = {v: k for k, v in enumerate(np.unique(bitstring_df.biomass))}
-#cvals = [cdict[c] for c in bitstring_df.biomass]
+cdict = {v: k for k, v in enumerate(np.unique(bitstring_df.biomass))}
+cvals = [cdict[c] for c in bitstring_df.biomass]
 
 # if coloring by input metabolites, make a colormap
 # start by getting the column of input metabolites, splitting it into a list of
@@ -57,5 +57,5 @@ plt.scatter(
     c = cvals, cmap = 'nipy_spectral',  # color by biomass reaction
     s = 100 # make points big
 )
-plt.title('20 Different Biomass Reactions Pruned on 1000 2-Metabolite Environments Each')
+plt.title('10 Different Biomass Reactions Pruned on 1000 2-Metabolite Environments Each')
 plt.show()
