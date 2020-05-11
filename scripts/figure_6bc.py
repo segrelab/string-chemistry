@@ -1,4 +1,4 @@
-# figure_6.py
+# figure_6bc.py
 # make a UMAP visualizing the results of multiple_env_min_prune.py
 
 import sys
@@ -38,7 +38,7 @@ in_cdict = {v: k for k, v in enumerate(np.unique(in_groups))}
 in_cvals = [in_cdict[c] for c in in_groups]
 
 # make the figure large
-plt.figure(figsize = (20,22))
+plt.figure(figsize = (5,6))
 
 # make the text legible
 matplotlib.rcParams.update({
@@ -52,15 +52,25 @@ plt.scatter(
     c = bm_cvals, cmap = 'nipy_spectral',
     s = 10
 )
-plt.title('10 Different Biomass Reactions Pruned on 1000 2-Metabolite Environments Each')
+#plt.title('10 Different Biomass Reactions Pruned on 1000 2-Metabolite Environments Each')
+plt.xlabel('UMAP_1')
+plt.ylabel('UMAP_2')
+
+# save the figure
+plt.savefig('data/figure_6b.png', dpi = 600)
+
 
 # and one colored by input metabolites
 plt.figure(2)
+plt.figure(figsize = (5,6))
 plt.scatter(
     plotting_df.x, plotting_df.y,
     c = in_cvals, cmap = 'nipy_spectral',
     s = 10
 )
-plt.title('10 Different Biomass Reactions Pruned on 1000 2-Metabolite Environments Each')
+#plt.title('10 Different Biomass Reactions Pruned on 1000 2-Metabolite Environments Each')
+plt.xlabel('UMAP_1')
+plt.ylabel('UMAP_2')
 
-plt.show()
+# save the figure
+plt.savefig('data/figure_6c.png', dpi = 600)

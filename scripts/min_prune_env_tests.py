@@ -84,20 +84,24 @@ while i < int(bm_count):
             rxn for rxn in pruned_model.boundary if rxn.id.startswith('->')
         ]
         pruned_model.remove_reactions(in_rxns)
+        # while we have the pruned network with no input reactions, make the
+        # reaction-inclusion vector
+        bitstring = scn.make_bitstring(universal_model, pruned_model)
         # create new input reactions
         for met in env:
             in_rxn = cobra.Reaction(
                 '->' + met.id,
-                upper_bound = 100.0, # only allow importing of this metabolite
+                upper_bound = 1.0, # only allow importing of this metabolite
                 lower_bound = 0.0
             )
             in_rxn.add_metabolites({met: 1.0})
             pruned_model.add_reaction(in_rxn)
         # do FBA to find growth in this environment
         solution = pruned_model.optimize()
+        # prepare output
         growth = str(solution.fluxes.get(key = bm_rxn.id))
         env_string = ','.join([met.id for met in env])
-        growth_lists.append([bm_rxn.id, env_string, growth])
+        growth_lists.append([bm_rxn.id, env_string, growth, bitstring])
 
 # write output
 with open(f'data/min_env_test_{monos}_{max_pol}_{ins}ins_{outs}outs_' +

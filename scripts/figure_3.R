@@ -48,16 +48,15 @@ counts <- read.csv(
 #   # since we're using monos to separate lines in the plots, make it a factor
 #   mutate(monos = as.factor(monos))
 
-# got these numbers from BiGG
 # iJO1336
 ecoli_mets <- 1805
 ecoli_rxns <- 2583
 # Recon3D
 human_mets <- 5835
 human_rxns <- 10600
-# iMM904
-yeast_mets <- 1226
-yeast_rxns <- 1577
+# Yeast8
+yeast_mets <- 2666
+yeast_rxns <- 3895
 
 # metabolite count as a function of monomers and max length
 png("data/figure_3_met.png", width = 700, height = 500)
@@ -67,11 +66,11 @@ counts %>%
     scale_x_continuous(breaks = c(2,4,6,8,10)) +
     scale_y_continuous(trans = "log10") +
     geom_hline(aes(yintercept = ecoli_mets)) +
-    annotate("text", x = 3, y = 2700, label = "E. coli") +
+    annotate("text", x = 3, y = 1300, label = "E. coli") +
     geom_hline(aes(yintercept = human_mets)) +
-    annotate("text", x = 3, y = 8500, label = "Human") +
+    annotate("text", x = 3, y = 8000, label = "Human") +
     geom_hline(aes(yintercept = yeast_mets)) +
-    annotate("text", x = 3, y = 800, label = "S. cerevisiae") +
+    annotate("text", x = 3, y = 3500, label = "S. cerevisiae") +
     labs(
       x = "Maximum String Length", y = "Number of Metabolites", 
       color = "Types of Monomers", 
@@ -87,11 +86,11 @@ counts %>%
     scale_x_continuous(breaks = c(2,4,6,8,10)) +
     scale_y_continuous(trans = "log10") +
     geom_hline(aes(yintercept = ecoli_rxns)) +
-    annotate("text", x = 2.5, y = 4000, label = "E. coli") +
+    annotate("text", x = 2.5, y = 1900, label = "E. coli") +
     geom_hline(aes(yintercept = human_rxns)) +
-    annotate("text", x = 2.5, y = 16000, label = "Human") +
+    annotate("text", x = 2.5, y = 15000, label = "Human") +
     geom_hline(aes(yintercept = yeast_rxns)) +
-    annotate("text", x = 2.5, y = 1000, label = "S. cerevisiae") +
+    annotate("text", x = 2.5, y = 5500, label = "S. cerevisiae") +
     labs(
       x = "Maximum String Length", y = "Number of Reactions", 
       color = "Types of Monomers", 
@@ -108,11 +107,11 @@ ggplot() +
   scale_x_continuous(breaks = c(2,4,6,8,10)) +
   # add horizontal lines for real organisms
   geom_hline(aes(yintercept = ecoli_rxns/ecoli_mets)) +
-  annotate("text", x = 8, y = 1.6, label = "E. coli") +
+  annotate("text", x = 8, y = 1.3, label = "E. coli") +
   geom_hline(aes(yintercept = human_rxns/human_mets)) +
   annotate("text", x = 8, y = 2, label = "Human") +
   geom_hline(aes(yintercept = yeast_rxns/yeast_mets)) +
-  annotate("text", x = 8, y = 1.1, label = "S. cerevisiae") +
+  annotate("text", x = 8, y = 1.6, label = "S. cerevisiae") +
   labs(
     x = "Maximum String Length", 
     y = "Number of Reactions / Number of Metabolites", 

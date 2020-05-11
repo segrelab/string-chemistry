@@ -51,7 +51,7 @@ try:
 except ValueError:
     sys.exit(
         'Arguments: monomers, max polymer length, number of food sources, ' +
-        'number of biomass precursors, number of times to radnomly prune.'
+        'number of biomass precursors, number of times to randomly prune.'
     )
 
 print('Creating universal string chemistry network.')
@@ -146,11 +146,18 @@ for rxn in cobra_model.reactions:
     full_graph.add_node(rxn.id, shape = 'oval')
     # distinguish exchange fluxes with colored edges
     if rxn == bm_rxn or rxn in cobra_model.boundary:
+        # red if they have flux or grey if they don't
         for met in rxn.metabolites:
-            full_graph.add_edge(
-                [met.id, rxn.id],
-                color = 'red',
-            )
+            if solution.fluxes.loc[rxn.id] == 0:
+                full_graph.add_edge(
+                    [met.id, rxn.id],
+                    color = 'grey'
+                )
+            else:
+                full_graph.add_edge(
+                    [met.id, rxn.id],
+                    color = 'red'
+                )
     else:
         for met in rxn.metabolites:
             # make reactions with no flux have grey edges

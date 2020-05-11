@@ -214,7 +214,7 @@ def make_cobra_model(met_list, rxn_list):
     # start by just making the COBRA reaction objects then add metabolites
     cobra_rxns = [
         # make all reactions reversible by default
-        cobra.Reaction(rxn, upper_bound = 100.0, lower_bound = -100.0)
+        cobra.Reaction(rxn, upper_bound = 1000.0, lower_bound = -1000.0)
         for rxn in rxn_list
     ]
     for rxn in cobra_rxns:
@@ -236,7 +236,7 @@ def make_cobra_model(met_list, rxn_list):
     for met in cobra_mets:
         out_rxn = cobra.Reaction(
             met.id + '->',
-            upper_bound = 100.0, # only allow exporting
+            upper_bound = 1000.0, # only allow exporting
             lower_bound = 0.0
         )
         out_rxn.add_metabolites({met: -1.0})
@@ -256,7 +256,7 @@ def choose_inputs(n, model, bm_rxn=cobra.Reaction()):
     for met in in_mets:
         in_rxn = cobra.Reaction(
             '->' + met.id,
-            upper_bound = 100.0, # only allow importing of this metabolite
+            upper_bound = 1.0, # only allow importing of this metabolite
             lower_bound = 0.0
         )
         in_rxn.add_metabolites({met: 1.0})
@@ -277,7 +277,7 @@ def choose_bm_mets(n, model):
     )
     bm_rxn = cobra.Reaction(
         '+'.join([met.id for met in bm_mets]) + '->',
-        upper_bound = 100.0,
+        upper_bound = 1000.0,
         lower_bound = 0
     )
     for met in bm_mets:

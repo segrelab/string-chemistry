@@ -31,6 +31,10 @@ data <- read.table(
 data <- data %>%
   # since so many growth fluxes were 0, make an indicator of growth variable to do logistic regression on
   mutate(binary_growth = ifelse(Growth == 0, 0, 1))
+data %>%
+  mutate(Growth = as.numeric(as.character(Growth))) %>%
+  group_by(Growth) %>%
+  summarize(count = n())
 ```
 
 # Look at the Data
