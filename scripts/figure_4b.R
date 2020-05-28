@@ -1,7 +1,7 @@
 # figure_4b.R
 # make heatmap to visualize S matrix
 
-library(tidyverse)
+suppressMessages(library(tidyverse))
 
 S <- read.csv("data/ab_3_2ins_3outs_full_S.csv", header = F)
 invisible(png("data/figure_4b.png"))

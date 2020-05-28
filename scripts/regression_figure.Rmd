@@ -51,20 +51,14 @@ When doing linear regression, it is generally assumed that the outcome variable 
 ## Predicting Growth with Environment
 
 ```{r}
-env_fit <- lm(Growth ~ Environment, data = filter(data, Biomass == "baa+aaabb+aaba->"))
-summary(env_fit)
+predict_growth_value <- function(biomass) {
+  value_fit <- lm(Growth ~ Environment, data = filter(data, Biomass == biomass))
+  return(summary(value_fit))
+}
+lapply(unique(data$Biomass), predict_growth_value)
 ```
 
 The adjusted R-squared value for this model is negative, which means it is aprroximately as bad as it can possibly be.
-
-## Predicting Growth with Biomass
-
-```{r}
-bm_fit <- lm(Growth ~ Biomass, data = data)
-summary(bm_fit)
-```
-
-Most biomass reactions are significant predictors of growth, which is nice, but this model still only accounts for about 36% of variation in growth fluxes. 
 
 # Logistic Regression to Predict Growth/No Growth
 
@@ -73,20 +67,14 @@ As previously mentioned, it might improve matters to make a this a binary classi
 ## Predicting Growth with Environment
 
 ```{r}
-logistic_env_model <- lrm(binary_growth ~ Environment, data = data[1:10000,], x = T, y = T, maxit = 1000)
-logistic_env_model
+predict_growth_binary <- function(biomass) {
+  logistic_fit <- lrm(binary_growth ~ Environment, data = filter(data, Biomass == biomass), x = T, y = T, maxit = 1000)
+  return(logistic_fit)
+}
+lapply(unique(data$Biomass), predict_growth_binary)
 ```
 
 The R-squared and AUC are both exactly 1, which is extremely suspcious. That's probably nonsense since the estimated coefficient of each environment is 0 with a massive standard error, so I think the model just completely failed.
-
-## Predicting Growth with Biomass
-
-```{r}
-logistic_bm_model <- lrm(binary_growth ~ Biomass, data = data, x = T, y = T)
-logistic_bm_model
-```
-
-Each biomass reaction is a significant predictor of growth. The Nagelkerke R-squared and C-statistic for this model are real values now, but they're both bad: 0.083 on a scale of 0 to 1 is terrible and an AUC of 0.773 is mediocre.
 
 # Conclusions
 

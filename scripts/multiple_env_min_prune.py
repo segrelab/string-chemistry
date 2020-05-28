@@ -77,5 +77,5 @@ bitstring_df['biomass'] = list(it.repeat(
 ))
 bitstring_df.to_csv(
     f'data/multiple_env_min_prune_{monos}_{max_pol}_{ins}ins_{envs}envs_' +
-    f'{outs}outs.csv', mode = 'a', index = False
+    f'{outs}outs.csv', mode = 'a', index = False, header = False
 )

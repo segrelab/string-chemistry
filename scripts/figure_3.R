@@ -4,7 +4,7 @@
 # used to generate them
 
 # load package(s)
-library(tidyverse)
+suppressMessages(library(tidyverse))
 
 # make all plots be nice
 theme_set(theme_bw())
@@ -18,36 +18,6 @@ counts <- read.csv(
   filter(rxns > 0) %>%
   mutate(ratio = rxns/mets)
 
-# keeping this here but commented out because we might want it later even if it isn't currently being used in this script
-# find all ratios files
-# all_files <- list.files("data")
-# ratio_files <- all_files[grepl("ratios.csv", all_files)]
-# 
-# # parse information from all of those files into a nice dataframe
-# parse_ratio_file <- function(ratio_file) {
-#   # get mean and standard deviation of reaction-to-metabolite ratios
-#   ratio_dist <- read.csv(paste("data/", ratio_file, sep = ""), header = F)
-#   mean_ratio <- mean(ratio_dist$V1)
-#   ratio_sd <- sd(ratio_dist$V1)
-#   # get number of monomers and max length used to generate the universal
-#   # network all these ratios correspond to
-#   filename_bits <- strsplit(ratio_file, "_")[[1]]
-#   monos <- filename_bits[1]
-#   max_len <- filename_bits[2]
-#   return(c(monos, max_len, mean_ratio, ratio_sd))
-# }
-# 
-# ratio_df <- as.data.frame(t(sapply(ratio_files, parse_ratio_file)))
-# # make the dataframe a bit easier to work with
-# colnames(ratio_df) <- c("monos", "max_len", "mean_ratio", "ratio_sd")
-# ratio_df <- ratio_df %>%
-#   mutate_at(vars(-monos), function(col) as.numeric(as.character(col))) %>%
-#   # for plotting purposes we only need to know how many monomers there were,
-#   # not exactly what they were
-#   mutate(monos = nchar(as.character(monos))) %>%
-#   # since we're using monos to separate lines in the plots, make it a factor
-#   mutate(monos = as.factor(monos))
-
 # iJO1336
 ecoli_mets <- 1805
 ecoli_rxns <- 2583
@@ -59,7 +29,7 @@ yeast_mets <- 2666
 yeast_rxns <- 3895
 
 # metabolite count as a function of monomers and max length
-png("data/figure_3_met.png", width = 700, height = 500)
+invisible(png("data/figure_3_met.png", width = 700, height = 500))
 counts %>%
   ggplot(aes(x = max_len, y = mets)) + 
     geom_line(aes(color = monos)) + 
@@ -76,10 +46,10 @@ counts %>%
       color = "Types of Monomers", 
       title = "Network Sizes By Metabolite Count"
     )
-dev.off()
+invisible(dev.off())
 
 # reaction count as a function of monomers and max length
-png("data/figure_3_rxn.png", width = 700, height = 500)
+invisible(png("data/figure_3_rxn.png", width = 700, height = 500))
 counts %>%
   ggplot(aes(x = max_len, y = rxns)) + 
     geom_line(aes(color = monos)) + 
@@ -96,10 +66,10 @@ counts %>%
       color = "Types of Monomers", 
       title = "Network Sizes By Reaction Count"
     )
-dev.off()
+invisible(dev.off())
 
 # reaction-to-metabolite ratio as a function of monomers and max length
-png("data/figure_3_ratio.png", width = 700, height = 500)
+invisible(png("data/figure_3_ratio.png", width = 700, height = 500))
 ggplot() +
   # plot ratios from universal networks
   geom_line(data = counts, aes(x = max_len, y = ratio, color = monos)) +
@@ -118,4 +88,4 @@ ggplot() +
     color = "Types of Monomers", 
     title = "Network Sizes By Ratio of Reaction Count to Metabolite Count"
   )
-dev.off()
+invisible(dev.off())

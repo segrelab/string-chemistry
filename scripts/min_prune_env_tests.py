@@ -14,7 +14,7 @@ try:
 except ValueError:
     sys.exit('Arguments:\nmonomers\nmax polymer length\nnumber of food ' +
         'sources in each environment\nnumber of environments to test\n' +
-        'number of biomass precursors\nNumber of biomass reactions to try\n'
+        'number of biomass precursors\nNumber of biomass reactions to try'
     )
 
 # create the universal network
@@ -66,9 +66,9 @@ while i < int(bm_count):
         in_rxns = [
             # don't want to remove all boundary reactions because that would
             # also remove all of the export reactions
-            rxn for rxn in pruned_model.boundary if rxn.id.startswith('->')
+            rxn for rxn in universal_model.boundary if rxn.id.startswith('->')
         ]
-        pruned_model.remove_reactions(in_rxns)
+        universal_model.remove_reactions(in_rxns)
         scn.choose_inputs(int(ins), universal_model, bm_rxn)
         solution = universal_model.optimize()
         bm_rxn_flux = solution.fluxes.get(key = bm_rxn.id)

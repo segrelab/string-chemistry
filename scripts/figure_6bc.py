@@ -38,7 +38,7 @@ in_cdict = {v: k for k, v in enumerate(np.unique(in_groups))}
 in_cvals = [in_cdict[c] for c in in_groups]
 
 # make the figure large
-plt.figure(figsize = (5,6))
+plt.figure(figsize = (8,7))
 
 # make the text legible
 matplotlib.rcParams.update({
@@ -59,10 +59,9 @@ plt.ylabel('UMAP_2')
 # save the figure
 plt.savefig('data/figure_6b.png', dpi = 600)
 
-
 # and one colored by input metabolites
 plt.figure(2)
-plt.figure(figsize = (5,6))
+plt.figure(figsize = (8,7))
 plt.scatter(
     plotting_df.x, plotting_df.y,
     c = in_cvals, cmap = 'nipy_spectral',

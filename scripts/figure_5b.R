@@ -3,7 +3,7 @@
 # and the min flux-pruned network for a given large network
 
 library(pheatmap)
-library(tidyverse)
+suppressMessages(library(tidyverse))
 
 bitstring_df <- read.csv(
   "data/ab_5_2ins_5outs_10000reps.csv",
