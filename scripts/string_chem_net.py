@@ -193,7 +193,10 @@ def remove_random_rxns(more_rxns, S, prob):
     return(less_rxns, smaller_S)
 
 # make a COBRA model using these metbolites and reactants so you can do FBA
-def make_cobra_model(met_list, rxn_list):
+# setting allow_export to True will create an exchange reaction for every
+# metabolite in the model, basically letting the "organism" export whatever
+# waste products it wants to
+def make_cobra_model(met_list, rxn_list, allow_export = False):
     model = cobra.Model('string_chem')
     # start with the metabolites
     # we will need to make a dictionary with the COBRA metabolite objects
@@ -230,17 +233,16 @@ def make_cobra_model(met_list, rxn_list):
         # now that the reaction is complete, we can just add it to the model
         model.add_reaction(rxn)
 
-    # real organisms are allowed to and often depend on being able to export
-    # waste products, so add an exchange reaction for every metabolite that
-    # can only export it
-    for met in cobra_mets:
-        out_rxn = cobra.Reaction(
-            met.id + '->',
-            upper_bound = 1000.0, # only allow exporting
-            lower_bound = 0.0
-        )
-        out_rxn.add_metabolites({met: -1.0})
-        model.add_reaction(out_rxn)
+    # add in export reactions for all metabolites if specified
+    if allow_export is True:
+        for met in cobra_mets:
+            out_rxn = cobra.Reaction(
+                met.id + '->',
+                upper_bound = 1000.0, # only allow exporting
+                lower_bound = 0.0
+            )
+            out_rxn.add_metabolites({met: -1.0})
+            model.add_reaction(out_rxn)
     return(model)
 
 # choose n metabolites at random to create exchange reactions that are
