@@ -1,5 +1,6 @@
-# figure_4.py
-# make a figure to show the results of pruning a network
+# figure_4a.py
+# visualize a universal scale network, a minimum-flux pruned network from that
+# universal network, and several randomly-pruned networks
 
 import sys
 import string_chem_net as scn
@@ -192,9 +193,12 @@ elif export == 'n':
     )
 
 # visualize pruned networks
-# have a counter so there can be unique filenames
-i = 0
+# have a counter so there can be unique filenames but call it "min" for the 
+# minimum-flux pruned one and then make it an actual number for the randomly
+# pruned ones
+i = 'min'
 viz_pruned_net(min_flux_pruned, cobra_model, full_graph, i)
+i = 0
 for random_pruned in random_pruned_nets:
     i += 1
     viz_pruned_net(random_pruned, cobra_model, full_graph, i)
