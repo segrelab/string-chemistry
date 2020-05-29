@@ -109,6 +109,7 @@ The key script; contains a class for generating arbitrary string chemistry netwo
 
     - `met_list`: list of metabolites in the network
     - `rxn_list`: list of reactions in the network
+    - `allow_export`: True/False (default is False); if True, all metabolites in network can be exported
 
     Returns:
 

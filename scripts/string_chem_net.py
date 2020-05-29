@@ -258,7 +258,7 @@ def choose_inputs(n, model, bm_rxn=cobra.Reaction()):
     for met in in_mets:
         in_rxn = cobra.Reaction(
             '->' + met.id,
-            upper_bound = 1.0, # only allow importing of this metabolite
+            upper_bound = 100.0, # only allow importing of this metabolite
             lower_bound = 0.0
         )
         in_rxn.add_metabolites({met: 1.0})

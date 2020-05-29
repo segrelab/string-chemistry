@@ -29,7 +29,7 @@ yeast_mets <- 2666
 yeast_rxns <- 3895
 
 # metabolite count as a function of monomers and max length
-invisible(png("data/figure_3_met.png", width = 700, height = 500))
+png("data/figure_3_met.png", width = 700, height = 500)
 counts %>%
   ggplot(aes(x = max_len, y = mets)) + 
     geom_line(aes(color = monos)) + 
@@ -49,8 +49,8 @@ counts %>%
 invisible(dev.off())
 
 # reaction count as a function of monomers and max length
-invisible(png("data/figure_3_rxn.png", width = 700, height = 500))
-counts %>%
+png("data/figure_3_rxn.png", width = 700, height = 500)
+counts %>
   ggplot(aes(x = max_len, y = rxns)) + 
     geom_line(aes(color = monos)) + 
     scale_x_continuous(breaks = c(2,4,6,8,10)) +
@@ -69,7 +69,7 @@ counts %>%
 invisible(dev.off())
 
 # reaction-to-metabolite ratio as a function of monomers and max length
-invisible(png("data/figure_3_ratio.png", width = 700, height = 500))
+png("data/figure_3_ratio.png", width = 700, height = 500)
 ggplot() +
   # plot ratios from universal networks
   geom_line(data = counts, aes(x = max_len, y = ratio, color = monos)) +

@@ -5,8 +5,10 @@
 library(pheatmap)
 suppressMessages(library(tidyverse))
 
+file <- commandArgs(trailingOnly = T)[1]
+
 bitstring_df <- read.csv(
-  "data/ab_5_2ins_5outs_10000reps.csv",
+  file,
   header = T,
   row.names = 1,
   # read the bitstring/binary vector as a character otherwise R condenses it
@@ -19,6 +21,6 @@ rxn_incl <- as.data.frame(t(as.data.frame(strsplit(bitstring_df$bitstring, "")))
   mutate_all(function(col) as.numeric(as.character(col)))
 
 # make the heatmap
-invisible(png("data/figure_5b.png"))
+png("data/figure_5b.png")
 pheatmap(rxn_incl, show_rownames = F, show_colnames = F)
 invisible(dev.off())

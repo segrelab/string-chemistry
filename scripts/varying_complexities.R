@@ -15,7 +15,7 @@ data <- read.csv(
 
 # show how the ratio of reactions to metabolites changes as you change the
 # number of food sources and the number of biomass precursors
-invisible(png("data/ratio_plot.png", height = 500, width = 700))
+png("data/ratio_plot.png", height = 500, width = 700)
 ggplot(data, aes(x = bm_comp, y = ratio)) + 
   geom_violin(aes(fill = env_comp)) +
   labs(
@@ -28,7 +28,7 @@ invisible(dev.off())
 
 # show how the percentage of reactions removed by pruning changes as you change
 # the number of food sources and the number of biomass precursors
-invisible(png("data/percent_pruned_plot.png", height = 500, width = 700))
+png("data/percent_pruned_plot.png", height = 500, width = 700)
 ggplot(data, aes(x = bm_comp, y = pruned_pct)) + 
   geom_violin(aes(fill = env_comp)) +
   labs(

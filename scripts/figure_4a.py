@@ -47,17 +47,24 @@ def viz_pruned_net(pruned_net, full_net, full_graph, i):
 
 # get command-line arguments
 try:
-    (monos, max_pol, ins, outs, reps) = sys.argv[1:]
+    (monos, max_pol, ins, outs, reps, export) = sys.argv[1:]
 except ValueError:
     sys.exit(
         'Arguments: monomers, max polymer length, number of food sources, ' +
-        'number of biomass precursors, number of times to randomly prune.'
+        'number of biomass precursors, number of times to randomly prune, ' +
+        'whether or not to allow export of all metabolites (y/n)'
     )
 
 print('Creating universal string chemistry network.')
-# make the stoichiometric matrix just so we have it around
 SCN = scn.CreateNetwork(monos, int(max_pol))
-cobra_model = scn.make_cobra_model(SCN.met_list, SCN.rxn_list)
+if export == 'y':
+    cobra_model = scn.make_cobra_model(
+        SCN.met_list, SCN.rxn_list, allow_export = True
+    )
+elif export == 'n':
+    cobra_model = scn.make_cobra_model(
+        SCN.met_list, SCN.rxn_list, allow_export = False
+    )
 bm_rxn = scn.choose_bm_mets(int(outs), cobra_model)
 scn.choose_inputs(int(ins), cobra_model, bm_rxn)
 cobra_model.objective = bm_rxn
@@ -173,9 +180,16 @@ for rxn in cobra_model.reactions:
                     penwidth = 2
                 )
 
-full_graph.draw(
-    f'data/{monos}_{max_pol}_{ins}ins_{outs}outs_full.png', prog = 'fdp'
-)
+if export == 'y':
+    full_graph.draw(
+        f'data/{monos}_{max_pol}_{ins}ins_{outs}outs_exp_full.png',
+        prog = 'fdp'
+    )
+elif export == 'n':
+    full_graph.draw(
+        f'data/{monos}_{max_pol}_{ins}ins_{outs}outs_noexp_full.png',
+        prog = 'fdp'
+    )
 
 # visualize pruned networks
 # have a counter so there can be unique filenames
@@ -186,8 +200,15 @@ for random_pruned in random_pruned_nets:
     viz_pruned_net(random_pruned, cobra_model, full_graph, i)
 
 # save the S matrix for the full network
-np.savetxt(
-    f'data/{monos}_{max_pol}_{ins}ins_{outs}outs_full_S.csv',
-    cobra.util.create_stoichiometric_matrix(cobra_model), 
-    delimiter = ','
-)
+if export == 'y':
+    np.savetxt(
+        f'data/{monos}_{max_pol}_{ins}ins_{outs}outs_exp_full_S.csv',
+        cobra.util.create_stoichiometric_matrix(cobra_model), 
+        delimiter = ','
+    )
+elif export == 'n':
+    np.savetxt(
+        f'data/{monos}_{max_pol}_{ins}ins_{outs}outs_noexp_full_S.csv',
+        cobra.util.create_stoichiometric_matrix(cobra_model), 
+        delimiter = ','
+    )
