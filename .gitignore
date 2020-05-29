@@ -11,4 +11,5 @@ etc/
 *.png
 *.sh
 data/
-.Rproj.user
+*.Rproj.user
+*.html
