@@ -410,9 +410,9 @@ def random_prune(cobra_model, bm_rxn):
     return(cobra_net)
 
 # given a model containing all possible reactions and a pruned model only
-# containing some subset of those reactions, make a bitstring indicating which
-# reactions are present in the pruned model
-def make_bitstring(full_model, pruned_model):
+# containing some subset of those reactions, make a binary vector indicating 
+# which reactions are present in the pruned model
+def make_rxn_incl(full_model, pruned_model):
     # make sure the pruned network is actually a subnetwork of the full one
     for rxn in pruned_model.reactions:
         if rxn not in full_model.reactions:
@@ -426,5 +426,5 @@ def make_bitstring(full_model, pruned_model):
     # same parent network
     all_reactions.sort()
     bits = [1 if rxn in pruned_model.reactions else 0 for rxn in all_reactions]
-    bitstring = ''.join([str(bit) for bit in bits])
-    return(bitstring)
+    rxn_incl = ''.join([str(bit) for bit in bits])
+    return(rxn_incl)
