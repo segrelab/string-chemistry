@@ -339,26 +339,27 @@ def min_flux_prune(cobra_model, bm_rxn):
 # iteratively choose a reaction with nonzero flux to remove until there are no
 # reactions that can be removed without making the network unsolvable
 # need to know what the biomass reaction is to make sure it doesn't get removed
-def random_prune(cobra_model, bm_rxn):
+def random_prune(full_model, bm_rxn):
     # removing reactions happens in-place, so we need to make a copy of the
     # cobra model before altering it in any way
-    cobra_net = cobra_model.copy()
-    solution = cobra_net.optimize()
-    # remove all non-boundary reactions with no flux
+    pruned_model = full_model.copy()
+    # start by doing FBA and removing all reactions with no flux that are
+    # not an export reaction
+    solution = pruned_model.optimize()
     no_flux_rxn_ids = solution.fluxes[solution.fluxes == 0].index
-    boundary_rxn_ids = [rxn.id for rxn in cobra_net.boundary]
-    ids_to_remove = [
-        rxn for rxn in no_flux_rxn_ids if rxn not in boundary_rxn_ids
+    export_rxn_ids = [
+        rxn.id for rxn in pruned_model.boundary if rxn.id.endswith('->')
     ]
     rxns_to_remove = [
-        cobra_net.reactions.get_by_id(rxn_id) for rxn_id in ids_to_remove
+        rxn for rxn in no_flux_rxn_ids if rxn not in export_rxn_ids
     ]
-    cobra_net.remove_reactions(rxns_to_remove)
-    # get list of all reactions with nonzero flux
+    pruned_model.remove_reactions(rxns_to_remove)
+    # get a list of all the reaction ids we didn't just remove to loop over
+    # as we try to remove reactions
     flux_bearer_names = solution.fluxes[solution.fluxes != 0].index
     # exclude the biomass reaction, since we know we want to keep that
     flux_bearers = [
-        rxn for rxn in cobra_net.reactions 
+        rxn for rxn in pruned_model.reactions 
         if rxn.id in flux_bearer_names and rxn.id != bm_rxn.id
     ]
     # shuffle this list and then do a for loop over it so that we can tell if
@@ -372,9 +373,9 @@ def random_prune(cobra_model, bm_rxn):
     while infeas_count < len(flux_bearers):
         for rxn in flux_bearers:
             # try to remove the reaction from the model
-            cobra_net.remove_reactions([rxn])
-            # see if you can solve the model
-            solution = cobra_net.optimize()
+            pruned_model.remove_reactions([rxn])
+            # see if there's still a way to get flux through the biomass rxn
+            solution = pruned_model.optimize()
             # sometimes "feasible" solutions have extremely small fluxes
             # through the biomass reaction
             bm_rxn_flux = solution.fluxes.get(key = bm_rxn.id)
@@ -382,23 +383,23 @@ def random_prune(cobra_model, bm_rxn):
                 # keep track of how many times we've gotten a bad solution
                 infeas_count += 1
                 # put this reaction back and get the old solution object back
-                cobra_net.add_reactions([rxn])
-                solution = cobra_net.optimize()
+                pruned_model.add_reaction(rxn)
+                solution = pruned_model.optimize()
             else:
-                # remove all non-boundary reactions with no flux
+                # remove all non-export reactions with no flux
                 no_flux_rxn_ids = solution.fluxes[solution.fluxes == 0].index
-                boundary_rxn_ids = [rxn.id for rxn in cobra_net.boundary]
-                ids_to_remove = [
-                    rxn for rxn in no_flux_rxn_ids if rxn not in boundary_rxn_ids
+                export_rxn_ids = [
+                    rxn.id for rxn in pruned_model.boundary 
+                    if rxn.id.endswith('->')
                 ]
                 rxns_to_remove = [
-                    cobra_net.reactions.get_by_id(rxn_id) for rxn_id in ids_to_remove
+                    rxn for rxn in no_flux_rxn_ids if rxn not in export_rxn_ids
                 ]
-                cobra_net.remove_reactions(rxns_to_remove)
+                pruned_model.remove_reactions(rxns_to_remove)
                 # recreate the list of non-biomass reaction flux bearers
                 flux_bearer_names = solution.fluxes[solution.fluxes != 0].index
                 flux_bearers = [
-                    rxn for rxn in cobra_net.reactions
+                    rxn for rxn in pruned_model.reactions
                     if rxn.id in flux_bearer_names and rxn.id != bm_rxn.id
                 ]
                 # reset infeas_count
@@ -406,8 +407,8 @@ def random_prune(cobra_model, bm_rxn):
                 break
     # we kept the exchange reactions around to make sure waste could be
     # exported if needed but now they can all be dropped
-    cobra_net.remove_reactions(solution.fluxes[solution.fluxes == 0].index)
-    return(cobra_net)
+    pruned_model.remove_reactions(solution.fluxes[solution.fluxes == 0].index)
+    return(pruned_model)
 
 # given a model containing all possible reactions and a pruned model only
 # containing some subset of those reactions, make a binary vector indicating 

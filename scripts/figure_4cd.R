@@ -26,5 +26,9 @@ no_exp_data <- raw_no_exp_data %>%
   cbind(., select(raw_no_exp_data, -X, -rxn_incl))
 
 png("data/figure_4c.png")
-pheatmap(t(S), cluster_rows = F, cluster_cols = F, show_rownames = F, show_colnames = F)
+pheatmap(exp_data, cluster_rows = F, cluster_cols = F, show_rownames = F, show_colnames = F)
+invisible(dev.off())
+
+png("data/figure_4d.png")
+pheatmap(no_exp_data, cluster_rows = F, cluster_cols = F, show_rownames = F, show_colnames = F)
 invisible(dev.off())

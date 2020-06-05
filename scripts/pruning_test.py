@@ -35,9 +35,15 @@ while solution.status == 'infeasible' or (solution.fluxes == 0).all():
 
 # prune using the random pruner
 pruned = scn.random_prune(cobra_model, bm_rxn)
-solution = pruned.optimize()
-print(solution.fluxes)
-print('--------------------------------------------')
+print(scn.make_rxn_incl(cobra_model, pruned))
 pruned = scn.random_prune(cobra_model, bm_rxn)
-solution = pruned.optimize()
-print(solution.fluxes)
+print(scn.make_rxn_incl(cobra_model, pruned))
+pruned = scn.random_prune(cobra_model, bm_rxn)
+print(scn.make_rxn_incl(cobra_model, pruned))
+pruned = scn.random_prune(cobra_model, bm_rxn)
+print(scn.make_rxn_incl(cobra_model, pruned))
+pruned = scn.random_prune(cobra_model, bm_rxn)
+print(scn.make_rxn_incl(cobra_model, pruned))
+pruned = scn.random_prune(cobra_model, bm_rxn)
+print(scn.make_rxn_incl(cobra_model, pruned))
+
