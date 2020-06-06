@@ -1,4 +1,4 @@
-# varying_complexities.py
+# figure_S1_S2_data.py
 # given a particular universal network, compare pruning results at several
 # different combinations of environmental and biomass complexities
 # i.e. prune several times with 2 input metabolites and 5 biomass precursors,
@@ -21,7 +21,11 @@ except ValueError:
 
 # create the universal network
 SCN = scn.CreateNetwork(monos, int(max_pol))
-universal_model = scn.make_cobra_model(SCN.met_list, SCN.rxn_list)
+universal_model = scn.make_cobra_model(
+    SCN.met_list, 
+    SCN.rxn_list, 
+    allow_export = True
+)
 
 # make every pair of number of environments and number of biomass precursors
 conditions = list(it.product(
@@ -36,7 +40,8 @@ output_data = list()
 # outermost loop over those conditions
 for condition in conditions:
     print(
-        f'On condition {conditions.index(condition)+1} of {len(conditions)}'
+        f'On condition {conditions.index(condition)+1} of {len(conditions)}: '+
+        f'{condition[0]} inputs and {condition[1]} outputs'
     )
     # next, loop over number of times to prune with each condition
     for rep in range(int(reps)):

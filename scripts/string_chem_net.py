@@ -196,7 +196,7 @@ def remove_random_rxns(more_rxns, S, prob):
 # setting allow_export to True will create an exchange reaction for every
 # metabolite in the model, basically letting the "organism" export whatever
 # waste products it wants to
-def make_cobra_model(met_list, rxn_list, allow_export = False):
+def make_cobra_model(met_list, rxn_list, allow_export = True):
     model = cobra.Model('string_chem')
     # start with the metabolites
     # we will need to make a dictionary with the COBRA metabolite objects

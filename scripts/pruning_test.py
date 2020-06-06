@@ -14,7 +14,7 @@ SCN = scn.CreateNetwork('ab', 5)
 cobra_model = scn.make_cobra_model(
     SCN.met_list,
     SCN.rxn_list,
-    allow_export = False
+    allow_export = True
 )
 bm_rxn = scn.choose_bm_mets(outs, cobra_model)
 scn.choose_inputs(ins, cobra_model, bm_rxn)
