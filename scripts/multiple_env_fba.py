@@ -1,7 +1,7 @@
-# multiple_env_min_prune.py
-# runs the minimum flux pruning algorithm many times on the same universal
-# network with the multiple biomass reactions and environments (such that each
-# biomass reaction is run with the same large number of environments)
+# multiple_env_fba.py
+# runs normal FBA many times on the same universal network with different
+# biomass reactions and environments (but such that each biomass reaction is
+# run with the same environments)
 
 import sys
 import string_chem_net as scn
@@ -32,7 +32,7 @@ untouched_model = scn.make_cobra_model(
     allow_export = allow_export
 )
 # make a dataframe to store information about the pruned networks
-all_data = pd.DataFrame(columns = ['biomass', 'env', 'rxn_incl', 'growth'])
+all_data = pd.DataFrame(columns = ['env', 'rxn_incl', 'biomass'])
 # loop over the different biomass reactions
 for bm in range(int(orgs)):
     print(f'On biomass reaction {bm}')
@@ -42,11 +42,10 @@ for bm in range(int(orgs)):
     # add a biomass reaction and set it as the objective
     bm_rxn = scn.choose_bm_mets(int(outs), model)
     model.objective = bm_rxn
-    # keep lists of the environments used, the reaction-inclusion vectors of
-    # the pruned networks and the growth rates on the pruned networks
+    # keep lists of the environments used and the reaction-inclusion vectors of
+    # the pruned networks
     food_mets = list()
     rxn_incl_vecs = list()
-    pruned_growths = list()
     # use a while loop and not a for loop so we can go back on occasion
     i = 0
     # counter for how many times it had to reselct the environment to get a
@@ -73,7 +72,7 @@ for bm in range(int(orgs)):
             # increment the counter of redos
             j += 1 
             continue
-        # record the metabolites that worked and prune the network
+        # record these metabolites and the reactions that had flux
         else:
             if i % 100 == 0:
                 print(f'On environment {i}')
@@ -85,20 +84,16 @@ for bm in range(int(orgs)):
                 for rxn in in_rxns 
                 for met in rxn.metabolites
             ]))
-            # prune the network
-            pruned_net = scn.min_flux_prune(model, bm_rxn)
-            rxn_incl = scn.make_rxn_incl(model, pruned_net)
+            # remove all reactions without flux
+            no_flux_rxns = solution.fluxes[solution.fluxes == 0].index
+            flux_only = model.copy()
+            flux_only.remove_reactions(no_flux_rxns)
+            rxn_incl = scn.make_rxn_incl(model, flux_only)
             rxn_incl_vecs.append(rxn_incl)
-            # get the growth rate on the pruned network
-            solution = pruned_net.optimize()
-            pruned_growth = solution.fluxes.get(key = bm_rxn.id)
-            pruned_growths.append(pruned_growth)
 
-    # make a dataframe out of the lists and add it to the larger dataframe
-    more_data = pd.DataFrame(list(zip(
-        food_mets, rxn_incl_vecs, pruned_growths
-    )))
-    more_data.columns = ['env','rxn_incl', 'growth']
+    # make a dataframe out of the two lists and add it to the larger dataframe
+    more_data = pd.DataFrame(list(zip(food_mets, rxn_incl_vecs)))
+    more_data.columns = ['env','rxn_incl']
     # add a column with the biomass components
     more_data['biomass'] = list(it.repeat(
         '-'.join([met.id for met in bm_rxn.metabolites]),
@@ -107,6 +102,6 @@ for bm in range(int(orgs)):
     all_data = all_data.append(more_data)
 
 all_data.to_csv(
-    f'data/multiple_env_min_prune_{monos}_{max_pol}_{ins}ins_{envs}envs_' +
+    f'data/multiple_env_fba_{monos}_{max_pol}_{ins}ins_{envs}envs_' +
     f'{outs}outs_{orgs}orgs_{export}exp.csv'
 )

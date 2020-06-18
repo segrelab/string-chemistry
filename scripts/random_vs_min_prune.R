@@ -1,4 +1,4 @@
-# figure_5b.R
+# random_vs_min_prune.R
 # makes a heatmap to visualize the differences between randomly-pruned networks
 # and the min flux-pruned network for a given large network
 
@@ -21,6 +21,6 @@ rxn_incl <- as.data.frame(t(as.data.frame(strsplit(bitstring_df$bitstring, "")))
   mutate_all(function(col) as.numeric(as.character(col)))
 
 # make the heatmap
-png("data/figure_5b.png")
+png("data/random_vs_min_prune.png")
 pheatmap(rxn_incl, show_rownames = F, show_colnames = F)
 invisible(dev.off())

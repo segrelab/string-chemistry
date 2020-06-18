@@ -1,4 +1,4 @@
-# figure_S1_S2_data.py
+# figure_S2_S3_data.py
 # given a particular universal network, compare pruning results at several
 # different combinations of environmental and biomass complexities
 # i.e. prune several times with 2 input metabolites and 5 biomass precursors,
@@ -83,7 +83,7 @@ for condition in conditions:
 
 with open(
     f'data/varied_{monos}_{max_pol}_{min_ins}to{max_ins}ins_' +
-    f'{min_outs}to{max_outs}outs.csv', 
+    f'{min_outs}to{max_outs}outs_exp.csv', 
     'w') as out:
     output = '\n'.join([','.join(row) for row in output_data])
     out.write(output)
