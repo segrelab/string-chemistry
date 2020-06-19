@@ -8,8 +8,9 @@ import matplotlib
 from matplotlib import pyplot as plt
 
 # need name of file with multiple_env_prune output, name for the plot colored
-# by biomass reaction and name for the plot colored by environment
-def do_umap(filename, bm_plot_name, env_plot_name):
+# by biomass reaction, name for the plot colored by environment and name for
+# plot colored by growth rates
+def do_umap(filename, bm_plot_name, env_plot_name, growth_plot_name):
     # get the reaction-inclusion vector out of the input file and make it into
     # a bunch of 1/0 columns instead of one column of strings of 1s and 0s
     data = pd.read_csv(filename)
@@ -68,16 +69,35 @@ def do_umap(filename, bm_plot_name, env_plot_name):
     plt.xlabel('UMAP_1')
     plt.ylabel('UMAP_2')
     plt.savefig(f'data/{env_plot_name}.png', dpi = 600)
+
+    # do one scatterplot colored by growth
+    plt.figure(2)
+    plt.figure(figsize = (8,7))
+    fig, ax = plt.subplots()
+    plot = ax.scatter(
+        plotting_df.x, 
+        plotting_df.y, 
+        c = plotting_df.growth, 
+        cmap = 'Blues', 
+        s = 10
+    )
+    fig.colorbar(plot, ax = ax)
+    plt.xlabel('UMAP_1')
+    plt.ylabel('UMAP_2')
+    plt.savefig(f'data/{growth_plot_name}.png', dpi = 600)
+
     # return nothing; the plots are the only required output
 
 # panels B and C are with export reactions, panels D and E are without
 do_umap(
     'data/multiple_env_min_prune_ab_5_2ins_1000envs_5outs_10orgs_yesexp.csv',
     'figure_5b',
-    'figure_5c'
+    'figure_5c',
+    'figure_5_export_growth'
 )
 do_umap(
     'data/multiple_env_min_prune_ab_5_2ins_1000envs_5outs_10orgs_noexp.csv',
     'figure_5d',
-    'figure_5e'
+    'figure_5e',
+    'figure_5_noexport_growth'
 )
