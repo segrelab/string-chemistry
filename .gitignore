@@ -13,3 +13,4 @@ etc/
 data/
 *.Rproj.user
 *.html
+.Rproj.user

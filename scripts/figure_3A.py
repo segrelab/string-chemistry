@@ -1,4 +1,4 @@
-# figure_4b.py
+# figure_3A.py
 # visualize a universal scale network, a minimum-flux pruned network from that
 # universal network, and several randomly-pruned networks
 
@@ -60,42 +60,83 @@ def viz_universal_net(full_model, bm_rxn, export):
     full_graph = gv.AGraph(
         size = '5,5', 
         dpi = '400', 
-        splines = 'true'
+        splines = 'true', # this API was made perfectly and intuitively
+        directed = True
     )
     # distinguish metabolite and reaction nodes by shape
-    solution = full_model.optimize()
     for met in full_model.metabolites:
-        full_graph.add_node(met.id, shape = 'box')
-    for rxn in full_model.reactions:
-        full_graph.add_node(rxn.id, shape = 'oval')
-        # distinguish exchange fluxes with colored edges
-        if rxn == bm_rxn or rxn in full_model.boundary:
-            # red if they have flux or grey if they don't
-            for met in rxn.metabolites:
-                if solution.fluxes.loc[rxn.id] == 0:
-                    full_graph.add_edge(
-                        [met.id, rxn.id],
-                        color = 'grey'
-                    )
-                else:
-                    full_graph.add_edge(
-                        [met.id, rxn.id],
-                        color = 'red'
-                    )
+        # grey out metabolites that aren't produced or consumed by anything
+        if all([abs(rxn.flux) < 0.01 for rxn in met.reactions]):
+            full_graph.add_node(met.id, shape = 'box', color = 'grey')
         else:
+            full_graph.add_node(met.id, shape = 'box', color = 'blue')
+    for rxn in full_model.reactions:
+        # reactions with no flux get grey nodes
+        if abs(rxn.flux) < 0.01:
+            full_graph.add_node(rxn.id, shape = 'oval', color = 'grey')
+        # make them red otherwise
+        else:
+            full_graph.add_node(rxn.id, shape = 'oval', color = 'red')
+        # next do edges
+        if abs(rxn.flux) < 0.01:
+            # reactions with no flux get grey edges
             for met in rxn.metabolites:
-                # make reactions with no flux have grey edges
-                if solution.fluxes.loc[rxn.id] == 0:
-                    full_graph.add_edge(
-                        [met.id, rxn.id],
-                        color = 'grey'
-                    )
-                # make reactions with flux have bolded edges
+                # direct edges based on stoichiometric coefficients
+                if rxn.metabolites[met] > 0:
+                    # products
+                    full_graph.add_edge([rxn.id, met.id], color = 'grey')
                 else:
-                    full_graph.add_edge(
-                        [met.id, rxn.id],
-                        penwidth = 2
-                    )
+                    # reactants
+                    full_graph.add_edge([met.id, rxn.id], color = 'grey')
+        else:
+            # exchange reactions get green edges
+            if rxn == bm_rxn or rxn in full_model.boundary:
+                for met in rxn.metabolites:
+                    # direct edges based on stoichiometric coefficients
+                    # all exchange reactions are initialized so they can only
+                    # proceed in the forward direction, so we don't have to
+                    # worry about the sign of the flux
+                    if rxn.metabolites[met] > 0:
+                        # products
+                        full_graph.add_edge(
+                            [rxn.id, met.id], color = 'green'
+                        )
+                    else:
+                        # reactants
+                        full_graph.add_edge(
+                            [met.id, rxn.id], color = 'green'
+                        )
+            # other reactions get thicker black edges
+            else:
+                for met in rxn.metabolites:
+                    # have to use both stoichiometric coefficients and the sign
+                    # of the flux to direct edges for these reactions, since 
+                    # they have every right to be negative
+                    if rxn.flux > 0:
+                        # reaction is in the forward direction
+                        if rxn.metabolites[met] > 0:
+                            # prodcuts
+                            full_graph.add_edge(
+                                [rxn.id, met.id], penwidth = 2
+                            )
+                        else:
+                            # reactants
+                            full_graph.add_edge(
+                                [met.id, rxn.id], penwidth = 2
+                            )
+                    else:
+                        # reaction is running in the reverse direction, so 
+                        # invert signs on stoichiometric coefficients
+                        if rxn.metabolites[met] > 0:
+                            # reactants
+                            full_graph.add_edge(
+                                [met.id, rxn.id], penwidth = 2
+                            )
+                        else:
+                            # products
+                            full_graph.add_edge(
+                                [rxn.id, met.id], penwidth = 2
+                            )
     # draw the graph and save it to a file
     full_graph.draw(
         f'data/{monos}_{max_pol}_{ins}ins_{outs}outs_{export}_full.png',
@@ -106,6 +147,8 @@ def viz_universal_net(full_model, bm_rxn, export):
     return(full_graph)
 
 # visualize effects of pruning
+# TODO this function is broken but we're not using it for the paper figures so
+# I haven't bothered figuring out how; I suspect it is a minor issue
 def viz_pruned_net(pruned_model, full_model, full_graph, export, name):
     # make a copy with differently-colored edges indicating where it was pruned
     # (use copy so full_graph isn't modified and we can do this many times)
@@ -286,17 +329,17 @@ export_graph = viz_universal_net(export_model, exp_bm_rxn, 'exp')
 no_export_graph = viz_universal_net(no_export_model, no_exp_bm_rxn, 'noexp')
 
 # visualize pruned networks
-viz_pruned_nets(
-    export_model, 
-    export_graph, 
-    min_pruned_export, 
-    rand_export_pruned_nets,
-    'exp'
-)
-viz_pruned_nets(
-    no_export_model, 
-    no_export_graph, 
-    min_pruned_no_export, 
-    rand_no_export_pruned_nets,
-    'noexp'
-)
+#viz_pruned_nets(
+#    export_model, 
+#    export_graph, 
+#    min_pruned_export, 
+#    rand_export_pruned_nets,
+#    'exp'
+#)
+#viz_pruned_nets(
+#    no_export_model, 
+#    no_export_graph, 
+#    min_pruned_no_export, 
+#    rand_no_export_pruned_nets,
+#    'noexp'
+#)

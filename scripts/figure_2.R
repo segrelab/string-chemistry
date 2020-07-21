@@ -4,6 +4,7 @@
 # used to generate them
 
 # load package(s)
+library(ggpubr)
 suppressMessages(library(tidyverse))
 
 # make all plots be nice
@@ -29,63 +30,62 @@ yeast_mets <- 2666
 yeast_rxns <- 3895
 
 # metabolite count as a function of monomers and max length
-png("data/figure_2A.png", width = 700, height = 500)
-counts %>%
+panel_a <- counts %>%
   ggplot(aes(x = max_len, y = mets)) + 
     geom_line(aes(color = monos)) + 
     scale_x_continuous(breaks = c(2,4,6,8,10)) +
     scale_y_continuous(trans = "log10") +
     geom_hline(aes(yintercept = ecoli_mets)) +
-    annotate("text", x = 3, y = 1300, label = "E. coli") +
+    annotate("text", x = 3, y = 1200, label = "E. coli") +
     geom_hline(aes(yintercept = human_mets)) +
-    annotate("text", x = 3, y = 8000, label = "Human") +
+    annotate("text", x = 3, y = 8500, label = "Human") +
     geom_hline(aes(yintercept = yeast_mets)) +
-    annotate("text", x = 3, y = 3500, label = "S. cerevisiae") +
+    annotate("text", x = 3, y = 3700, label = "S. cerevisiae") +
     labs(
-      x = "Maximum String Length", y = "Number of Metabolites", 
+      x = "Maximum String Length", y = "Metabolites", 
       color = "Types of Monomers", 
       title = "Network Sizes By Metabolite Count"
     )
-invisible(dev.off())
+
 
 # reaction count as a function of monomers and max length
-png("data/figure_2B.png", width = 700, height = 500)
-counts %>
+panel_b <- counts %>%
   ggplot(aes(x = max_len, y = rxns)) + 
     geom_line(aes(color = monos)) + 
     scale_x_continuous(breaks = c(2,4,6,8,10)) +
     scale_y_continuous(trans = "log10") +
     geom_hline(aes(yintercept = ecoli_rxns)) +
-    annotate("text", x = 2.5, y = 1900, label = "E. coli") +
+    annotate("text", x = 2.5, y = 1700, label = "E. coli") +
     geom_hline(aes(yintercept = human_rxns)) +
-    annotate("text", x = 2.5, y = 15000, label = "Human") +
+    annotate("text", x = 2.5, y = 16000, label = "Human") +
     geom_hline(aes(yintercept = yeast_rxns)) +
-    annotate("text", x = 2.5, y = 5500, label = "S. cerevisiae") +
+    annotate("text", x = 2.5, y = 6000, label = "S. cerevisiae") +
     labs(
-      x = "Maximum String Length", y = "Number of Reactions", 
+      x = "Maximum String Length", y = "Reactions", 
       color = "Types of Monomers", 
       title = "Network Sizes By Reaction Count"
     )
-invisible(dev.off())
 
 # reaction-to-metabolite ratio as a function of monomers and max length
-png("data/figure_2C.png", width = 700, height = 500)
-ggplot() +
+panel_c <- ggplot() +
   # plot ratios from universal networks
   geom_line(data = counts, aes(x = max_len, y = ratio, color = monos)) +
   # set x-axis tick spacing
   scale_x_continuous(breaks = c(2,4,6,8,10)) +
   # add horizontal lines for real organisms
   geom_hline(aes(yintercept = ecoli_rxns/ecoli_mets)) +
-  annotate("text", x = 8, y = 1.3, label = "E. coli") +
+  annotate("text", x = 8, y = 1.2, label = "E. coli") +
   geom_hline(aes(yintercept = human_rxns/human_mets)) +
   annotate("text", x = 8, y = 2, label = "Human") +
   geom_hline(aes(yintercept = yeast_rxns/yeast_mets)) +
-  annotate("text", x = 8, y = 1.6, label = "S. cerevisiae") +
+  annotate("text", x = 8, y = 1.62, label = "S. cerevisiae") +
   labs(
     x = "Maximum String Length", 
-    y = "Number of Reactions / Number of Metabolites", 
+    y = "Reactions / Metabolites", 
     color = "Types of Monomers", 
     title = "Network Sizes By Ratio of Reaction Count to Metabolite Count"
   )
+
+png("../data/figure_2.png", height = 8000, width = 5000, res = 600)
+ggarrange(panel_a, panel_b, panel_c, nrow = 3, labels = c("A", "B", "C"))
 invisible(dev.off())
