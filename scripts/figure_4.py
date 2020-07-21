@@ -1,4 +1,4 @@
-# figure_5.py
+# figure_4.py
 # make several UMAPs visualizing the results of multiple_env_min_prune.py
 
 import pandas as pd
@@ -91,13 +91,13 @@ def do_umap(filename, bm_plot_name, env_plot_name, growth_plot_name):
 # panels B and C are with export reactions, panels D and E are without
 do_umap(
     'data/multiple_env_min_prune_ab_5_2ins_1000envs_5outs_10orgs_yesexp.csv',
-    'figure_5b',
-    'figure_5c',
-    'figure_5_export_growth'
+    'figure_4B',
+    'figure_4C',
+    'figure_4_export_growth'
 )
 do_umap(
     'data/multiple_env_min_prune_ab_5_2ins_1000envs_5outs_10orgs_noexp.csv',
-    'figure_5d',
-    'figure_5e',
-    'figure_5_noexport_growth'
+    'figure_4D',
+    'figure_4E',
+    'figure_4_noexport_growth'
 )

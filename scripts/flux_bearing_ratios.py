@@ -1,6 +1,5 @@
-# figure_4c_data.py
-# we'll figure out which figure this one is after it exists
-# just do FBA on a bunch of networks of different sizes to see what percentage
+# flux_bearing_ratios.py
+# do FBA on a bunch of networks of different sizes to see what percentage
 # of reactions have flux on the full network without doing any pruning
 
 import pandas as pd
@@ -73,4 +72,4 @@ for monos_count in range(min_monos, max_monos + 1):
                 data = data.append(new_row, ignore_index = True)
 
 # save the dataframe so we can plot it with R
-data.to_csv('data/figure_4c_data_noexp.csv')
+data.to_csv('data/flux_bearing_ratios_noexp.csv')

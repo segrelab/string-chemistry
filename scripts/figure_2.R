@@ -1,4 +1,4 @@
-# figure_3.R
+# figure_2.R
 # make the plots for figure 3 that show sizes of string chemistry networks
 # as functions of the number of unique monomers and the maximum string length
 # used to generate them
@@ -11,7 +11,7 @@ theme_set(theme_bw())
 
 # read in data
 counts <- read.csv(
-  "data/figure_3_data.csv", header = F,
+  "data/figure_2_data.csv", header = F,
   col.names = c("monos", "max_len", "mets", "rxns")
 ) %>%
   mutate(monos = as.factor(monos)) %>%
@@ -29,7 +29,7 @@ yeast_mets <- 2666
 yeast_rxns <- 3895
 
 # metabolite count as a function of monomers and max length
-png("data/figure_3_met.png", width = 700, height = 500)
+png("data/figure_2A.png", width = 700, height = 500)
 counts %>%
   ggplot(aes(x = max_len, y = mets)) + 
     geom_line(aes(color = monos)) + 
@@ -49,7 +49,7 @@ counts %>%
 invisible(dev.off())
 
 # reaction count as a function of monomers and max length
-png("data/figure_3_rxn.png", width = 700, height = 500)
+png("data/figure_2B.png", width = 700, height = 500)
 counts %>
   ggplot(aes(x = max_len, y = rxns)) + 
     geom_line(aes(color = monos)) + 
@@ -69,7 +69,7 @@ counts %>
 invisible(dev.off())
 
 # reaction-to-metabolite ratio as a function of monomers and max length
-png("data/figure_3_ratio.png", width = 700, height = 500)
+png("data/figure_2C.png", width = 700, height = 500)
 ggplot() +
   # plot ratios from universal networks
   geom_line(data = counts, aes(x = max_len, y = ratio, color = monos)) +

@@ -1,7 +1,7 @@
-# figure_3_data.py
+# figure_2_data.py
 # counts number of reactions and metabolites in networks with up to 5 kinds of 
 # monomers and polymers of up to length 10
-# figure_3.R makes plots using this data
+# figure_2.R makes plots using this data
 
 import itertools as it
 import sys
@@ -28,6 +28,6 @@ for n in range(1, 6):
         list_o_lists.append([str(x) for x in row_list])
 
 out_list = [','.join(row) for row in list_o_lists]
-with open('data/figure_3_data.csv', 'w') as out:
+with open('data/figure_2_data.csv', 'w') as out:
     for row in out_list:
         out.write(row + '\n')

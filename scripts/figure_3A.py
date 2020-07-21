@@ -1,4 +1,4 @@
-# figure_4a.py
+# figure_4b.py
 # visualize a universal scale network, a minimum-flux pruned network from that
 # universal network, and several randomly-pruned networks
 
