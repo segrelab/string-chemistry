@@ -6,7 +6,7 @@ suppressMessages(library(tidyverse))
 theme_set(theme_bw())
 
 data <- read.csv(
-  "data/varied_ab_5_2to5ins_2to20outs_exp.csv", 
+  "data/varied_ab_5_2to5ins_2to10outs_exp.csv", 
   header = F,
   col.names = c("env_comp", "bm_comp", "ratio", "pruned_pct")
 ) %>%
@@ -17,6 +17,8 @@ data <- read.csv(
 # the number of food sources and the number of biomass precursors
 png("data/figure_S2.png", height = 5000, width = 7000, res = 600)
 data %>%
+  # graph is a bit too busy with all the points on it
+  filter(as.numeric(as.character(bm_comp)) < 11) %>%
   group_by(bm_comp, env_comp) %>%
   summarize(
     # get mean and standard deviation
@@ -26,19 +28,22 @@ data %>%
   ggplot(aes(x = bm_comp, y = mean_pruned)) + 
     geom_pointrange(
       aes(ymin = mean_pruned - stdev, ymax = mean_pruned + stdev, col = env_comp),
-      position = position_dodge(width = 1)
+      position = position_dodge(width = 0.75)
     ) +
     labs(
       x = "Number of Biomass Precursors",
       y = "Percent of Reactions Removed During Pruning",
       col = "Number of Food Sources"
-    )
+    ) +
+    theme(text = element_text(size = 15))
 invisible(dev.off())
 
 # show how the ratio of reactions to metabolites changes as you change the
 # number of food sources and the number of biomass precursors
 png("data/figure_S3.png", height = 5000, width = 7000, res = 600)
 data %>%
+  # graph is a bit too busy with all the points on it
+  filter(as.numeric(as.character(bm_comp)) < 11) %>% 
   group_by(bm_comp, env_comp) %>%
   summarize(
     mean_ratio = mean(ratio),
@@ -47,12 +52,13 @@ data %>%
   ggplot(aes(x = bm_comp, y = mean_ratio)) + 
     geom_pointrange(
       aes(ymin = mean_ratio - stdev, ymax = mean_ratio + stdev, col = env_comp),
-      position = position_dodge(width = 1)
+      position = position_dodge(width = 0.75)
     ) +
     labs(
       x = "Number of Biomass Precursors",
       y = "Number of Reactions / Number of Metabolites in Pruned Network",
       col = "Number of Food Sources"
-    )
+    ) +
+    theme(text = element_text(size = 15))
 invisible(dev.off())
 

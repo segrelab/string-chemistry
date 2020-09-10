@@ -45,7 +45,7 @@ for condition in conditions:
     )
     # next, loop over number of times to prune with each condition
     for rep in range(int(reps)):
-        if rep % 100 == 0:
+        if rep % 10 == 0:
             print(f'On prune {rep} of {reps}')
         # work with a copy of the model so it remains untouched for the next
         # iteration of the loop
@@ -73,8 +73,13 @@ for condition in conditions:
         # now that we know there's at least one environment that supports growth
         # with this biomass reaction, we can prune the universal network
         pruned_model = scn.min_flux_prune(full_model, bm_rxn)
+        # metabolites aren't automatically removed when all of their reactions
+        # are removed, so find out how many metabolites are left
+        met_count = len([
+            m for m in pruned_model.metabolites if len(m.reactions) > 0
+        ])
         # compute the reaction-to-metabolite ratio and % of pruned reactions
-        ratio = len(pruned_model.reactions)/len(pruned_model.metabolites)
+        ratio = len(pruned_model.reactions)/met_count
         pruned_count = len(universal_model.reactions)-len(pruned_model.reactions)
         pruned_pct = pruned_count/len(universal_model.reactions)
         output = [condition[0], condition[1], ratio, pruned_pct]
