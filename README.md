@@ -1,44 +1,11 @@
 # string-chemistry
 
-Tools for creating string chemistry networks and doing flux-balance analysis on them.
+Tools for creating string chemistry networks and doing flux-balance analysis on them. All scripts have a summary of what they do in the first few lines, and I've given more detailed descriptions of a few key ones below. The central script is string_chem_net.py, which almost every other script directly depends on.
 
-## Scripts That Make & Modify Networks
+## The `string_chem_net` package
+Contains a class for generating arbitrary string chemistry networks and several functions for maniuplating them and turning them into [COBRApy models](https://cobrapy.readthedocs.io/en/latest/index.html) for FBA.
 
-### exhaustive_prune.py
-
-Finds every possible way to prune a given network, i.e. every subnetwork that can still grow (i.e. have flux through the biomass reaction). Runs forever / crashes due to memory issues on all but the smallest of networks; was mostly created to see just how fast the number of possible pruned networks exploded beyond the point of computational feasibility.
-
-Arguments:
-
-- `monos`: number of different kinds of monomers to include in the network
-- `max_pol`: maximum length of a polymer in the network
-- `ins`: number of input reactions to add to the network before pruning (i.e. "food" sources; randomly chosen)
-- `outs`: number of biomass precursors (randomly chosen)
-
-### pruning.py
-
-Makes a string chemistry network, prunes it once using the minimum-flux pruner, prunes it n times with the random pruner, recording which reactions were left after each round of pruning and how many times each network was returned as a result.
-
-Arguments:
-
-- `monos`: number of different kinds of monomers to include in the network
-- `max_pol`: maximum length of a polymer in the network
-- `ins`: number of input reactions to add to the network before pruning (i.e. "food" sources; randomly chosen)
-- `outs`: number of biomass precursors (randomly choosen)
-
-Returns:
-
-CSV file with the following columns:
-
-- Reaction inclusion bitstrings for all pruned networks (using the full un-pruned network as a reference for all of them so all the bitstrings are directly comparable)
-- Number of times the network was returned by the random pruner (1 for the minimum-flux pruned network)
-- Number of reactions in the network
-
-### string_chem_net.py
-
-The key script; contains a class for generating arbitrary string chemistry networks and several functions for maniuplating them and turning them into [COBRApy models](https://cobrapy.readthedocs.io/en/latest/index.html) for FBA.
-
-#### Classes:
+### Classes:
 
 - CreateNetwork
 
@@ -60,7 +27,7 @@ The key script; contains a class for generating arbitrary string chemistry netwo
     - `rxn_list`: list of all possible bimolecular reactions involving only those metabolites in `met_list`
     - `S`: stoichiometric matrix corresponding to the network of reactions in `rxn_list` (only defined if `make_stoich` is True)
 
-#### Functions:
+### Functions:
 
 - choose_bm_mets
 
@@ -194,26 +161,51 @@ The key script; contains a class for generating arbitrary string chemistry netwo
     - `model`: a COBRApy model
     - `n`: number of reactions to make reversible
 
-## Pruning Scripts
 
-Most of the scripts in this repo generate string chemistry networks and then prune them under a bunch of different circumstances.
+## Scripts That Use `string_chem_net`
 
-## Plotting Scripts
+### exhaustive_prune.py
 
-I've come up with a number of ways to visualize the results of pruning and compare results from multiple rounds of pruning, both just in general and for the specific figures used for the paper.
+Finds every possible way to prune a given network, i.e. every subnetwork that can still grow (i.e. have flux through the biomass reaction). Runs forever / crashes due to memory issues on all but the smallest of networks; was mostly created to see just how fast the number of possible pruned networks exploded beyond the point of computational feasibility.
+
+Arguments:
+
+- `monos`: number of different kinds of monomers to include in the network
+- `max_pol`: maximum length of a polymer in the network
+- `ins`: number of input reactions to add to the network before pruning (i.e. "food" sources; randomly chosen)
+- `outs`: number of biomass precursors (randomly chosen)
+
+### pruning.py
+
+Makes a string chemistry network, prunes it once using the minimum-flux pruner, prunes it n times with the random pruner, recording which reactions were left after each round of pruning and how many times each network was returned as a result.
+
+Arguments:
+
+- `monos`: number of different kinds of monomers to include in the network
+- `max_pol`: maximum length of a polymer in the network
+- `ins`: number of input reactions to add to the network before pruning (i.e. "food" sources; randomly chosen)
+- `outs`: number of biomass precursors (randomly choosen)
+
+Returns:
+
+CSV file with the following columns:
+
+- Reaction inclusion bitstrings for all pruned networks (using the full un-pruned network as a reference for all of them so all the bitstrings are directly comparable)
+- Number of times the network was returned by the random pruner (1 for the minimum-flux pruned network)
+- Number of reactions in the network
 
 ## Other Scripts
 
-- bm\_edit\_dist.py
+- bm_edit_dist.py
     
-    Looks at the output of multiple\_env\_prune.py, which has a set of food source metabolites and biomass precursors on each line, and calculates the average edit distance between every possible pair of either the food source metabolite lists or the biomass precursor lists. E.g.: line 1 has ab and bb as food source metabolites, while line 2 has aa and bc as food source metabolites. The average edit distance between the two sets of metabolites is (1 [ab <-> aa] + 2 [ab <-> bc] + 2 [bb <-> aa] + 1 [bb <-> bc]) / 4 = 1.5. This could concievably be helpful information when interpreting the results of multiple\_env\_prune.py, since you might expect networks with more similar input and output metabolites to get pruned into more similar networks, and this would be a way to quantify that.
+    Looks at the output of multiple_env_prune.py, which has a set of food source metabolites and biomass precursors on each line, and calculates the average edit distance between every possible pair of either the food source metabolite lists or the biomass precursor lists. E.g.: line 1 has ab and bb as food source metabolites, while line 2 has aa and bc as food source metabolites. The average edit distance between the two sets of metabolites is (1 [ab <-> aa] + 2 [ab <-> bc] + 2 [bb <-> aa] + 1 [bb <-> bc]) / 4 = 1.5. This could concievably be helpful information when interpreting the results of multiple_env_prune.py, since you might expect networks with more similar input and output metabolites to get pruned into more similar networks, and this would be a way to quantify that.
     I don't think I ever finished debugging this script so I doubt it works yet. 
 
     Arguments:
         
-    None; at the moment it is hard-coded to look at the default-named output file from multiple\_env\_prune.py. Eventually, it would be good if multiple_env_prune named its output files differently for each run and this script took a command-line argument specifying a target file, but that is not likely to happen soon.
+    None; at the moment it is hard-coded to look at the default-named output file from multiple_env_prune.py. Eventually, it would be good if multiple_env_prune named its output files differently for each run and this script took a command-line argument specifying a target file, but that is not likely to happen soon.
 
-- counting.py
+- network_sizes.py
 
     Prints number of metabolites and reactions in a string chemistry network with those parameters; does not actually generate that network.
 
@@ -222,3 +214,4 @@ I've come up with a number of ways to visualize the results of pruning and compa
     - n: number of unique metabolites
     - l: maximum polymer length
 
+The other scripts mostly do a lot of pruning by pruning the same network in a wide variety of ways and saving varying pieces of information about the pruned networks. The rest have some examples of how one might visualize various things about string chemistry networks, both pruned and not.
