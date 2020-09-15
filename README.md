@@ -1,13 +1,13 @@
-# string-chemistry
+# ARtificial CHemistry NEtwork Toolbox (ARCHNET)
 
-Tools for creating string chemistry networks and doing flux-balance analysis on them. All scripts have a summary of what they do in the first few lines, and I've given more detailed descriptions of a few key ones below. The central script is string_chem_net.py, which almost every other script directly depends on.
+Tools for creating string chemistry networks and doing flux-balance analysis on them. All scripts have a summary of what they do in the first few lines, and I've given more detailed descriptions of a few key ones below. The package itself is in string_chem_net.py, and everything else just uses the package in various ways. Nearly every script expects there to be another directory called `data` in the same directory as `scripts`, and that you're calling the script from that directory (rather than `scripts`). Every script should print the command-line arguments it expects if you run it without any arguments.
 
-## The `string_chem_net` package
+## The `ARCHNET` package
 Contains a class for generating arbitrary string chemistry networks and several functions for maniuplating them and turning them into [COBRApy models](https://cobrapy.readthedocs.io/en/latest/index.html) for FBA.
 
 ### Classes:
 
-- CreateNetwork
+- `CreateNetwork`
 
     Generates all possible metabolites given the constraints and generates all possible bimolecular reactions involving only those metabolites.
 
@@ -29,7 +29,7 @@ Contains a class for generating arbitrary string chemistry networks and several 
 
 ### Functions:
 
-- choose_bm_mets
+- `choose_bm_mets`
 
     Randomly choose n metabolites (without replacement) from a given network and make an exchange reaction that consumes all of them (i.e. a biomass reaction)
     NOTE: Does not set the biomass reaction as the objective for the model; if you want to do FBA with this biomass reaction as the objective, you need to do that separately
@@ -42,7 +42,7 @@ Contains a class for generating arbitrary string chemistry networks and several 
 
     - `bm_rxn`: the COBRApy reaction object corresponding to the newly-created biomass reaction, so you can set it as the objective for the model or just have it around for whatever purpose
 
-- choose_inputs
+- `choose_inputs`
 
     Randomly choose n metabolites (without replacement) from a given network and make exchange reactions that produce them
 
@@ -55,7 +55,7 @@ Contains a class for generating arbitrary string chemistry networks and several 
     Returns:
     None; COBRApy models are edited in-place
 
-- make_bitstring
+- `make_bitstring`
 
     Given two COBRApy models where one is a subset of the other (e.g. the input and output from one of the pruning functions), makes a string of 1s and 0s representing which reactions in the larger model are present in the smaller one. Reactions from a particular COBRApy model are always output in the same order, so you can use this on multiple models pruned from the same initial model and get multiple comparable bitstrings (many of the plotting scripts depend on this)
 
@@ -68,7 +68,7 @@ Contains a class for generating arbitrary string chemistry networks and several 
 
     A binary vector indicating which reactions in `full_model` are present in `pruned_model`
 
-- make_cobra_model
+- `make_cobra_model`
 
     Makes a COBRApy model so you can do FBA on a string chemistry network
 
@@ -82,7 +82,7 @@ Contains a class for generating arbitrary string chemistry networks and several 
 
     A [COBRApy model](https://cobrapy.readthedocs.io/en/latest/index.html)
 
-- make_edgelist
+- `make_edgelist`
 
     Makes an edgelist to facilitate visualization of a network using, e.g. Cytoscape or graphviz
 
@@ -95,7 +95,7 @@ Contains a class for generating arbitrary string chemistry networks and several 
 
     A list of lists where each sublist is two elements: the names of the pair of metabolites or the metabolite-reaction pair connected by that edge
 
-- min_flux_prune
+- `min_flux_prune`
 
     Removes reactions from a COBRApy model by:
     1. Doing FBA (the model has to have a reaction set as the objective and needs some input reactions)
@@ -114,7 +114,7 @@ Contains a class for generating arbitrary string chemistry networks and several 
 
     A COBRApy model; it makes a copy of the input model so that the input model isn't modified
 
-- random_prune
+- `random_prune`
 
     Removes reactions from a COBRApy model by:
     1. Doing FBA (the model has to have a reaction set as the objective and needs some input reactions)
@@ -134,7 +134,7 @@ Contains a class for generating arbitrary string chemistry networks and several 
 
     A COBRApy model; it makes a copy of the input model so that the input model isn't modified
 
-- remove_random_rxns
+- `remove_random_rxns`
 
     Randomly removes reactions from a network given a removal probability.
 
@@ -151,7 +151,7 @@ Contains a class for generating arbitrary string chemistry networks and several 
 
     At some point, I'll change this to make including S optional, since CreateNetwork no longer creates an S by default.
 
-- reverse_rxns
+- `reverse_rxns`
 
     Makes n randomly-chosen (without replacement) reactions in a COBRApy model reversible (by setting their lower bounds to -100)
     Note that CreateNetwork makes all reactions irreversible by default, hence the existence of this function
@@ -162,9 +162,9 @@ Contains a class for generating arbitrary string chemistry networks and several 
     - `n`: number of reactions to make reversible
 
 
-## Scripts That Use `string_chem_net`
+## Scripts That Use `ARCHNET`
 
-### exhaustive_prune.py
+### `exhaustive_prune.py`
 
 Finds every possible way to prune a given network, i.e. every subnetwork that can still grow (i.e. have flux through the biomass reaction). Runs forever / crashes due to memory issues on all but the smallest of networks; was mostly created to see just how fast the number of possible pruned networks exploded beyond the point of computational feasibility.
 
@@ -175,7 +175,7 @@ Arguments:
 - `ins`: number of input reactions to add to the network before pruning (i.e. "food" sources; randomly chosen)
 - `outs`: number of biomass precursors (randomly chosen)
 
-### pruning.py
+### `pruning.py`
 
 Makes a string chemistry network, prunes it once using the minimum-flux pruner, prunes it n times with the random pruner, recording which reactions were left after each round of pruning and how many times each network was returned as a result.
 
@@ -196,7 +196,7 @@ CSV file with the following columns:
 
 ## Other Scripts
 
-- bm_edit_dist.py
+- `bm_edit_dist.py`
     
     Looks at the output of multiple_env_prune.py, which has a set of food source metabolites and biomass precursors on each line, and calculates the average edit distance between every possible pair of either the food source metabolite lists or the biomass precursor lists. E.g.: line 1 has ab and bb as food source metabolites, while line 2 has aa and bc as food source metabolites. The average edit distance between the two sets of metabolites is (1 [ab <-> aa] + 2 [ab <-> bc] + 2 [bb <-> aa] + 1 [bb <-> bc]) / 4 = 1.5. This could concievably be helpful information when interpreting the results of multiple_env_prune.py, since you might expect networks with more similar input and output metabolites to get pruned into more similar networks, and this would be a way to quantify that.
     I don't think I ever finished debugging this script so I doubt it works yet. 
@@ -205,7 +205,7 @@ CSV file with the following columns:
         
     None; at the moment it is hard-coded to look at the default-named output file from multiple_env_prune.py. Eventually, it would be good if multiple_env_prune named its output files differently for each run and this script took a command-line argument specifying a target file, but that is not likely to happen soon.
 
-- network_sizes.py
+- `network_sizes.py`
 
     Prints number of metabolites and reactions in a string chemistry network with those parameters; does not actually generate that network.
 
