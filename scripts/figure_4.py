@@ -106,10 +106,10 @@ def growth_plot(figure, axes, data, label):
 # get UMAP results for networks with and without export reactions
 print('Doing UMAP')
 export_umap = do_umap(
-    'data/multiple_env_min_prune_ab_5_2ins_1000envs_5outs_10orgs_yesexp.csv'
+    'data/multiple_env_min_prune_ab_5_2ins_100envs_5outs_100orgs_yesexp.csv'
 )
 no_export_umap = do_umap(
-    'data/multiple_env_min_prune_ab_5_2ins_1000envs_5outs_10orgs_noexp.csv'
+    'data/multiple_env_min_prune_ab_5_2ins_100envs_5outs_100orgs_noexp.csv'
 )
 
 print('Plotting UMAP results')

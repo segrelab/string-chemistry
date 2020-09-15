@@ -8,9 +8,9 @@ stoich_mat.dat
 *.Rproj
 *.Rhistory
 etc/
-*.png
 *.sh
 data/
 *.Rproj.user
 *.html
 .Rproj.user
+*.png
