@@ -1,16 +1,2 @@
-lib/
-bin/
-include/
-__pycache__/
-share/
-stoich_mat.dat
-*.RData*
-*.Rproj
-*.Rhistory
-etc/
-*.sh
-data/
-*.Rproj.user
-*.html
-.Rproj.user
-*.png
+# created by virtualenv automatically
+*
