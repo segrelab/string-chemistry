@@ -211,7 +211,7 @@ CSV file with the following columns:
 
     Arguments:
 
-    - n: number of unique metabolites
-    - l: maximum polymer length
+    - `n`: number of unique metabolites
+    - `l`: maximum polymer length
 
 The other scripts mostly do a lot of pruning by pruning the same network in a wide variety of ways and saving varying pieces of information about the pruned networks. The rest have some examples of how one might visualize various things about string chemistry networks, both pruned and not.
