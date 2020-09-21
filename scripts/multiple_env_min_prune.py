@@ -7,40 +7,17 @@ import sys
 import string_chem_net as scn
 import pandas as pd
 import itertools as it
+import multiprocessing as mp
 
-# get command-line arguments
-try:
-    (monos, max_pol, ins, envs, outs, orgs, export) = sys.argv[1:]
-except ValueError:
-    sys.exit('Arguments:\nmonomers\nmax polymer length\n' +
-        'number of food sources\nnumber of times to reselect food sources\n' +
-        'number of biomass precursors\nnumber of times to reselect biomass\n' +
-        'should there be an export reaction for every metabolite? (yes/no)')
-
-if export == 'yes':
-    allow_export = True
-elif export == 'no':
-    allow_export = False
-else:
-    sys.exit('The last argument must be either "yes" or "no"')
-
-# create the universal network
-SCN = scn.CreateNetwork(monos, int(max_pol))
-untouched_model = scn.make_cobra_model(
-    SCN.met_list, 
-    SCN.rxn_list, 
-    allow_export = allow_export
-)
-# make a dataframe to store information about the pruned networks
-all_data = pd.DataFrame(columns = ['biomass', 'env', 'rxn_incl', 'growth'])
-# loop over the different biomass reactions
-for bm in range(int(orgs)):
-    print(f'On biomass reaction {bm}')
+# prune one biomass reaction in the specified number of environments
+def prune_many_times(arglist):
+    # probably a more elegant way to do this but I'm currently new to mp.map()
+    full_model, ins, outs, envs = arglist
     # start by making a copy of the original model so we don't have to remove
     # the biomass reaction each time
-    model = untouched_model.copy()
+    model = full_model.copy()
     # add a biomass reaction and set it as the objective
-    bm_rxn = scn.choose_bm_mets(int(outs), model)
+    bm_rxn = scn.choose_bm_mets(outs, model)
     model.objective = bm_rxn
     # keep lists of the environments used, the reaction-inclusion vectors of
     # the pruned networks and the growth rates on the pruned networks
@@ -52,13 +29,13 @@ for bm in range(int(orgs)):
     # counter for how many times it had to reselct the environment to get a
     # feasible solution with the full network
     j = 0
-    while i < int(envs):
+    while i < envs:
         i +=  1 
         # remove existing input reactions
         in_rxns = [rxn for rxn in model.boundary if rxn.id.startswith('->')]
         model.remove_reactions(in_rxns)
         # choose new input reactions
-        scn.choose_inputs(int(ins), model, bm_rxn)
+        scn.choose_inputs(ins, model, bm_rxn)
         in_rxns = [rxn for rxn in model.boundary if rxn.id.startswith('->')]
         foods_string = ' '.join([
             # getting the metabolite IDs out of a reaction is annoying
@@ -95,17 +72,54 @@ for bm in range(int(orgs)):
             pruned_growths.append(pruned_growth)
 
     # make a dataframe out of the lists and add it to the larger dataframe
-    more_data = pd.DataFrame(list(zip(
+    data = pd.DataFrame(list(zip(
         food_mets, rxn_incl_vecs, pruned_growths
     )))
-    more_data.columns = ['env','rxn_incl', 'growth']
+    data.columns = ['env','rxn_incl', 'growth']
     # add a column with the biomass components
     more_data['biomass'] = list(it.repeat(
         '-'.join([met.id for met in bm_rxn.metabolites]),
         len(food_mets)
     ))
-    all_data = all_data.append(more_data)
+    # reorder columns 
+    data = data[['biomass', 'env', 'rxn_incl', 'growth']]
+    return(data)
 
+# get command-line arguments
+try:
+    (monos, max_pol, ins, envs, outs, orgs, export) = sys.argv[1:]
+except ValueError:
+    sys.exit('Arguments:\nmonomers\nmax polymer length\n' +
+        'number of food sources\nnumber of times to reselect food sources\n' +
+        'number of biomass precursors\nnumber of times to reselect biomass\n' +
+        'should there be an export reaction for every metabolite? (yes/no)')
+
+if export == 'yes':
+    allow_export = True
+elif export == 'no':
+    allow_export = False
+else:
+    sys.exit('The last argument must be either "yes" or "no"')
+
+# create the universal network
+SCN = scn.CreateNetwork(monos, int(max_pol))
+full_model = scn.make_cobra_model(
+    SCN.met_list, 
+    SCN.rxn_list, 
+    allow_export = allow_export
+)
+
+# just in case we're trying a particularly large number of biomass reactions,
+# run the function in parallel since each biomass reaction can be handled
+# completely independently of the others
+pool = mp.Pool(mp.cpu_count())
+data_bits = pool.map(
+    prune_many_times,
+    # same arguments every time for orgs times
+    [[full_model, int(ins), int(outs), int(envs)] for bm in range(int(orgs))]
+)
+# concatenate all the dataframes and write to output
+all_data = pd.concat(data_bits)
 all_data.to_csv(
     f'data/multiple_env_min_prune_{monos}_{max_pol}_{ins}ins_{envs}envs_' +
     f'{outs}outs_{orgs}orgs_{export}exp.csv'

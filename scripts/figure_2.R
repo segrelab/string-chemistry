@@ -19,6 +19,13 @@ counts <- read.csv(
   filter(rxns > 0) %>%
   mutate(ratio = rxns/mets)
 
+pruned_counts <- read.csv(
+  "data/varied_ab_5_2to5ins_2to10outs_exp.csv", 
+  header = F,
+  col.names = c("ins", "outs", "ratio", "pruned_pct")
+) %>%
+  mutate(monos = as.factor(monos))
+
 # iJO1336
 ecoli_mets <- 1805
 ecoli_rxns <- 2583
@@ -79,6 +86,15 @@ panel_c <- ggplot() +
   annotate("text", x = 8, y = 2, label = "Human") +
   geom_hline(aes(yintercept = yeast_rxns/yeast_mets)) +
   annotate("text", x = 8, y = 1.62, label = "S. cerevisiae") +
+  # add points for pruned networks
+  geom_boxplot(data = pruned_counts, aes(x = 5, y = ratio, color = "2")) +
+  annotate("text", x = 6.2, y = 1, label = "Pruned networks") +
+  # add an arrow to this boxplot from the A = 2 line
+  geom_segment(
+    aes(x = 5, y = 3.1, xend = 5, yend = 1.4, color = "2"), 
+    arrow = arrow(length = unit(0.03, "npc"))
+  ) +
+  # add labels
   labs(
     x = "Maximum String Length", 
     y = "Reactions / Metabolites", 
