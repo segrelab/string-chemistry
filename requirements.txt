@@ -5,8 +5,10 @@ editdistance==0.5.3
 future==0.18.2
 joblib==0.14.1
 kiwisolver==1.2.0
+llvmlite==0.32.0
 matplotlib==3.2.1
 mpmath==1.1.0
+numba==0.49.0
 numpy==1.18.2
 optlang==1.4.4
 pandas==1.0.3
@@ -25,3 +27,5 @@ scipy==1.4.1
 six==1.14.0
 swiglpk==4.65.1
 sympy==1.5.1
+tbb==2020.0.133
+umap-learn==0.4.2

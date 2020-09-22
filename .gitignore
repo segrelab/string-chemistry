@@ -1,3 +1,16 @@
-# created by virtualenv automatically
-*
+lib/
+bin/
+include/
+__pycache__/
+share/
+stoich_mat.dat
+*.RData*
+*.Rproj
+*.Rhistory
+etc/
+*.sh
+data/
+*.Rproj.user
+*.html
 .Rproj.user
+*.png
