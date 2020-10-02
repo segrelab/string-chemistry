@@ -1,4 +1,4 @@
-# figure_S2_S3_data.py
+# figure_S3_S4_data.py
 # given a particular universal network, compare pruning results at several
 # different combinations of environmental and biomass complexities
 # i.e. prune several times with 2 input metabolites and 5 biomass precursors,

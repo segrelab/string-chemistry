@@ -17,8 +17,11 @@ def do_umap(filename):
     # first and last columns will be empty and all columns will be strings
     umap_ready = rxn_incl_cols.iloc[:,1:-1].astype('int32')
     # do UMAP
+    print('Making reducer')
     reducer = umap.UMAP()
+    print('Making fit')
     umap_results = reducer.fit_transform(umap_ready)
+    print('Coercing to DataFrame')
     umap_df = pd.DataFrame(data = umap_results, columns = ['x', 'y'])
     # add in other info for plotting purposes
     plotting_df = pd.concat([umap_df, data], axis = 1)
