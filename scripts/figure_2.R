@@ -23,8 +23,7 @@ pruned_counts <- read.csv(
   "data/varied_ab_5_2to5ins_2to10outs_exp.csv", 
   header = F,
   col.names = c("ins", "outs", "ratio", "pruned_pct")
-) %>%
-  mutate(monos = as.factor(monos))
+)
 
 # iJO1336
 ecoli_mets <- 1805
@@ -102,6 +101,6 @@ panel_c <- ggplot() +
     title = "Network Sizes By Ratio of Reaction Count to Metabolite Count"
   )
 
-png("../data/figure_2.png", height = 8000, width = 5000, res = 600)
-ggarrange(panel_a, panel_b, panel_c, nrow = 3, labels = c("A", "B", "C"))
+png("data/figure_2.png", height = 8000, width = 5000, res = 600)
+ggarrange(panel_a, panel_b, panel_c, nrow = 3, labels = c("a", "b", "c"))
 invisible(dev.off())

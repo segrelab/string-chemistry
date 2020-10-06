@@ -109,10 +109,10 @@ def growth_plot(figure, axes, data, label):
 # get UMAP results for networks with and without export reactions
 print('Doing UMAP')
 export_umap = do_umap(
-    'data/multiple_env_min_prune_ab_5_2ins_1000envs_5outs_1000orgs_yesexp.csv'
+    'data/multiple_env_min_prune_ab_5_2ins_100envs_5outs_100orgs_yesexp.csv'
 )
 no_export_umap = do_umap(
-    'data/multiple_env_min_prune_ab_5_2ins_1000envs_5outs_1000orgs_noexp.csv'
+    'data/multiple_env_min_prune_ab_5_2ins_100envs_5outs_100orgs_noexp.csv'
 )
 
 print('Plotting UMAP results')
@@ -128,14 +128,14 @@ fig, ax = plt.subplots(nrows = 2, ncols = 3, figsize = (12,6))
 # we're starting with panel B
 
 # panels B-D use the data from the networks with export reactions
-biomass_plot(ax[0,0], export_umap, 'B')
-nutrient_plot(ax[0,1], export_umap, 'C')
-growth_plot(fig, ax[0,2], export_umap, 'D')
+biomass_plot(ax[0,0], export_umap, 'b')
+nutrient_plot(ax[0,1], export_umap, 'c')
+growth_plot(fig, ax[0,2], export_umap, 'd')
 
 # panels E-G use the data from the networks without export reactions
-biomass_plot(ax[1,0], no_export_umap, 'E')
-nutrient_plot(ax[1,1], no_export_umap, 'F')
-growth_plot(fig, ax[1,2], no_export_umap, 'G')
+biomass_plot(ax[1,0], no_export_umap, 'e')
+nutrient_plot(ax[1,1], no_export_umap, 'f')
+growth_plot(fig, ax[1,2], no_export_umap, 'g')
 
 # tight_layout just fixes all sorts of problems with subplots overlapping
 plt.tight_layout()
