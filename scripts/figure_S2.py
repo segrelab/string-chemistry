@@ -19,7 +19,7 @@ ax[0].set_xlabel('Export Reactions')
 ax[0].set_ylabel('Number of Metabolites')
 ax[0].text(
     # position the panel label above the plot on the left side
-    -0.15, 1.05, 'A', va = 'top', ha = 'right',
+    -0.15, 1.05, 'a', va = 'top', ha = 'right',
     # no idea what this does; got it from StackOverflow
     transform = ax[0].transAxes,
     # make the letter large and bold
@@ -30,7 +30,7 @@ ax[1].set_xlabel('Export Reactions')
 ax[1].set_ylabel('Number of Reactions')
 ax[1].text(
     # position the panel label above the plot on the left side
-    -0.15, 1.05, 'B', va = 'top', ha = 'right',
+    -0.15, 1.05, 'b', va = 'top', ha = 'right',
     # no idea what this does; got it from StackOverflow
     transform = ax[1].transAxes,
     # make the letter large and bold

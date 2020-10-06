@@ -17,11 +17,8 @@ def do_umap(filename):
     # first and last columns will be empty and all columns will be strings
     umap_ready = rxn_incl_cols.iloc[:,1:-1].astype('int32')
     # do UMAP
-    print('Making reducer')
     reducer = umap.UMAP()
-    print('Making fit')
     umap_results = reducer.fit_transform(umap_ready)
-    print('Coercing to DataFrame')
     umap_df = pd.DataFrame(data = umap_results, columns = ['x', 'y'])
     # add in other info for plotting purposes
     plotting_df = pd.concat([umap_df, data], axis = 1)
@@ -45,7 +42,7 @@ def biomass_plot(axes, data, label):
     # add the panel label
     axes.text(
         # position the letter above the plot on the left side
-        -0.05, 1.15, label, va = 'top', ha = 'right',
+        -0.11, 1.1, label, va = 'top', ha = 'right',
         # no idea what this does; got it from StackOverflow
         transform = axes.transAxes,
         # make the letter large and bold
@@ -75,7 +72,7 @@ def nutrient_plot(axes, data, label):
     # add the panel label
     axes.text(
         # position the letter above the plot on the left side
-        -0.05, 1.15, label, va = 'top', ha = 'right',
+        -0.11, 1.1, label, va = 'top', ha = 'right',
         # no idea what this does; got it from StackOverflow
         transform = axes.transAxes,
         # make the letter large and bold
@@ -98,7 +95,7 @@ def growth_plot(figure, axes, data, label):
     # add the panel label
     axes.text(
         # position the letter above the plot on the left side
-        -0.05, 1.15, label, va = 'top', ha = 'right',
+        -0.11, 1.1, label, va = 'top', ha = 'right',
         # no idea what this does; got it from StackOverflow
         transform = axes.transAxes,
         # make the letter large and bold
