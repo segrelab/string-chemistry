@@ -77,7 +77,7 @@ while i < int(envs):
         # reaction presence bitstrings. 
         # We also want to keep track of how many times we see each model, so we 
         # will make a dict with the bitstrings as keys
-        bitstring = scn.make_bitstring(cobra_model, pruned_net)
+        bitstring = scn.make_rxn_incl(cobra_model, pruned_net)
         if bitstring not in random_pruned_dict.keys():
             # make sure all reaction lists are sorted so that all isomorphic
             # networks have the same reaction list

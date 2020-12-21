@@ -1,12 +1,15 @@
 # figure_3A.py
-# visualize a universal scale network, a minimum-flux pruned network from that
-# universal network, and several randomly-pruned networks
+'''
+Draw a universal-scale string chemistry network and modify it to represent
+which reactions were pruned. Also has functions for getting and comparing 
+results from the random pruner, but they're currently unused. Also makes a
+stoichiometric matrix for the network
+'''
 
 import sys
 import string_chem_net as scn
 import random
 import pandas as pd
-import pygraphviz as gv
 import numpy as np
 import cobra
 
@@ -54,134 +57,13 @@ def do_many_rand_prunes(full_model, bm_rxn, reps):
         pruned_rxn_counts.append(len(pruned_net.reactions))
     return(pruned_rxn_counts, pruned_counts_dict, pruned_nets)
 
-# visualize universal network
-def viz_universal_net(full_model, bm_rxn, export):
-    # make a graphviz object
-    full_graph = gv.AGraph(
-        size = '5,5', 
-        dpi = '400', 
-        splines = 'true', # this API was made perfectly and intuitively
-        directed = True
-    )
-    # distinguish metabolite and reaction nodes by shape
-    for met in full_model.metabolites:
-        # grey out metabolites that aren't produced or consumed by anything
-        if all([abs(rxn.flux) < 0.01 for rxn in met.reactions]):
-            full_graph.add_node(met.id, shape = 'box', color = 'grey')
-        else:
-            full_graph.add_node(met.id, shape = 'box', color = 'blue')
-    for rxn in full_model.reactions:
-        # reactions with no flux get grey nodes
-        if abs(rxn.flux) < 0.01:
-            full_graph.add_node(rxn.id, shape = 'oval', color = 'grey')
-        # make them red otherwise
-        else:
-            full_graph.add_node(rxn.id, shape = 'oval', color = 'red')
-        # next do edges
-        if abs(rxn.flux) < 0.01:
-            # reactions with no flux get grey edges
-            for met in rxn.metabolites:
-                # direct edges based on stoichiometric coefficients
-                if rxn.metabolites[met] > 0:
-                    # products
-                    full_graph.add_edge([rxn.id, met.id], color = 'grey')
-                else:
-                    # reactants
-                    full_graph.add_edge([met.id, rxn.id], color = 'grey')
-        else:
-            # exchange reactions get green edges
-            if rxn == bm_rxn or rxn in full_model.boundary:
-                for met in rxn.metabolites:
-                    # direct edges based on stoichiometric coefficients
-                    # all exchange reactions are initialized so they can only
-                    # proceed in the forward direction, so we don't have to
-                    # worry about the sign of the flux
-                    if rxn.metabolites[met] > 0:
-                        # products
-                        full_graph.add_edge(
-                            [rxn.id, met.id], color = 'green'
-                        )
-                    else:
-                        # reactants
-                        full_graph.add_edge(
-                            [met.id, rxn.id], color = 'green'
-                        )
-            # other reactions get thicker black edges
-            else:
-                for met in rxn.metabolites:
-                    # have to use both stoichiometric coefficients and the sign
-                    # of the flux to direct edges for these reactions, since 
-                    # they have every right to be negative
-                    if rxn.flux > 0:
-                        # reaction is in the forward direction
-                        if rxn.metabolites[met] > 0:
-                            # prodcuts
-                            full_graph.add_edge(
-                                [rxn.id, met.id], penwidth = 2
-                            )
-                        else:
-                            # reactants
-                            full_graph.add_edge(
-                                [met.id, rxn.id], penwidth = 2
-                            )
-                    else:
-                        # reaction is running in the reverse direction, so 
-                        # invert signs on stoichiometric coefficients
-                        if rxn.metabolites[met] > 0:
-                            # reactants
-                            full_graph.add_edge(
-                                [met.id, rxn.id], penwidth = 2
-                            )
-                        else:
-                            # products
-                            full_graph.add_edge(
-                                [rxn.id, met.id], penwidth = 2
-                            )
-    # draw the graph and save it to a file
-    full_graph.draw(
-        f'data/{monos}_{max_pol}_{ins}ins_{outs}outs_{export}_full.png',
-        prog = 'fdp'
-    )
-    # we'll use the same graph object to visualize all the pruned networks
-    # by just tweaking the edge colors
-    return(full_graph)
-
-# visualize effects of pruning
-# TODO this function is broken but we're not using it for the paper figures so
-# I haven't bothered figuring out how; I suspect it is a minor issue
-def viz_pruned_net(pruned_model, full_model, full_graph, export, name):
-    # make a copy with differently-colored edges indicating where it was pruned
-    # (use copy so full_graph isn't modified and we can do this many times)
-    pruned_graph = full_graph.copy()
-    # now change the colors of the reaction nodes/edges that were pruned
-    for rxn in full_model.reactions:
-        if rxn not in pruned_model.reactions:
-            # change color of that reaction's node
-            rxn_node = pruned_graph.get_node(rxn.id)
-            rxn_node.attr['color'] = 'grey'
-            # change color of all attached edges
-            for met in rxn.metabolites:
-                dropped_edge = pruned_graph.get_edge(met.id, rxn.id)
-                dropped_edge.attr['color'] = 'grey'
-    # now change the colors of the metabolites that are now dropped
-    for met in full_model.metabolites:
-        if met not in pruned_model.metabolites:
-            met_node = pruned_graph.get_node(met.id)
-            met_node.attr['color'] = 'grey'
-    # draw the graph
-    pruned_graph.draw(
-        f'data/{monos}_{max_pol}_{ins}ins_{outs}outs_{export}_{name}.png', 
-        prog = 'fdp'
-    )
-    # return nothing; that file is the only necessary output
-
 def viz_pruned_nets(full_model, full_graph, min_pruned, rand_pruned_nets, export):
     # call min-flux network 'min' and the rest 'rand1', 'rand2' etc
-    viz_pruned_net(min_pruned, full_model, full_graph, export, 'min')
+    scn.viz_pruned_net(min_pruned, full_model, full_graph, export, 'min')
     i = 0
     for rand_pruned in rand_pruned_nets:
         i += 1
-        viz_pruned_net(rand_pruned, full_model, full_graph, export, f'rand{i}')
+        scn.viz_pruned_net(rand_pruned, full_model, full_graph, export, f'rand{i}')
     # return nothing; viz_pruned_net will generate files as output
 
 # get command-line arguments

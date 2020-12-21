@@ -1,9 +1,32 @@
 # ARtificial CHemistry NEtwork Toolbox (ARCHNET)
 
-Tools for creating string chemistry networks and doing flux-balance analysis on them. All scripts have a summary of what they do in the first few lines, and I've given more detailed descriptions of a few key ones below. The package itself is in string_chem_net.py, and everything else just uses the package in various ways. Nearly every script expects there to be another directory called `data` in the same directory as `scripts`, and that you're calling the script from that directory (rather than `scripts`). Every script should print the command-line arguments it expects if you run it without any arguments.
+Tools for creating string chemistry networks and doing flux-balance analysis on them. All scripts have a summary of what they do in the first few lines, and I've given more detailed descriptions of a few key ones below. The package itself is in string\_chem\_net.py, and everything else just uses the package in various ways. Nearly every script expects there to be another directory called `data` in the same directory as `scripts`, and that you're calling the script from that directory (rather than `scripts`). Every script should print the command-line arguments it expects if you run it without any arguments.
 
 ## The `ARCHNET` package
 Contains a class for generating arbitrary string chemistry networks and several functions for maniuplating them and turning them into [COBRApy models](https://cobrapy.readthedocs.io/en/latest/index.html) for FBA.
+
+### Quick Example Use:
+
+(from same directory as string\_chem\_net.py, i.e. `scripts`)
+```
+import string_chem_net as scn
+
+monos = 'ab' # characters to use as monomers
+max_len = 5  # maximum length of each string chemical
+ins = 2      # number of food sources / environmental nutrients
+outs = 5     # number of biomass precursors
+
+SCN = scn.CreateNetwork(monos, max_len)
+cobra_model = scn.make_cobra_model(SCN.met_list, SCN.rxn_list)
+
+bm_rxn = scn.choose_bm_mets(outs, cobra_model)
+scn.choose_inputs(ins, bm_rxn)
+cobra_model.objective = bm_rxn
+
+solution = cobra_model.optimize()
+```
+
+If you want to work with the stoichiometric matrix directly, you can pass `make_stoich_mat = True` to CreateNetwork; it's set to false by default because it can take a while to create for large networks.
 
 ### Classes:
 

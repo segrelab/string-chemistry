@@ -52,7 +52,7 @@ while i < int(bms):
         # the biomass reaction became different in some subtle way
         pruned_bm_rxn = pruned_net.reactions.get_by_id(bm_rxn.id)
         pruned_net.remove_reactions([pruned_bm_rxn])
-        bitstring = scn.make_bitstring(cobra_model, pruned_net)
+        bitstring = scn.make_rxn_incl(cobra_model, pruned_net)
         pruned_nets[bitstring] = [met.id for met in bm_rxn.metabolites]
     # remove this biomass reaction from the full network regardless of whether
     # it worked or not

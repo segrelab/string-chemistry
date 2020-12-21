@@ -8,6 +8,7 @@ import numpy as np
 import random
 import cobra
 import re
+import pygraphviz as gv
 
 class CreateNetwork():
     # given a set of monomers and a max polymer length, generate a network
@@ -429,3 +430,168 @@ def make_rxn_incl(full_model, pruned_model):
     bits = [1 if rxn in pruned_model.reactions else 0 for rxn in all_reactions]
     rxn_incl = ''.join([str(bit) for bit in bits])
     return(rxn_incl)
+
+def viz_universal_net(full_model, bm_rxn, show_all = False):
+    '''
+    Use pygraphviz to visualize a string chemistry network
+    show_all governs whether or not every reaction and metabolite are shown; if
+    false, only the reactions and metabolites that actually carry flux in the
+    supplied COBRA model will be visualized
+    '''
+    # make a graphviz object
+    full_graph = gv.AGraph(
+        size = '5,5', 
+        dpi = '400', 
+        splines = 'true', # this API was made perfectly and intuitively
+        directed = True,
+    )
+    # distinguish metabolite and reaction nodes by shape
+    for met in full_model.metabolites:
+        # grey out metabolites that aren't produced or consumed by anything if
+        # show_all is True or just skip them if it's False
+        if all([abs(rxn.flux) < 0.01 for rxn in met.reactions]):
+            if show_all:
+                full_graph.add_node(met.id, shape = 'box', color = 'grey')
+            else:
+                pass
+        # make other metabolite nodes blue
+        else:
+            full_graph.add_node(met.id, shape = 'box', color = 'blue')
+    for rxn in full_model.reactions:
+        # reactions with no flux get grey nodes if show_all is True and get
+        # completely whited out if it's false (so that all the nodes are still
+        # there but invisible)
+        if abs(rxn.flux) < 0.01:
+            if show_all:
+                full_graph.add_node(rxn.id, shape = 'oval', color = 'grey')
+            else:
+                full_graph.add_node(
+                    rxn.id,
+                    shape = 'oval',
+                    color = 'invis',
+                    fontcolor = 'invis'
+                )
+        # nodes for reactions with flux are red
+        else:
+            full_graph.add_node(rxn.id, shape = 'oval', color = 'red')
+        # now handle edges
+        if abs(rxn.flux) < 10e-10:
+            # reactions with no flux get grey edges if show_all is True and get
+            # added invisibly (i.e. everything about them is white) if show_all
+            # is false
+            if show_all:
+                for met in rxn.metabolites:
+                    # direct edges based on stoichiometric coefficients
+                    if rxn.metabolites[met] > 0:
+                        # products
+                        full_graph.add_edge([rxn.id, met.id], color = 'grey')
+                    else:
+                        # reactants
+                        full_graph.add_edge([met.id, rxn.id], color = 'grey')
+            else:
+                for met in rxn.metabolites:
+                    if rxn.metabolites[met] > 0:
+                        # products
+                        full_graph.add_edge(
+                            [rxn.id, met.id],
+                            color = 'invis',
+                            fontcolor = 'invis'
+                        )
+                    else:
+                        # reactants
+                        full_graph.add_edge(
+                            [met.id, rxn.id],
+                            color = 'invis',
+                            fontcolor = 'invis'
+                        )
+        else:
+            # exchange reactions get green edges
+            if rxn == bm_rxn or rxn in full_model.boundary:
+                for met in rxn.metabolites:
+                    # direct edges based on stoichiometric coefficients
+                    # all exchange reactions are initialized so they can only
+                    # proceed in the forward direction, so we don't have to
+                    # worry about the sign of the flux
+                    if rxn.metabolites[met] > 0:
+                        # products
+                        full_graph.add_edge(
+                            [rxn.id, met.id], color = 'green'
+                        )
+                    else:
+                        # reactants
+                        full_graph.add_edge(
+                            [met.id, rxn.id], color = 'green'
+                        )
+            # other reactions get thicker black edges
+            else:
+                for met in rxn.metabolites:
+                    # have to use both stoichiometric coefficients and the sign
+                    # of the flux to direct edges for these reactions, since 
+                    # they have every right to be negative
+                    if rxn.flux > 0:
+                        # reaction is in the forward direction
+                        if rxn.metabolites[met] > 0:
+                            # prodcuts
+                            full_graph.add_edge(
+                                [rxn.id, met.id], penwidth = 2
+                            )
+                        else:
+                            # reactants
+                            full_graph.add_edge(
+                                [met.id, rxn.id], penwidth = 2
+                            )
+                    else:
+                        # reaction is running in the reverse direction, so 
+                        # invert signs on stoichiometric coefficients
+                        if rxn.metabolites[met] > 0:
+                            # reactants
+                            full_graph.add_edge(
+                                [met.id, rxn.id], penwidth = 2
+                            )
+                        else:
+                            # products
+                            full_graph.add_edge(
+                                [rxn.id, met.id], penwidth = 2
+                            )
+    # return the graph without setting a layout or drawing it so that can be
+    # handeled in whatever way fits the context
+    return(full_graph)
+
+def viz_pruned_net(pruned_model, full_model, graph):
+    '''
+    Use graphviz to visualize the results of pruning a network
+    pruned_model and full_model are cobrapy objects that you want visualized
+    full_graph is a pygraphviz object made using full_model
+    '''
+    # get a list of all the reaction IDs in the pruned model so that we can see
+    # which reactions are in both models (since two reaction objects from 
+    # different models are never equal, but their IDs might be)
+    pruned_ids = [r.id for r in pruned_model.reactions]
+    # now change the colors of the reaction nodes/edges that were pruned
+    for rxn in full_model.reactions:
+        # identify all the reactions that had flux in the full model (since we
+        # only included those in the graphviz object) that weren't in the
+        # pruned model
+        if rxn.id in graph.nodes() and rxn.id not in pruned_ids:
+            # make the node invisible
+            rxn_node = graph.get_node(rxn.id)
+            rxn_node.attr['color'] = 'invis'
+            rxn_node.attr['fontcolor'] = 'invis'
+            # change color of all attached edges
+            for met in rxn.metabolites:
+                # pygraphviz is a little dumb about the ordering of nodes in
+                # edges
+                try:
+                    dropped_edge = graph.get_edge(met.id, rxn.id)
+                except KeyError:
+                    dropped_edge = graph.get_edge(rxn.id, met.id)
+                dropped_edge.attr['color'] = 'invis'
+    # now change the colors of the metabolites that are now dropped
+    pruned_met_ids = [m.id for m in pruned_model.metabolites]
+    for met in full_model.metabolites:
+        # once again, make sure the metabolite is in the graph before trying to
+        # turn it invisible
+        if met.id in graph.nodes() and met.id not in pruned_met_ids:
+            met_node = graph.get_node(met.id)
+            met_node.attr['color'] = 'invis'
+    return(graph)

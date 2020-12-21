@@ -86,7 +86,7 @@ while i < int(bm_count):
         pruned_model.remove_reactions(in_rxns)
         # while we have the pruned network with no input reactions, make the
         # reaction-inclusion vector
-        bitstring = scn.make_bitstring(universal_model, pruned_model)
+        bitstring = scn.make_rxn_incl(universal_model, pruned_model)
         # create new input reactions
         for met in env:
             in_rxn = cobra.Reaction(
