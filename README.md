@@ -20,7 +20,7 @@ SCN = scn.CreateNetwork(monos, max_len)
 cobra_model = scn.make_cobra_model(SCN.met_list, SCN.rxn_list)
 
 bm_rxn = scn.choose_bm_mets(outs, cobra_model)
-scn.choose_inputs(ins, bm_rxn)
+scn.choose_inputs(ins, cobra_model, bm_rxn)
 cobra_model.objective = bm_rxn
 
 solution = cobra_model.optimize()

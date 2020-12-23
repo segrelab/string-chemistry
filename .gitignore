@@ -5,12 +5,12 @@ __pycache__/
 share/
 stoich_mat.dat
 *.RData*
-*.Rproj
+*.Rproj*
 *.Rhistory
 etc/
 *.sh
 data/
 *.Rproj.user
 *.html
-.Rproj.user
 *.png
+*.cfg
