@@ -26,8 +26,9 @@ def bm_impact_prune(cobra_model, bm_rxn):
     solution = cobra_net.optimize()
     bm_rxn_flux = solution.fluxes.get(key = bm_rxn.id)
     # record which reactions are in the network at each step of the pruning
-    # process, starting now at step 0
-    rxn_lists = [[rxn.id for rxn in cobra_net.reactions]]
+    # process
+    #rxn_lists = [[rxn.id for rxn in cobra_net.reactions]]
+    rxn_lists = list()
     while True:
         # remove all non-boundary reactions with no flux
         no_flux_rxn_ids = solution.fluxes[solution.fluxes == 0].index
@@ -46,6 +47,11 @@ def bm_impact_prune(cobra_model, bm_rxn):
         kos['rxn'] = kos.index
         kos['rxn'] = kos['rxn'].apply(lambda x: list(x)[0])
         kos = kos[~kos['rxn'].isin(boundary_rxn_ids)]
+        if kos.empty:
+            print('KO dataframe was emtpy after trying to remove exchange rxns')
+            print(get_kos(cobra_net))
+            print(boundary_rxn_ids)
+            sys.exit()
         # now we can identify the reaction with the smallest impact on biomass
         # flux and drop it
         min_flux_rxn_id = list(kos['growth'].idxmax())[0]
@@ -76,7 +82,7 @@ def bm_impact_prune(cobra_model, bm_rxn):
     solution = cobra_net.optimize()
     cobra_net.remove_reactions(solution.fluxes[solution.fluxes == 0].index)
     # and add this final reaction list to rxn_lists
-    rxn_lists.append([rxn.id for rxn in cobra_net.reactions])
+    #rxn_lists.append([rxn.id for rxn in cobra_net.reactions])
     return(rxn_lists)
 
 def min_flux_prune(cobra_model, bm_rxn):
@@ -94,9 +100,9 @@ def min_flux_prune(cobra_model, bm_rxn):
     # assign reaction fluxes to everything before starting the loop
     solution = cobra_net.optimize()
     bm_rxn_flux = solution.fluxes.get(key = bm_rxn.id)
-    # record which reactions are in the network at each stage of pruning,
-    # starting now at step 0
-    rxn_lists = [[rxn.id for rxn in cobra_net.reactions]]
+    # record which reactions are in the network at each stage of pruning
+    rxn_lists = list()
+    #rxn_lists = [[rxn.id for rxn in cobra_net.reactions]]
     while True:
         # remove all non-boundary reactions with no flux
         no_flux_rxn_ids = solution.fluxes[solution.fluxes == 0].index
@@ -138,7 +144,7 @@ def min_flux_prune(cobra_model, bm_rxn):
     solution = cobra_net.optimize()
     cobra_net.remove_reactions(solution.fluxes[solution.fluxes == 0].index)
     # and now all this list to rxn_lists
-    rxn_lists.append([rxn.id for rxn in cobra_net.reactions])
+    #rxn_lists.append([rxn.id for rxn in cobra_net.reactions])
     return(rxn_lists)
 
 def compare_nets(universal_network, ins, outs):
@@ -261,4 +267,4 @@ for i in range(int(reps)):
     all_data = all_data.append(some_data)
 # write all_data to a csv so we can tweak the plotting details without having
 # to run this script again
-all_data.to_csv('data/bm_impact_pruning_data.csv')
+all_data.to_csv('data/bm_impact_pruning_data.csv', index = False)

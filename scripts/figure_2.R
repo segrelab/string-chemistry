@@ -1,5 +1,5 @@
 # figure_2.R
-# make the plots for figure 3 that show sizes of string chemistry networks
+# make the plots for figure 2 that show sizes of string chemistry networks
 # as functions of the number of unique monomers and the maximum string length
 # used to generate them
 
