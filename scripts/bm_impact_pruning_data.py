@@ -27,7 +27,6 @@ def bm_impact_prune(cobra_model, bm_rxn):
     bm_rxn_flux = solution.fluxes.get(key = bm_rxn.id)
     # record which reactions are in the network at each step of the pruning
     # process
-    #rxn_lists = [[rxn.id for rxn in cobra_net.reactions]]
     rxn_lists = list()
     while True:
         # remove all non-boundary reactions with no flux
@@ -82,7 +81,7 @@ def bm_impact_prune(cobra_model, bm_rxn):
     solution = cobra_net.optimize()
     cobra_net.remove_reactions(solution.fluxes[solution.fluxes == 0].index)
     # and add this final reaction list to rxn_lists
-    #rxn_lists.append([rxn.id for rxn in cobra_net.reactions])
+    rxn_lists.append([rxn.id for rxn in cobra_net.reactions])
     return(rxn_lists)
 
 def min_flux_prune(cobra_model, bm_rxn):
@@ -102,7 +101,6 @@ def min_flux_prune(cobra_model, bm_rxn):
     bm_rxn_flux = solution.fluxes.get(key = bm_rxn.id)
     # record which reactions are in the network at each stage of pruning
     rxn_lists = list()
-    #rxn_lists = [[rxn.id for rxn in cobra_net.reactions]]
     while True:
         # remove all non-boundary reactions with no flux
         no_flux_rxn_ids = solution.fluxes[solution.fluxes == 0].index
@@ -144,7 +142,7 @@ def min_flux_prune(cobra_model, bm_rxn):
     solution = cobra_net.optimize()
     cobra_net.remove_reactions(solution.fluxes[solution.fluxes == 0].index)
     # and now all this list to rxn_lists
-    #rxn_lists.append([rxn.id for rxn in cobra_net.reactions])
+    rxn_lists.append([rxn.id for rxn in cobra_net.reactions])
     return(rxn_lists)
 
 def compare_nets(universal_network, ins, outs):
@@ -230,7 +228,6 @@ def compare_nets(universal_network, ins, outs):
             info_dict['rxn_count'].append(longer_count)
             info_dict['jaccard'].append(jaccard)
             j += 1
-
     # now that that's taken care of, turn this dict into a pandas dataframe and
     # return it
     info_df = pd.DataFrame(info_dict)
