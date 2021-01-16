@@ -8,7 +8,7 @@ stoich_mat.dat
 *.Rproj*
 *.Rhistory
 etc/
-*.sh
+*.sh*
 data/
 *.Rproj.user
 *.html

@@ -14,15 +14,16 @@ from networkx.algorithms.cluster import square_clustering
 from networkx.algorithms.shortest_paths.generic \
     import average_shortest_path_length
 from networkx.algorithms.smallworld import random_reference, lattice_reference
-import sys
+import multiprocessing as mp
 
-def prune_once(universal_model, ins, outs, flux_bins):
+def prune_once(universal_model, ins, outs, flux_bins, rep):
     '''
     Given a universal string chemistry network, add a random biomass reaction
     and random input reactions, make sure that combination can produce biomass,
     prune the network, and return the degree and flux distributions of the 
     pruned network
     '''
+    print(f'Working on rep {rep}')
     # work with a copy of the model so it remains untouched for the next
     # iteration of the loop
     full_model = universal_model.copy()
@@ -55,6 +56,10 @@ def prune_once(universal_model, ins, outs, flux_bins):
     # exclude fluxes that are approximately zero
     flux_dist = pd.DataFrame(fluxes[fluxes > 10e-10])
     flux_dist.columns = ['flux']
+    # add a column to the degree and flux distribution dataframes to indicate
+    # which round of pruning this data came from
+    deg_dist['trial'] = rep
+    flux_dist['trial'] = rep
     # get the various metrics of small-worldness
     sw_things = do_small_world_things(pruned_model)
     return((deg_dist, flux_dist, sw_things))
@@ -113,17 +118,21 @@ def do_small_world_things(model):
     for r in model.reactions:
         for m in r.metabolites:
             edgelist.append((m.id, r.id))
-    # make a networkx object and find the average clustering coefficient and
-    # the average shortest path length
-    print('Computing C and L for original network')
+    # make a networkx object and make sure the graph is connected because the
+    # yeast one isn't for unclear and annoying reasons
     graph = nx.Graph(edgelist)
+    if not nx.is_connected(graph):
+        # only work with the largest component; it contains nearly everything
+        # anyway
+        graph = graph.subgraph(max(list(nx.connected_components(graph))))
+    # compute the average clustering coefficient and average shortest path
+    # length for this network
     ref_C = 0
     for n in graph.nodes:
         ref_C += square_clustering(graph, n)
     ref_C /= len(graph.nodes)
     ref_L = average_shortest_path_length(graph)
     # find the same parameters for an equivalent random graph
-    print('Computing C and L for random network')
     rand_graph = random_reference(graph)
     rand_C = 0
     for n in rand_graph.nodes:
@@ -131,19 +140,17 @@ def do_small_world_things(model):
     rand_C /= len(rand_graph.nodes)
     rand_L = average_shortest_path_length(rand_graph)
     # do it again but for an equivalent lattice
-    print('Computing C and L for lattice')
     lat_graph = lattice_reference(graph)
     lat_C = 0
     for n in lat_graph.nodes:
         lat_C += square_clustering(lat_graph, n)
     lat_C /= len(lat_graph.nodes)
     lat_L = average_shortest_path_length(lat_graph)
-    # put all these together in a pandas Series with a specified index to
-    # facilitate appending this to a dataframe with these values from other
-    # networks
-    out = pd.Series(
-        [ref_C, ref_L, rand_C, rand_L, lat_C, lat_L],
-        index = ['ref_C', 'ref_L', 'rand_C', 'rand_L', 'lat_C', 'lat_L']
+    # put all these together in a pandas DataFrame so we can easily concatenate
+    # the outputs from every pruned network
+    out = pd.DataFrame(
+        [[ref_C, ref_L, rand_C, rand_L, lat_C, lat_L]],
+        columns = ['ref_C', 'ref_L', 'rand_C', 'rand_L', 'lat_C', 'lat_L']
     )
     return(out)
 
@@ -177,11 +184,12 @@ flux_bins = 20
 print('Preparing pruned string chemistry networks')
 # create a string chemistry network and prune it reps times on random groups of
 # nutrients and biomass precursors
-monos = 'ab'
-max_pol = 5
+monos = 'abc'
+max_pol = 7
 ins = 2
 outs = 5
 reps = 100
+threads = 20
 
 SCN = scn.CreateNetwork(monos, max_pol)
 universal_model = scn.make_cobra_model(
@@ -189,27 +197,14 @@ universal_model = scn.make_cobra_model(
     SCN.rxn_list, 
     allow_export = True
 )
-# make a dataframe to store the fluxes from each round of pruning
-scn_fluxes = pd.DataFrame(columns = ['trial', 'flux'])
-# make a dataframe to store the degree distributions for each pruned network
-scn_deg_dists = pd.DataFrame(columns = ['trial', 'degree', 'freq'])
-# make a dataframe to store the various metrics of small-worldness
-scn_sw_things = pd.DataFrame(
-    columns = ['ref_C', 'ref_L', 'rand_C', 'rand_L', 'lat_C', 'lat_L']
-)
-for rep in range(reps + 1):
-    if (rep + 1) % 10 == 0:
-        print(f'On rep {rep + 1} of {reps}')
-    (some_degs, some_fluxes, some_sw_things) = prune_once(
-        universal_model, ins, outs, flux_bins
-    )
-    # add a new column to each dataframe so we can distinguish the results from
-    # different trials
-    some_degs['trial'] = rep + 1
-    scn_deg_dists = scn_deg_dists.append(some_degs)
-    some_fluxes['trial'] = rep + 1
-    scn_fluxes = scn_fluxes.append(some_fluxes)
-    scn_sw_things = scn_sw_things.append(some_sw_things, ignore_index = True)
+# do the reps rounds of pruning in parallel
+pool = mp.Pool(threads)
+args = [(universal_model, ins, outs, flux_bins, i+1) for i in range(reps + 1)]
+mixed_data = pool.starmap(prune_once, args)
+# separate the three types of data from mixed_data
+scn_deg_dists = pd.concat([t[0] for t in mixed_data])
+scn_fluxes = pd.concat([t[1] for t in mixed_data])
+scn_sw_things = pd.concat([t[2] for t in mixed_data])
 
 # get the mean and standard deviation of the frequency of each metabolite
 # degree across all 100 pruned networks
@@ -244,7 +239,7 @@ scn_flux_dists.to_csv('data/scn_flux_dists.csv', index = False)
 scn_sw_things.to_csv('data/scn_sw_things.csv', index = False)
 ecoli_deg_dist.to_csv('data/ecoli_deg_dist.csv', index = False)
 ecoli_flux_dist.to_csv('data/ecoli_flux_dist.csv', index = False)
-ecolit_sw_things.to_csv('data/ecoli_sw_things.csv', index = False)
+ecoli_sw_things.to_csv('data/ecoli_sw_things.csv', index = False)
 yeast_deg_dist.to_csv('data/yeast_deg_dist.csv', index = False)
 yeast_flux_dist.to_csv('data/yeast_flux_dist.csv', index = False)
 yeast_sw_things.to_csv('data/yeast_sw_things.csv', index = False)
