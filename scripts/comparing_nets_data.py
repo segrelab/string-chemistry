@@ -10,7 +10,8 @@ import string_chem_net as scn
 import cobra
 import pandas as pd
 import networkx as nx
-from networkx.algorithms.cluster import square_clustering
+from networkx.algorithms.bipartite import is_bipartite
+from networkx.algorithms.cluster import average_clustering, square_clustering
 from networkx.algorithms.shortest_paths.generic \
     import average_shortest_path_length
 from networkx.algorithms.smallworld import random_reference, lattice_reference
@@ -23,7 +24,6 @@ def prune_once(universal_model, ins, outs, flux_bins, rep):
     prune the network, and return the degree and flux distributions of the 
     pruned network
     '''
-    print(f'Working on rep {rep}')
     # work with a copy of the model so it remains untouched for the next
     # iteration of the loop
     full_model = universal_model.copy()
@@ -116,8 +116,14 @@ def do_small_world_things(model):
     # COBRApy model
     edgelist = list()
     for r in model.reactions:
-        for m in r.metabolites:
-            edgelist.append((m.id, r.id))
+        # do a bipartite metabolite-reaction network
+        #for m in r.metabolites:
+            #edgelist.append((m.id, r.id))
+        # just connect metabolites to each other if they participate in the
+        # same reaction
+        for m1 in r.reactants:
+            for m2 in r.products:
+                edgelist.append((m1.id, m2.id))
     # make a networkx object and make sure the graph is connected because the
     # yeast one isn't for unclear and annoying reasons
     graph = nx.Graph(edgelist)
@@ -127,24 +133,34 @@ def do_small_world_things(model):
         graph = graph.subgraph(max(list(nx.connected_components(graph))))
     # compute the average clustering coefficient and average shortest path
     # length for this network
+    # use square clustering if graph is bipartite
     ref_C = 0
-    for n in graph.nodes:
-        ref_C += square_clustering(graph, n)
-    ref_C /= len(graph.nodes)
+    if is_bipartite(graph):
+        for n in graph.nodes:
+            ref_C += square_clustering(graph, n)
+        ref_C /= len(graph.nodes)
+    else:
+        ref_C = average_clustering(graph)
     ref_L = average_shortest_path_length(graph)
     # find the same parameters for an equivalent random graph
     rand_graph = random_reference(graph)
     rand_C = 0
-    for n in rand_graph.nodes:
-        rand_C += square_clustering(rand_graph, n)
-    rand_C /= len(rand_graph.nodes)
+    if is_bipartite(graph)
+        for n in rand_graph.nodes:
+            rand_C += square_clustering(rand_graph, n)
+        rand_C /= len(rand_graph.nodes)
+    else:
+        rand_C = average_clustering(rand_graph)
     rand_L = average_shortest_path_length(rand_graph)
     # do it again but for an equivalent lattice
     lat_graph = lattice_reference(graph)
     lat_C = 0
-    for n in lat_graph.nodes:
-        lat_C += square_clustering(lat_graph, n)
-    lat_C /= len(lat_graph.nodes)
+    if is_bipartite(graph):
+        for n in lat_graph.nodes:
+            lat_C += square_clustering(lat_graph, n)
+        lat_C /= len(lat_graph.nodes)
+    else:
+        lat_C = average_clustering(lat_graph)
     lat_L = average_shortest_path_length(lat_graph)
     # put all these together in a pandas DataFrame so we can easily concatenate
     # the outputs from every pruned network
@@ -181,7 +197,6 @@ def make_binned_flux_dist(model, bins):
 # flux distributions if you don't bin the fluxes
 flux_bins = 20
 
-print('Preparing pruned string chemistry networks')
 # create a string chemistry network and prune it reps times on random groups of
 # nutrients and biomass precursors
 monos = 'abc'
@@ -216,7 +231,6 @@ scn_deg_dists.columns = ['degree', 'mean_freq', 'std_freq']
 # do the same for the flux distribution
 scn_flux_dists = make_scn_flux_dists(scn_fluxes, flux_bins)
 
-print('Preparing real metabolic networks')
 # read in the real metabolic networks using COBRApy
 ecoli = cobra.io.read_sbml_model('data/iJO1366.xml')
 yeast = cobra.io.read_sbml_model('data/yeastGEM.xml')
