@@ -69,28 +69,17 @@ def fix_axes(axes, x_lab, y_lab, panel):
 # read in files produced by comparing_nets_data.py
 scn_deg_dists = pd.read_csv('data/scn_deg_dists.csv')
 scn_flux_dists = pd.read_csv('data/scn_flux_dists.csv')
-scn_sw_data = pd.read_csv('data/scn_sw_things.csv')
 ecoli_deg_dist = pd.read_csv('data/ecoli_deg_dist.csv')
 ecoli_flux_dist = pd.read_csv('data/ecoli_flux_dist.csv')
-ecoli_sw_data = pd.read_csv('data/ecoli_sw_things.csv')
 yeast_deg_dist = pd.read_csv('data/yeast_deg_dist.csv')
 yeast_flux_dist = pd.read_csv('data/yeast_flux_dist.csv')
-yeast_sw_data = pd.read_csv('data/yeast_sw_things.csv')
 
-# combine the E. coli and yeast small-world dataframes and add a new column to
-# label which row is which
-ecoli_sw_data['org'] = 'E. coli'
-yeast_sw_data['org'] = 'S. cerevisiae'
-real_sw_data = pd.concat([ecoli_sw_data, yeast_sw_data])
-
-# make a 2 by 2 grid with the degree and flux distributions in the first row
-# and the plots of connectivities and shortest path lengths in the second
-fig = plt.figure(figsize = (9,8))
-gs = GridSpec(2,2, figure = fig)
+# make two subplots so we can have the degree and flux distributions in the
+# same figure
+fig = plt.figure(figsize = (12,6))
+gs = GridSpec(1,2, figure = fig)
 deg_ax = fig.add_subplot(gs[0,0])
 flux_ax = fig.add_subplot(gs[0,1])
-C_ax = fig.add_subplot(gs[1,0])
-L_ax = fig.add_subplot(gs[1,1])
 
 # give each degree distribution a different color since they're all going on
 # the same axes
@@ -106,49 +95,7 @@ flux_ax = plot_scn(flux_ax, scn_flux_dists, 'flux')
 flux_ax = plot_dist(flux_ax, ecoli_flux_dist, 'flux', 'red', 'E. coli')
 flux_ax = plot_dist(flux_ax, yeast_flux_dist, 'flux', 'green', 'S. cerevisiae')
 flux_ax = fix_axes(flux_ax, 'Flux', 'Reactions', 'b')
-
-# make a scatterplot to look at the metrics of network small-worldness
-C_ax.scatter(
-    data = real_sw_data,
-    x = 'org',
-    y = 'ref_C',
-    label = 'Actual'
-)
-C_ax.scatter(
-    data = real_sw_data,
-    x = 'org',
-    y = 'rand_C',
-    label = 'Randomized'
-)
-C_ax.scatter(
-    data = real_sw_data,
-    x = 'org',
-    y = 'lat_C',
-    label = 'Lattice'
-)
-C_ax.legend()
-
-L_ax.scatter(
-    data = real_sw_data,
-    x = 'org',
-    y = 'ref_L',
-    label = 'Actual'
-)
-L_ax.scatter(
-    data = real_sw_data,
-    x = 'org',
-    y = 'rand_L',
-    label = 'Randomized'
-)
-L_ax.scatter(
-    data = real_sw_data,
-    x = 'org',
-    y = 'lat_L',
-    label = 'Lattice'
-)
-L_ax.legend()
-
 # make sure subplots don't overlap with each other
 plt.tight_layout()
-#plt.savefig('data/deg_flux_dists.png', dpi = 600)
-plt.show()
+plt.savefig('data/deg_flux_dists.png', dpi = 600)
+#plt.show()

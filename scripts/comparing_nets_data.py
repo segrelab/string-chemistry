@@ -9,12 +9,6 @@ Writes csv files that are read by comparing_nets_plots.py to make plots
 import string_chem_net as scn
 import cobra
 import pandas as pd
-import networkx as nx
-from networkx.algorithms.bipartite import is_bipartite
-from networkx.algorithms.cluster import average_clustering, square_clustering
-from networkx.algorithms.shortest_paths.generic \
-    import average_shortest_path_length
-from networkx.algorithms.smallworld import random_reference, lattice_reference
 import multiprocessing as mp
 
 def prune_once(universal_model, ins, outs, flux_bins, rep):
@@ -60,9 +54,7 @@ def prune_once(universal_model, ins, outs, flux_bins, rep):
     # which round of pruning this data came from
     deg_dist['trial'] = rep
     flux_dist['trial'] = rep
-    # get the various metrics of small-worldness
-    sw_things = do_small_world_things(pruned_model)
-    return((deg_dist, flux_dist, sw_things))
+    return((deg_dist, flux_dist))
 
 def make_deg_dist(model):
     '''
@@ -89,6 +81,11 @@ def make_scn_flux_dists(fluxes, bins):
     Then find the mean and standard deviation of those bin frequencies across
     all pruned networks
     '''
+    # start by normalizing all fluxes to the maximum flux within each trial
+    fluxes['flux'] = fluxes.groupby('trial')['flux'].transform(
+        lambda x: x / max(x)
+    )
+    fluxes['flux'] /= max(fluxes['flux'])
     # find bins using fluxes from all trials
     fluxes['flux_bin'] = pd.cut(
         fluxes['flux'], flux_bins
@@ -107,69 +104,6 @@ def make_scn_flux_dists(fluxes, bins):
     flux_dists.columns = ['flux', 'mean_freq', 'std_freq']
     return(flux_dists)
 
-def do_small_world_things(model):
-    '''
-    Given a COBRApy model, use networkx to find the global connectivity and 
-    mean path length and compare them to those of an equal-sized lattice
-    '''
-    # start by getting an edgelist of the metabolic network represented by the
-    # COBRApy model
-    edgelist = list()
-    for r in model.reactions:
-        # do a bipartite metabolite-reaction network
-        #for m in r.metabolites:
-            #edgelist.append((m.id, r.id))
-        # just connect metabolites to each other if they participate in the
-        # same reaction
-        for m1 in r.reactants:
-            for m2 in r.products:
-                edgelist.append((m1.id, m2.id))
-    # make a networkx object and make sure the graph is connected because the
-    # yeast one isn't for unclear and annoying reasons
-    graph = nx.Graph(edgelist)
-    if not nx.is_connected(graph):
-        # only work with the largest component; it contains nearly everything
-        # anyway
-        graph = graph.subgraph(max(list(nx.connected_components(graph))))
-    # compute the average clustering coefficient and average shortest path
-    # length for this network
-    # use square clustering if graph is bipartite
-    ref_C = 0
-    if is_bipartite(graph):
-        for n in graph.nodes:
-            ref_C += square_clustering(graph, n)
-        ref_C /= len(graph.nodes)
-    else:
-        ref_C = average_clustering(graph)
-    ref_L = average_shortest_path_length(graph)
-    # find the same parameters for an equivalent random graph
-    rand_graph = random_reference(graph)
-    rand_C = 0
-    if is_bipartite(graph)
-        for n in rand_graph.nodes:
-            rand_C += square_clustering(rand_graph, n)
-        rand_C /= len(rand_graph.nodes)
-    else:
-        rand_C = average_clustering(rand_graph)
-    rand_L = average_shortest_path_length(rand_graph)
-    # do it again but for an equivalent lattice
-    lat_graph = lattice_reference(graph)
-    lat_C = 0
-    if is_bipartite(graph):
-        for n in lat_graph.nodes:
-            lat_C += square_clustering(lat_graph, n)
-        lat_C /= len(lat_graph.nodes)
-    else:
-        lat_C = average_clustering(lat_graph)
-    lat_L = average_shortest_path_length(lat_graph)
-    # put all these together in a pandas DataFrame so we can easily concatenate
-    # the outputs from every pruned network
-    out = pd.DataFrame(
-        [[ref_C, ref_L, rand_C, rand_L, lat_C, lat_L]],
-        columns = ['ref_C', 'ref_L', 'rand_C', 'rand_L', 'lat_C', 'lat_L']
-    )
-    return(out)
-
 def make_binned_flux_dist(model, bins):
     '''
     Given a COBRApy model, optimize production of biomass to get reaction 
@@ -177,6 +111,8 @@ def make_binned_flux_dist(model, bins):
     fluxes fall in each of the equally-wide bins
     '''
     fluxes = abs(model.optimize().fluxes)
+    # normalize fluxes to the maximum flux
+    fluxes /= max(fluxes)
     # bin the fluxes into the specified number of equally-large bins after
     # dropping all of the very low fluxes that are probably supposed to be 0
     binned_fluxes = pd.cut(
@@ -219,7 +155,6 @@ mixed_data = pool.starmap(prune_once, args)
 # separate the three types of data from mixed_data
 scn_deg_dists = pd.concat([t[0] for t in mixed_data])
 scn_fluxes = pd.concat([t[1] for t in mixed_data])
-scn_sw_things = pd.concat([t[2] for t in mixed_data])
 
 # get the mean and standard deviation of the frequency of each metabolite
 # degree across all 100 pruned networks
@@ -227,7 +162,6 @@ scn_deg_dists = scn_deg_dists.groupby('degree').agg(
     {'freq': ['mean', 'std']}
 ).reset_index()
 scn_deg_dists.columns = ['degree', 'mean_freq', 'std_freq']
-
 # do the same for the flux distribution
 scn_flux_dists = make_scn_flux_dists(scn_fluxes, flux_bins)
 
@@ -241,19 +175,13 @@ yeast_deg_dist = make_deg_dist(yeast)
 # now the flux distributions
 ecoli_flux_dist = make_binned_flux_dist(ecoli, flux_bins)
 yeast_flux_dist = make_binned_flux_dist(yeast, flux_bins)
-# now the small-world properties
-ecoli_sw_things = do_small_world_things(ecoli)
-yeast_sw_things = do_small_world_things(yeast)
 
 # now write these dataframes to csv files to be read by the accompanying
 # plotting script so that we can edit that script and rerun it a bunch of times
 # without also needing to recreate all of this data
 scn_deg_dists.to_csv('data/scn_deg_dists.csv', index = False)
 scn_flux_dists.to_csv('data/scn_flux_dists.csv', index = False)
-scn_sw_things.to_csv('data/scn_sw_things.csv', index = False)
 ecoli_deg_dist.to_csv('data/ecoli_deg_dist.csv', index = False)
 ecoli_flux_dist.to_csv('data/ecoli_flux_dist.csv', index = False)
-ecoli_sw_things.to_csv('data/ecoli_sw_things.csv', index = False)
 yeast_deg_dist.to_csv('data/yeast_deg_dist.csv', index = False)
 yeast_flux_dist.to_csv('data/yeast_flux_dist.csv', index = False)
-yeast_sw_things.to_csv('data/yeast_sw_things.csv', index = False)
