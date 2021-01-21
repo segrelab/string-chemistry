@@ -56,7 +56,7 @@ def fix_axes(axes, x_lab, y_lab, panel):
     axes.set_yscale('log')
     axes.text(
         # position the letter above the plot on the left side
-        -0.11, 1.1, panel, va = 'top', ha = 'right',
+        -0.08, 1.05, panel, va = 'top', ha = 'right',
         # no idea what this does; got it from StackOverflow
         transform = axes.transAxes,
         # make the letter large and bold
@@ -94,7 +94,7 @@ deg_ax = fix_axes(deg_ax, 'Degree', 'Metabolites', 'a')
 flux_ax = plot_scn(flux_ax, scn_flux_dists, 'flux')
 flux_ax = plot_dist(flux_ax, ecoli_flux_dist, 'flux', 'red', 'E. coli')
 flux_ax = plot_dist(flux_ax, yeast_flux_dist, 'flux', 'green', 'S. cerevisiae')
-flux_ax = fix_axes(flux_ax, 'Flux', 'Reactions', 'b')
+flux_ax = fix_axes(flux_ax, 'Normalized Flux', 'Reactions', 'b')
 # make sure subplots don't overlap with each other
 plt.tight_layout()
 plt.savefig('data/deg_flux_dists.png', dpi = 600)
