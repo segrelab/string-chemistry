@@ -1,13 +1,77 @@
-# multiple_env_min_prune.py
-# runs the minimum flux pruning algorithm many times on the same universal
+# multiple_env_bm_prune.py
+# runs the biomass impact pruning algorithm many times on the same universal
 # network with the multiple biomass reactions and environments (such that each
 # biomass reaction is run with the same large number of environments)
 
+from cobra.flux_analysis import single_reaction_deletion as get_kos
 import sys
 import string_chem_net as scn
 import pandas as pd
 import itertools as it
 import multiprocessing as mp
+
+def bm_impact_prune(cobra_model, bm_rxn):
+    '''
+    Prune network by identifying reactions whose removal has minimal impact on
+    the biomass flux and iteratively removing them until removing any more
+    reactions would eliminate flux through the biomass reaction
+    '''
+    # removing reactions happens in-place, so we need to make a copy of the 
+    # cobra model before altering it in any way
+    cobra_net = cobra_model.copy()
+    # assign reaction fluxes to everything before starting the loop
+    solution = cobra_net.optimize()
+    bm_rxn_flux = solution.fluxes.get(key = bm_rxn.id)
+    while True:
+        # remove all non-boundary reactions with no flux
+        no_flux_rxn_ids = solution.fluxes[solution.fluxes == 0].index
+        boundary_rxn_ids = [rxn.id for rxn in cobra_net.boundary]
+        ids_to_remove = [
+            rxn for rxn in no_flux_rxn_ids if rxn not in boundary_rxn_ids
+        ]
+        rxns_to_remove = [
+            cobra_net.reactions.get_by_id(rxn_id) for rxn_id in ids_to_remove
+        ]
+        cobra_net.remove_reactions(rxns_to_remove)
+        # get biomass fluxes for all single reaction knockouts
+        kos = get_kos(cobra_net, processes = 1)
+        # make sure we don't drop a boundary reaction (takes several steps
+        # because the index of kos is a bunch of frozensets of reaction ids)
+        kos['rxn'] = kos.index
+        kos['rxn'] = kos['rxn'].apply(lambda x: list(x)[0])
+        kos = kos[~kos['rxn'].isin(boundary_rxn_ids)]
+        if kos.empty:
+            print('KO dataframe was emtpy after trying to remove exchange rxns')
+            print(get_kos(cobra_net))
+            print(boundary_rxn_ids)
+            sys.exit()
+        # now we can identify the reaction with the smallest impact on biomass
+        # flux and drop it
+        min_flux_rxn_id = list(kos['growth'].idxmax())[0]
+        min_flux_rxn = cobra_net.reactions.get_by_id(min_flux_rxn_id)
+        # if this reaction is the biomass reaction, we're clearly done pruning
+        if min_flux_rxn.id == bm_rxn.id:
+            break
+        cobra_net.remove_reactions([min_flux_rxn])
+        # see if that made the network unsolvable; if so, add the reaction back
+        # and exit the while loop
+        solution = cobra_net.optimize()
+        # sometimes the solution will be feasible but the flux through the
+        # biomass reaction will be some absurdly small number and then if you
+        # do FBA on the same network again you won't get a feasible solution
+        # so can't just check to see if the flux is 0
+        bm_rxn_flux = solution.fluxes.get(key = bm_rxn.id)
+        if solution.status == 'infeasible' or bm_rxn_flux < 10e-10:
+            cobra_net.add_reaction(min_flux_rxn)
+            break
+    # we kept all of the boundary reactions around until now; drop the ones
+    # that have no flux
+    # have to recreate the solution object first since we probably just added
+    # an essential reaction back to the network after discovering that it was
+    # essential
+    solution = cobra_net.optimize()
+    cobra_net.remove_reactions(solution.fluxes[solution.fluxes == 0].index)
+    return(cobra_net)
 
 # prune one biomass reaction in the specified number of environments
 def prune_many_times(arglist):
@@ -63,7 +127,7 @@ def prune_many_times(arglist):
                 for met in rxn.metabolites
             ]))
             # prune the network
-            pruned_net = scn.min_flux_prune(model, bm_rxn)
+            pruned_net = bm_impact_prune(model, bm_rxn)
             rxn_incl = scn.make_rxn_incl(model, pruned_net)
             rxn_incl_vecs.append(rxn_incl)
             # get the growth rate on the pruned network
@@ -122,6 +186,6 @@ data_bits = pool.map(
 # concatenate all the dataframes and write to output
 all_data = pd.concat(data_bits)
 all_data.to_csv(
-    f'data/multiple_env_bm_prune_{monos}_{max_pol}_{ins}ins_{envs}envs_' +
+    f'data/multiple_env_min_prune_{monos}_{max_pol}_{ins}ins_{envs}envs_' +
     f'{outs}outs_{orgs}orgs_{export}exp.csv'
 )

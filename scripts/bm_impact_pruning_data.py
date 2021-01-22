@@ -40,7 +40,7 @@ def bm_impact_prune(cobra_model, bm_rxn):
         ]
         cobra_net.remove_reactions(rxns_to_remove)
         # get biomass fluxes for all single reaction knockouts
-        kos = get_kos(cobra_net)
+        kos = get_kos(cobra_net, processes = 1)
         # make sure we don't drop a boundary reaction (takes several steps
         # because the index of kos is a bunch of frozensets of reaction ids)
         kos['rxn'] = kos.index
@@ -233,35 +233,36 @@ def compare_nets(universal_network, ins, outs):
     info_df = pd.DataFrame(info_dict)
     return(info_df)
 
-try:
-    (monos, max_len, ins, outs, reps) = sys.argv[1:]
-except ValueError:
-    sys.exit(
-        'Specify monomers to use, maximum length of polymer, number of ' + 
-        'food sources, number of biomass precursors, and number of times to ' +
-        'prune'
-    )
+if __name__ == '__main__':
+    try:
+        (monos, max_len, ins, outs, reps) = sys.argv[1:]
+    except ValueError:
+        sys.exit(
+            'Specify monomers to use, maximum length of polymer, number of ' + 
+            'food sources, number of biomass precursors, and number of times to ' +
+            'prune'
+        )
 
-# setup network of specified size
-SCN = scn.CreateNetwork(monos, int(max_len))
-cobra_model = scn.make_cobra_model(SCN.met_list, SCN.rxn_list)
+    # setup network of specified size
+    SCN = scn.CreateNetwork(monos, int(max_len))
+    cobra_model = scn.make_cobra_model(SCN.met_list, SCN.rxn_list)
 
-# prepare dataframe to hold info from all rounds of pruning
-all_data = pd.DataFrame({
-    'step' : list(),
-    'type' : list(),
-    'rxn_count' : list(),
-    'jaccard' : list()
-})
-# prune reps times and store all information in all_data
-for i in range(int(reps)):
-    if (i+1) % 10 == 0:
-        print(f'On rep {i+1} of {reps}')
-    some_data = compare_nets(cobra_model, int(ins), int(outs))
-    # make another column to put i in so we can separate out all the different
-    # trajectories
-    some_data['trial'] = i+1
-    all_data = all_data.append(some_data)
-# write all_data to a csv so we can tweak the plotting details without having
-# to run this script again
-all_data.to_csv('data/bm_impact_pruning_data.csv', index = False)
+    # prepare dataframe to hold info from all rounds of pruning
+    all_data = pd.DataFrame({
+        'step' : list(),
+        'type' : list(),
+        'rxn_count' : list(),
+        'jaccard' : list()
+    })
+    # prune reps times and store all information in all_data
+    for i in range(int(reps)):
+        if (i+1) % 10 == 0:
+            print(f'On rep {i+1} of {reps}')
+        some_data = compare_nets(cobra_model, int(ins), int(outs))
+        # make another column to put i in so we can separate out all the different
+        # trajectories
+        some_data['trial'] = i+1
+        all_data = all_data.append(some_data)
+    # write all_data to a csv so we can tweak the plotting details without having
+    # to run this script again
+    all_data.to_csv('data/bm_impact_pruning_data.csv', index = False)
