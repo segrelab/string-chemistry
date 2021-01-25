@@ -119,6 +119,23 @@ flux_ax = fig.add_subplot(gs[1,1])
 met_ax = make_size_plot(met_ax, data, 'met_count', 'Number of Metabolites', 'a')
 rxn_ax = make_size_plot(rxn_ax, data, 'rxn_count', 'Number of Reactions', 'b')
 
+# add the reaction and metabolite counts for some real metabolic networks
+# iJO1366
+met_ax.axhline(1805)
+met_ax.text(1, 900, 'E. coli')
+rxn_ax.axhline(2583)
+rxn_ax.text(1, 1100, 'E. coli')
+# Recon3D
+met_ax.axhline(5385)
+met_ax.text(1, 6000, 'Human')
+rxn_ax.axhline(10600)
+rxn_ax.text(1, 12000, 'Human')
+# Yeast8
+met_ax.axhline(2666)
+met_ax.text(1, 3000, 'S. cerevisiae')
+rxn_ax.axhline(3895)
+rxn_ax.text(1, 4500, 'S. cerevisiae')
+
 # give each degree distribution a different color since they're all going on
 # the same axes
 deg_ax = plot_scn(deg_ax, scn_deg_dists, 'degree')
@@ -135,4 +152,5 @@ flux_ax = plot_dist(flux_ax, yeast_flux_dist, 'flux', 'green', 'S. cerevisiae')
 flux_ax = fix_axes(flux_ax, 'Normalized Flux', 'Reactions', 'd')
 # make sure subplots don't overlap with each other
 plt.tight_layout()
+plt.savefig('data/figure_2.png', dpi = 600)
 plt.show()

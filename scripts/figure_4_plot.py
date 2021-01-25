@@ -1,5 +1,7 @@
-# figure_4.py
-# make several UMAPs visualizing the results of multiple_env_min_prune.py
+# figure_4_plot.py
+'''
+Make several UMAPs visualizing the results of figure_4_data.py
+'''
 
 import pandas as pd
 import umap
@@ -105,21 +107,12 @@ def growth_plot(figure, axes, data, label):
 
 # get UMAP results for networks with and without export reactions
 print('Doing UMAP')
-export_umap = do_umap(
-    'data/multiple_env_min_prune_ab_5_2ins_100envs_5outs_100orgs_yesexp.csv'
-)
-no_export_umap = do_umap(
-    'data/multiple_env_min_prune_ab_5_2ins_100envs_5outs_100orgs_noexp.csv'
-)
+export_umap = do_umap('data/figure_4_export_data.csv')
+no_export_umap = do_umap('data/figure_4_no_export_data.csv')
 
 print('Plotting UMAP results')
 # set up the subplots in a 3x2 grid
 fig, ax = plt.subplots(nrows = 2, ncols = 3, figsize = (12,6))
-# make the text legible
-#matplotlib.rcParams.update({
-#    'font.size': 18, 'xtick.labelsize': 18, 'ytick.labelsize': 18,
-#    'axes.labelsize': 18
-#})
 
 # panel A is the schematic representation of how the data was generated so 
 # we're starting with panel B
@@ -137,3 +130,4 @@ growth_plot(fig, ax[1,2], no_export_umap, 'g')
 # tight_layout just fixes all sorts of problems with subplots overlapping
 plt.tight_layout()
 plt.savefig('data/figure_4B-G.png', dpi = 600)
+#plt.show()

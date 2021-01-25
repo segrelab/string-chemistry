@@ -1,4 +1,4 @@
-# figure_S2.py
+# figure_S3.py
 # makes violin plots to compare sizes of networks pruned with and without
 # export reactions
 

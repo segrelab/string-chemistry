@@ -122,6 +122,6 @@ data_bits = pool.map(
 # concatenate all the dataframes and write to output
 all_data = pd.concat(data_bits)
 all_data.to_csv(
-    f'data/multiple_env_bm_prune_{monos}_{max_pol}_{ins}ins_{envs}envs_' +
+    f'data/multiple_env_min_prune_{monos}_{max_pol}_{ins}ins_{envs}envs_' +
     f'{outs}outs_{orgs}orgs_{export}exp.csv'
 )

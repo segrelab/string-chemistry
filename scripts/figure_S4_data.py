@@ -1,7 +1,12 @@
-# multiple_env_bm_prune.py
-# runs the biomass impact pruning algorithm many times on the same universal
-# network with the multiple biomass reactions and environments (such that each
-# biomass reaction is run with the same large number of environments)
+# figure_S4_data.py
+'''
+Make the (2,5) universal string chemistry network and two COBRApy models of it
+with and without export reactions, then prune each of those networks using the 
+biomass-impact pruner with 100 different biomass reactions and 100 different 
+environments per biomass reaction. Save the reaction-inclusion vectors and 
+biomass fluxes for the pruned networks in files that figure_S4_plot.py will 
+read to make plots
+'''
 
 import sys
 import string_chem_net as scn
@@ -85,43 +90,36 @@ def prune_many_times(arglist):
     data = data[['biomass', 'env', 'rxn_incl', 'growth']]
     return(data)
 
-# get command-line arguments
 try:
-    (monos, max_pol, ins, envs, outs, orgs, export, threads) = sys.argv[1:]
-except ValueError:
-    sys.exit('Arguments:\nmonomers\nmax polymer length\n' +
-        'number of food sources\nnumber of times to reselect food sources\n' +
-        'number of biomass precursors\nnumber of times to reselect biomass\n' +
-        'should there be an export reaction for every metabolite? (yes/no)\n' +
-        'number of threads to run on in parallel')
+    threads = int(sys.argv[1])
+except IndexError:
+    sys.exit('Specify a number of threads to run on')
 
-if export == 'yes':
-    allow_export = True
-elif export == 'no':
-    allow_export = False
-else:
-    sys.exit('The second-to-last argument must be either "yes" or "no"')
+# define parameters
+monos = 'ab'
+max_pol = 5
+ins = 2 # number of input metabolites in each set
+envs = 100 # number of different sets of ins to choose
+outs = 5 # number of biomass precursors in each biomass reaction
+orgs = 100 # number of different sets of outs to choose
 
 # create the universal network
-SCN = scn.CreateNetwork(monos, int(max_pol))
+SCN = scn.CreateNetwork(monos, max_pol)
 full_model = scn.make_cobra_model(
     SCN.met_list, 
     SCN.rxn_list, 
-    allow_export = allow_export
+    allow_export = True
 )
 
 # just in case we're trying a particularly large number of biomass reactions,
 # run the function in parallel since each biomass reaction can be handled
 # completely independently of the others
-pool = mp.Pool(int(threads))
+pool = mp.Pool(threads)
 data_bits = pool.map(
     prune_many_times,
     # same arguments every time for orgs times
-    [[full_model, int(ins), int(outs), int(envs)] for bm in range(int(orgs))]
+    [[full_model, ins, outs, envs] for bm in range(orgs)]
 )
 # concatenate all the dataframes and write to output
 all_data = pd.concat(data_bits)
-all_data.to_csv(
-    f'data/multiple_env_bm_prune_{monos}_{max_pol}_{ins}ins_{envs}envs_' +
-    f'{outs}outs_{orgs}orgs_{export}exp.csv'
-)
+all_data.to_csv(f'data/figure_S4_data.csv')
