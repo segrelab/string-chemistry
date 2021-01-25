@@ -119,16 +119,13 @@ print('Doing UMAP')
 umap_results = do_umap('data/figure_S4_data.csv')
 
 print('Plotting UMAP results')
-# set up the subplots in a 3x2 grid
-fig, ax = plt.subplots(nrows = 2, ncols = 3, figsize = (12,6))
+# set up the three subplots
+fig, ax = plt.subplots(nrows = 1, ncols = 3, figsize = (12,3))
 
-# panel A is the schematic representation of how the data was generated so 
-# we're starting with panel B
-
-# panels B-D use the data from the networks with export reactions
-biomass_plot(ax[0,0], umap_results, 'a')
-nutrient_plot(ax[0,1], umap_results, 'b')
-growth_plot(fig, ax[0,2], umap_results, 'c')
+# plot
+biomass_plot(ax[0], umap_results, 'a')
+nutrient_plot(ax[1], umap_results, 'b')
+growth_plot(fig, ax[2], umap_results, 'c')
 
 # tight_layout just fixes all sorts of problems with subplots overlapping
 plt.tight_layout()

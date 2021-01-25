@@ -1,7 +1,9 @@
 # figure_2.R
-# make the plots for figure 2 that show sizes of string chemistry networks
-# as functions of the number of unique monomers and the maximum string length
-# used to generate them
+'''
+Make a lineplot showing the reaction-to-metabolite ratios for several string
+chemistry networks and compare them to the ratios for real metabolic networks
+and pruned string chemistry networks
+'''
 
 # load package(s)
 library(ggpubr)

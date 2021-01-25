@@ -1,6 +1,8 @@
 # figure_S3.py
-# makes violin plots to compare sizes of networks pruned with and without
-# export reactions
+'''
+makes violin plots to compare sizes of networks pruned with and without
+export reactions
+'''
 
 import pandas as pd
 from matplotlib import pyplot as plt
