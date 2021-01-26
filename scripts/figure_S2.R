@@ -1,12 +1,9 @@
-# figure_2.R
-'''
-Make a lineplot showing the reaction-to-metabolite ratios for several string
-chemistry networks and compare them to the ratios for real metabolic networks
-and pruned string chemistry networks
-'''
+# figure_S2.R
+# Make a lineplot showing the reaction-to-metabolite ratios for several string
+# chemistry networks and compare them to the ratios for real metabolic networks
+# and pruned string chemistry networks
 
-# load package(s)
-library(ggpubr)
+# load package
 suppressMessages(library(tidyverse))
 
 # make all plots be nice
@@ -22,7 +19,7 @@ counts <- read.csv(
   mutate(ratio = rxns/mets)
 
 pruned_counts <- read.csv(
-  "data/varied_ab_5_2to5ins_2to10outs_exp.csv", 
+  "data/figure_S4_S5_data.csv", 
   header = F,
   col.names = c("ins", "outs", "ratio", "pruned_pct")
 )

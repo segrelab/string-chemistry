@@ -153,4 +153,4 @@ flux_ax = fix_axes(flux_ax, 'Normalized Flux', 'Reactions', 'd')
 # make sure subplots don't overlap with each other
 plt.tight_layout()
 plt.savefig('data/figure_2.png', dpi = 600)
-plt.show()
+#plt.show()

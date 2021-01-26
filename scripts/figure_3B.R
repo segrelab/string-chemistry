@@ -3,8 +3,7 @@
 
 library(pheatmap)
 
-file <- commandArgs(trailingOnly = T)[1]
-S <- read.csv(file, header = F)
+S <- read.csv("data/figure_3B_data.csv", header = F)
 png("data/figure_3B.png", height = 2000, width = 2000, res = 600)
 pheatmap(
   t(S), # opinions differ on whether reactions should be the columns or rows

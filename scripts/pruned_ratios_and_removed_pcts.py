@@ -1,37 +1,38 @@
-# figure_S4_S5_data.py
+# pruned_ratios_and_removed_pcts.py
 '''
-Prune the (2,5) universal network 100 times with 2 input metabolites and 5
-output metabolites, then do it again but with 6 output metabolites and keep
-going until you've done every combination of 2-5 input metabolites and 5-10
-output metabolites
+given a particular universal network, compare pruning results at several
+different combinations of environmental and biomass complexities
+i.e. prune several times with 2 input metabolites and 5 biomass precursors,
+then prune several times with 5 input metabolites and 10 biomass precursors,
+etc. Each time, record the reaction-to-metabolite ratio and % of reactions
+removed
 '''
 
 import sys
 import string_chem_net as scn
 import itertools as it
 
-# set parameters
-monos = 'ab'
-max_pol = 5
-min_ins = 2 # smallest number of nutrients to use
-max_ins = 5 # largest number of nutrients to use
-min_outs = 5 # smallest number of biomass precursors to use
-max_outs = 10 # largest number of biomass precursors to use
-reps = 100 # number of times to prune with each combination
+try:
+    (monos, max_pol, min_ins, max_ins, min_outs, max_outs, reps) = sys.argv[1:]
+except ValueError:
+    sys.exit('Arguments:\nmonomers\nmax polymer length\nminimum ' +
+        'number of food sources\nmaximum number of food sources\nminimum ' +
+        'number of biomass precursors\nmaximum number of biomass precursors\n' +
+        'number of times to prune with each setup'
+    )
 
 # create the universal network
-SCN = scn.CreateNetwork(monos, max_pol)
+SCN = scn.CreateNetwork(monos, int(max_pol))
 universal_model = scn.make_cobra_model(
     SCN.met_list, 
     SCN.rxn_list, 
     allow_export = True
 )
 
-# make every pair of number of environmental metabolites and number of biomass 
-# precursors
+# make every pair of number of environments and number of biomass precursors
 conditions = list(it.product(
-    range(min_ins, max_ins + 1), # have to add 1 because Python
-    range(min_outs, max_outs + 1)
+    range(int(min_ins), int(max_ins) + 1), # have to add 1 because Python
+    range(int(min_outs), int(max_outs) + 1)
 ))
 
 # store the reaction-to-metabolite ratio and the % of pruned reactions for each
@@ -45,7 +46,7 @@ for condition in conditions:
         f'{condition[0]} inputs and {condition[1]} outputs'
     )
     # next, loop over number of times to prune with each condition
-    for rep in range(reps):
+    for rep in range(int(reps)):
         if rep % 10 == 0:
             print(f'On prune {rep} of {reps}')
         # work with a copy of the model so it remains untouched for the next
@@ -87,6 +88,9 @@ for condition in conditions:
         # make everything a string so we can join it later
         output_data.append([str(x) for x in output])
 
-with open(f'data/figure_S4_S5_data.csv', 'w') as out:
+with open(
+    f'data/varied_{monos}_{max_pol}_{min_ins}to{max_ins}ins_' +
+    f'{min_outs}to{max_outs}outs_exp.csv', 
+    'w') as out:
     output = '\n'.join([','.join(row) for row in output_data])
     out.write(output)

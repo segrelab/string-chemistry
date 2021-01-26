@@ -1,4 +1,4 @@
-# figure_S6_plot.py
+# figure_S7_plot.py
 '''
 Make several UMAPs visualizing the results of figure_S4_data.py
 '''
@@ -116,7 +116,7 @@ def growth_plot(figure, axes, data, label):
 
 # get UMAP results for networks with and without export reactions
 print('Doing UMAP')
-umap_results = do_umap('data/figure_S4_data.csv')
+umap_results = do_umap('data/figure_S7_data.csv')
 
 print('Plotting UMAP results')
 # set up the three subplots
@@ -129,5 +129,5 @@ growth_plot(fig, ax[2], umap_results, 'c')
 
 # tight_layout just fixes all sorts of problems with subplots overlapping
 plt.tight_layout()
-#plt.savefig('data/figure_S6.png', dpi = 600)
+#plt.savefig('data/figure_S7.png', dpi = 600)
 plt.show()
