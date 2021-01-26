@@ -1,6 +1,6 @@
-# figure_S6_plot.R
+# figure_S6_S7_plot.R
 # visualizes the differences in the two pruning algorithms using the data in
-# figure_S6_data.csv
+# figure_S6_S7_data.csv
 
 suppressMessages(library(tidyverse))
 
@@ -8,7 +8,7 @@ suppressMessages(library(tidyverse))
 theme_set(theme_bw())
 
 # read in data
-data <- read.csv("data/figure_S6_data.csv")
+data <- read.csv("data/figure_S6_S7_data.csv")
 
 # plot number of reactions vs step for each trial and have each trial be a
 # different color and each pruner be a different linetype
@@ -23,10 +23,10 @@ data %>%
 invisible(dev.off())
 
 # plot distribution of Jaccard similarities
-png("data/pruning_jaccards.png", height = 4000, width = 6000, res = 600)
+png("data/figure_S7.png", height = 4000, width = 6000, res = 600)
 data %>%
   ggplot(aes(x = jaccard)) + 
-  geom_histogram(fill = "royalblue", binwidth = 0.01) +
+  geom_histogram(fill = "royalblue", binwidth = 0.03) +
   labs(
     x = "Jaccard Similarity Between Pruned Networks",
     y = "Number of Network Pairs"

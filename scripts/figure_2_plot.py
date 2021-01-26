@@ -95,7 +95,6 @@ def fix_axes(axes, x_lab, y_lab, panel):
     return(axes)
 
 # read in data
-# read data
 data = pd.read_csv(
     'data/figure_2_data.csv',
     names = ['monos', 'max_pol', 'met_count', 'rxn_count']

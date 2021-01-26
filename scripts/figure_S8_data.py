@@ -1,4 +1,4 @@
-# figure_S7_data.py
+# figure_S8_data.py
 '''
 Make the (2,5) universal string chemistry network and two COBRApy models of it
 with and without export reactions, then prune each of those networks using the 
@@ -122,4 +122,4 @@ data_bits = pool.map(
 )
 # concatenate all the dataframes and write to output
 all_data = pd.concat(data_bits)
-all_data.to_csv(f'data/figure_S7_data.csv')
+all_data.to_csv(f'data/figure_S8_data.csv')

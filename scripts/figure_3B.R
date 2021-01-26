@@ -1,10 +1,10 @@
-# figure_3B.R
-# make heatmap to visualize S matrix
+# figure_2B.R
+# make heatmap to visualize the S matrix of the network shown in figure 2A
 
 library(pheatmap)
 
-S <- read.csv("data/figure_3B_data.csv", header = F)
-png("data/figure_3B.png", height = 2000, width = 2000, res = 600)
+S <- read.csv("data/figure_2B_data.csv", header = F)
+png("data/figure_2B.png", height = 2000, width = 2000, res = 600)
 pheatmap(
   t(S), # opinions differ on whether reactions should be the columns or rows
   # don't cluster anything
