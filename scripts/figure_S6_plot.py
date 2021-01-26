@@ -1,4 +1,4 @@
-# figure_S4_plot.py
+# figure_S6_plot.py
 '''
 Make several UMAPs visualizing the results of figure_S4_data.py
 '''
@@ -129,5 +129,5 @@ growth_plot(fig, ax[2], umap_results, 'c')
 
 # tight_layout just fixes all sorts of problems with subplots overlapping
 plt.tight_layout()
-#plt.savefig('data/figure_S4.png', dpi = 600)
+#plt.savefig('data/figure_S6.png', dpi = 600)
 plt.show()

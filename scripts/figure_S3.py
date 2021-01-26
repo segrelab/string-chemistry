@@ -41,4 +41,4 @@ ax[1].text(
 
 # make sure the two panels don't overlap or anything else unsightly
 plt.tight_layout()
-plt.savefig('data/figure_S2.png', dpi = 600)
+plt.savefig('data/figure_S3.png', dpi = 600)
