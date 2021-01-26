@@ -9,7 +9,7 @@ import random
 import cobra
 import re
 from cobra.flux_analysis import single_reaction_deletion as get_kos
-#import pygraphviz as gv
+import pygraphviz as gv
 
 class CreateNetwork():
     # given a set of monomers and a max polymer length, generate a network

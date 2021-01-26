@@ -37,7 +37,7 @@ def biomass_plot(axes, data, label):
         data.x, data.y,
         c = bm_cvals, cmap = 'nipy_spectral',
         # points need to be as small as possible so they don't overlap
-        s = 10
+        s = 1
     )
     axes.set_xlabel('UMAP_1')
     axes.set_ylabel('UMAP_2')
@@ -67,7 +67,7 @@ def nutrient_plot(axes, data, label):
         data.x, data.y,
         c = in_cvals, cmap = 'nipy_spectral',
         # points need to be as small as possible so they don't overlap
-        s = 10
+        s = 1
     )
     axes.set_xlabel('UMAP_1')
     axes.set_ylabel('UMAP_2')
@@ -89,7 +89,7 @@ def growth_plot(figure, axes, data, label):
         data.x, data.y, 
         c = data.growth, cmap = 'Blues', 
         # points need to be as small as possible so they don't overlap
-        s = 10
+        s = 1
     )
     figure.colorbar(plot, ax = axes)
     axes.set_xlabel('UMAP_1')

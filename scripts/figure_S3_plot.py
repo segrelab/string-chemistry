@@ -9,7 +9,7 @@ from matplotlib import pyplot as plt
 import seaborn as sns
 
 # read input file
-data = pd.read_csv('data/ab_5_2ins_5outs_sizes.csv', index_col = 0)
+data = pd.read_csv('data/figure_S3_data.csv', index_col = 0)
 
 # make two plots, one for metabolite counts and one for reaction counts
 fig, ax = plt.subplots(ncols = 2)
@@ -41,5 +41,5 @@ ax[1].text(
 
 # make sure the two panels don't overlap or anything else unsightly
 plt.tight_layout()
-#plt.savefig('data/figure_S3.png', dpi = 600)
-plt.show()
+plt.savefig('data/figure_S3.png', dpi = 600)
+#plt.show()

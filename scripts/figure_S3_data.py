@@ -1,8 +1,9 @@
-# export_comparison.py
-# generates a bunch of pruned networks from one universal network where half
-# were pruned with export reactions and half were pruned without
+# figure_S3_data.py
+'''
+generates a bunch of pruned networks from one universal network where half
+were pruned with export reactions and half were pruned without
+'''
 
-import sys
 import string_chem_net as scn
 import pandas as pd
 
@@ -64,28 +65,25 @@ def do_many_prunes(network, export, reps, ins, outs):
         output = output.append(some_output, ignore_index = True)
     return(output)
 
-# get command-line arguments
-try:
-    (monos, max_pol, ins, outs, reps) = sys.argv[1:]
-except ValueError:
-    sys.exit(
-        'Specify set of monomers to use, maximum string length, number of ' +
-        'environmental nutrients, number of biomass precursors, and number ' +
-        'of times to prune'
-    )
+# set parameters
+monos = 'ab'
+max_pol = 5
+ins = 2
+outs = 5
+reps = 100
 
 # make the universal network
-SCN = scn.CreateNetwork(monos, int(max_pol))
+SCN = scn.CreateNetwork(monos, max_pol)
 
 # prune with and without export reactions
 print('Pruning with export reactions')
-export_data = do_many_prunes(SCN, True, int(reps), int(ins), int(outs))
+export_data = do_many_prunes(SCN, True, reps, ins, outs)
 print('Pruning without export reactions')
-no_export_data = do_many_prunes(SCN, False, int(reps), int(ins), int(outs))
+no_export_data = do_many_prunes(SCN, False, reps, ins, outs)
 
 # add columns indicating whether or not there were export reactions, merge the
 # dataframes and write the result to a file
 export_data['export'] = 'Allowed'
 no_export_data['export'] = 'Not Allowed'
 all_data = export_data.append(no_export_data, ignore_index = False)
-all_data.to_csv(f'data/{monos}_{max_pol}_{ins}ins_{outs}outs_sizes.csv')
+all_data.to_csv(f'data/figure_S3_data.csv')

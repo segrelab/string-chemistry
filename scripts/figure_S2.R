@@ -35,7 +35,7 @@ yeast_mets <- 2666
 yeast_rxns <- 3895
 
 
-png("data/figure_S2.png", height = 8000, width = 5000, res = 600)
+png("data/figure_S2.png", height = 4000, width = 5000, res = 600)
 # reaction-to-metabolite ratio as a function of monomers and max length
 ggplot() +
   # plot ratios from universal networks
@@ -54,14 +54,13 @@ ggplot() +
   annotate("text", x = 6.2, y = 1, label = "Pruned networks") +
   # add an arrow to this boxplot from the A = 2 line
   geom_segment(
-    aes(x = 5, y = 3.1, xend = 5, yend = 1.4, color = "2"), 
+    aes(x = 5, y = 3.1, xend = 5, yend = 1.3, color = "2"), 
     arrow = arrow(length = unit(0.03, "npc"))
   ) +
   # add labels
   labs(
     x = "Maximum String Length", 
-    y = "Reactions / Metabolites", 
-    color = "Types of Monomers", 
-    title = "Network Sizes By Ratio of Reaction Count to Metabolite Count"
+    y = "Number of Reactions / Number of Metabolites", 
+    color = "Types of Monomers" 
   )
 invisible(dev.off())
