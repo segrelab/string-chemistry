@@ -108,54 +108,6 @@ def make_scn_flux_dists(fluxes, bins):
     flux_dists.columns = ['flux', 'mean_freq', 'std_freq']
     return(flux_dists)
 
-def make_deg_dist(model):
-    '''
-    Given a COBRApy model of either a real metabolic network or a pruned string
-    chemistry network, find the degree and flux distributions for that network
-    '''
-    degs = [
-        len(m.reactions) for m in model.metabolites
-        # skip metabolites with degrees of 0
-        if len(m.reactions) != 0
-    ]
-    # find frequency of each degree
-    deg_dist = pd.Series(degs).value_counts(normalize = True)
-    deg_dist = pd.DataFrame(deg_dist)
-    deg_dist = deg_dist.reset_index()
-    deg_dist.columns = ['degree', 'freq']
-    return(deg_dist)
-
-def make_scn_flux_dists(fluxes, bins):
-    '''
-    Given all of the fluxes in all pruned networks, find equally-sized bins
-    spanning the whole range of fluxes and assign each flux to a bin
-    Then get the frequency of fluxes in each bin in each pruned network
-    Then find the mean and standard deviation of those bin frequencies across
-    all pruned networks
-    '''
-    # start by normalizing all fluxes to the maximum flux within each trial
-    fluxes['flux'] = fluxes.groupby('trial')['flux'].transform(
-        lambda x: x / max(x)
-    )
-    fluxes['flux'] /= max(fluxes['flux'])
-    # find bins using fluxes from all trials
-    fluxes['flux_bin'] = pd.cut(
-        fluxes['flux'], flux_bins
-    ).apply(lambda x: x.mid).astype(float)
-    # get frequencies of fluxes in each bin grouped by trial
-    flux_dists = pd.DataFrame(
-        fluxes.groupby('trial')['flux_bin'].value_counts(normalize = True)
-    )
-    # rename things and bring the index back as columns
-    flux_dists.columns = ['freq']
-    flux_dists = flux_dists.reset_index()
-    # find mean and standard deviations of frequencies within each bin
-    flux_dists = flux_dists.groupby('flux_bin').agg(
-        {'freq' : ['mean', 'std']}
-    ).reset_index()
-    flux_dists.columns = ['flux', 'mean_freq', 'std_freq']
-    return(flux_dists)
-
 def make_binned_flux_dist(model, bins):
     '''
     Given a COBRApy model, optimize production of biomass to get reaction 

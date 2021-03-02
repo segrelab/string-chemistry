@@ -33,7 +33,7 @@ data %>%
     labs(
       x = "Number of Biomass Precursors",
       y = "Percent of Reactions Removed During Pruning",
-      col = "Number of Food Sources"
+      col = "Number of Available Nutrients"
     ) +
     theme(text = element_text(size = 15))
 invisible(dev.off())
@@ -57,7 +57,7 @@ data %>%
     labs(
       x = "Number of Biomass Precursors",
       y = "Number of Reactions / Number of Metabolites in Pruned Network",
-      col = "Number of Food Sources"
+      col = "Number of Available Nutrients"
     ) +
     theme(text = element_text(size = 15))
 invisible(dev.off())

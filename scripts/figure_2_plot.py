@@ -23,9 +23,13 @@ def make_size_plot(ax, data, y_var, y_lab, panel):
         ax = ax
     )
     # rename the legend from 'monos' to 'Types of Monomers'
-    ax.legend(title = 'Types of Monomers')
+    ax.legend(title = 'Types of Monomers (A)')
     # make y-axis log-scaled and set axis labels
-    ax.set(yscale = 'log', xlabel = 'Maximum String Length', ylabel = y_lab)
+    ax.set(
+        yscale = 'log', 
+        xlabel = 'Maximum String Length (L)', 
+        ylabel = y_lab
+    )
     # give this panel a label
     ax.text(
         # position the letter above the plot on the left side
