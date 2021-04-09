@@ -17,13 +17,35 @@ ins = 2      # number of food sources / environmental nutrients
 outs = 5     # number of biomass precursors
 
 SCN = scn.CreateNetwork(monos, max_len)
-cobra_model = scn.make_cobra_model(SCN.met_list, SCN.rxn_list)
+full_model = scn.make_cobra_model(SCN.met_list, SCN.rxn_list)
 
-bm_rxn = scn.choose_bm_mets(outs, cobra_model)
-scn.choose_inputs(ins, cobra_model, bm_rxn)
-cobra_model.objective = bm_rxn
+# make some reactions to import nutrient metabolites and represent creation of
+# biomass precursors
+bm_rxn = scn.choose_bm_mets(outs, full_model)
+scn.choose_inputs(ins, full_model, bm_rxn)
+full_model.objective = bm_rxn
 
-solution = cobra_model.optimize()
+# while that combination of nutrients and biomass precursors might result in a
+# feasible network, it frequently doesn't, so here's the way I make sure that
+# the pair I've chosen is viable before doing anything else
+solution = full_model.optimize()
+# can't just check solution.status because sometimes it's feasible but the
+# flux through the biomass reaction is vanishingly small
+bm_rxn_flux = solution.fluxes.get(key = bm_rxn.id)
+while solution.status == 'infeasible' or bm_rxn_flux < 10e-10:
+    # if the solution isn't feasible, pick a different environment
+    in_rxns = [
+        # don't want to remove all boundary reactions because that would
+        # also remove all of the export reactions
+        rxn for rxn in full_model.boundary if rxn.id.startswith('->')
+    ]
+    full_model.remove_reactions(in_rxns)
+    scn.choose_inputs(int(ins), full_model, bm_rxn)
+    solution = full_model.optimize()
+    bm_rxn_flux = solution.fluxes.get(key = bm_rxn.id)
+
+# now we can be confident that pruning will work
+pruned_model = scn.min_flux_prune(model, bm_rxn)
 ```
 
 If you want to work with the stoichiometric matrix directly, you can pass `make_stoich_mat = True` to CreateNetwork; it's set to false by default because it can take a while to create for large networks.
