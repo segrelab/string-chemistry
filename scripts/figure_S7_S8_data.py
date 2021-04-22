@@ -1,4 +1,4 @@
-# figure_S6_S7_data.py
+# figure_S7_S8_data.py
 '''
 One of the reviewers recommended that we try a different approach to the
 pruning algorithm that weighted the decision to remove individual reactions
@@ -265,4 +265,4 @@ if __name__ == '__main__':
         all_data = all_data.append(some_data)
     # write all_data to a csv so we can tweak the plotting details without having
     # to run this script again
-    all_data.to_csv('data/figure_S6_S7_data.csv', index = False)
+    all_data.to_csv('data/figure_S7_S8_data.csv', index = False)

@@ -1,6 +1,6 @@
-# figure_4_plot.py
+# figure_S9_plot.py
 '''
-Make several UMAPs visualizing the results of figure_4_data.py
+Make several UMAPs visualizing the results of figure_S9_data.py
 '''
 
 import pandas as pd
@@ -9,8 +9,11 @@ import numpy as np
 import matplotlib
 from matplotlib import pyplot as plt
 
-# just need name of file with output
 def do_umap(filename):
+    '''
+    Given a filename with a bunch of reaction-inclusion vectors, use UMAP to
+    get a two-dimensional representation of those networks
+    '''
     # get the reaction-inclusion vector out of the input file and make it into
     # a bunch of 1/0 columns instead of one column of strings of 1s and 0s
     data = pd.read_csv(filename)
@@ -26,9 +29,11 @@ def do_umap(filename):
     plotting_df = pd.concat([umap_df, data], axis = 1)
     return(plotting_df)
 
-# make a scatterplot of the UMAP results where each point is colored according
-# to the biomass reaction used by the associated network
 def biomass_plot(axes, data, label):
+    '''
+    Make a scatterplot of the UMAP results where each point is colored
+    according to the biomass reaction used by the associated network
+    '''
     # make a colormap
     bm_cdict = {v: k for k, v in enumerate(np.unique(data.biomass))}
     bm_cvals = [bm_cdict[c] for c in data.biomass]
@@ -52,13 +57,15 @@ def biomass_plot(axes, data, label):
     )
     # don't need to return anything because matplotlib is a bit weird
 
-# make a scatterplot of the UMAP results where each point is colored according
-# to the nutrients available to the associated network
 def nutrient_plot(axes, data, label):
+    '''
+    Make a scatterplot of the UMAP results where each point is colored 
+    according to the nutrients available to the associated network
+    '''
     # make a colormap
-    # start by getting the column of input metabolites, splitting it into a list of
-    # lists, then pasting the sublists together so that there's one string to use
-    # for making the colormap
+    # start by getting the column of input metabolites, splitting it into a 
+    # list of lists, then pasting the sublists together so that there's one 
+    # string to use for making the colormap
     in_groups = ['-'.join(sorted(ins.split('-'))) for ins in data.env]
     in_cdict = {v: k for k, v in enumerate(np.unique(in_groups))}
     in_cvals = [in_cdict[c] for c in in_groups]
@@ -82,9 +89,11 @@ def nutrient_plot(axes, data, label):
     )
     # return nothing because matplotlib
 
-# make a scatterplot of UMAP results where each point is colored according to
-# the growth rate of the associated network
 def growth_plot(figure, axes, data, label):
+    '''
+    Make scatterplot of UMAP results where each point is colored according to
+    the growth rate of the associated network
+    '''
     plot = axes.scatter(
         data.x, data.y, 
         c = data.growth, cmap = 'Blues', 
@@ -107,27 +116,18 @@ def growth_plot(figure, axes, data, label):
 
 # get UMAP results for networks with and without export reactions
 print('Doing UMAP')
-export_umap = do_umap('data/figure_4_export_data.csv')
-no_export_umap = do_umap('data/figure_4_no_export_data.csv')
+umap_results = do_umap('data/figure_S9_data.csv')
 
 print('Plotting UMAP results')
-# set up the subplots in a 3x2 grid
-fig, ax = plt.subplots(nrows = 2, ncols = 3, figsize = (12,6))
+# set up the three subplots
+fig, ax = plt.subplots(nrows = 1, ncols = 3, figsize = (12,3))
 
-# panel A is the schematic representation of how the data was generated so 
-# we're starting with panel B
-
-# panels B-D use the data from the networks with export reactions
-biomass_plot(ax[0,0], export_umap, 'b')
-nutrient_plot(ax[0,1], export_umap, 'c')
-growth_plot(fig, ax[0,2], export_umap, 'd')
-
-# panels E-G use the data from the networks without export reactions
-biomass_plot(ax[1,0], no_export_umap, 'e')
-nutrient_plot(ax[1,1], no_export_umap, 'f')
-growth_plot(fig, ax[1,2], no_export_umap, 'g')
+# plot
+biomass_plot(ax[0], umap_results, 'a')
+nutrient_plot(ax[1], umap_results, 'b')
+growth_plot(fig, ax[2], umap_results, 'c')
 
 # tight_layout just fixes all sorts of problems with subplots overlapping
 plt.tight_layout()
-plt.savefig('data/figure_4B-G.png', dpi = 600)
+plt.savefig('data/figure_S9.png', dpi = 600)
 #plt.show()

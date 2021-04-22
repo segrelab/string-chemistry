@@ -1,10 +1,10 @@
-# figure_S8_data.py
+# figure_S9_data.py
 '''
 Make the (2,5) universal string chemistry network and two COBRApy models of it
 with and without export reactions, then prune each of those networks using the 
 biomass-impact pruner with 100 different biomass reactions and 100 different 
 environments per biomass reaction. Save the reaction-inclusion vectors and 
-biomass fluxes for the pruned networks in files that figure_S4_plot.py will 
+biomass fluxes for the pruned networks in files that figure_S9_plot.py will 
 read to make plots
 '''
 
@@ -122,4 +122,4 @@ data_bits = pool.map(
 )
 # concatenate all the dataframes and write to output
 all_data = pd.concat(data_bits)
-all_data.to_csv(f'data/figure_S8_data.csv')
+all_data.to_csv(f'data/figure_S9_data.csv')

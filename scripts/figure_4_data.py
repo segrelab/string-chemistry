@@ -90,48 +90,49 @@ def prune_many_times(arglist):
     data = data[['biomass', 'env', 'rxn_incl', 'growth']]
     return(data)
 
-try:
-    threads = int(sys.argv[1])
-except IndexError:
-    sys.exit('Specify a number of threads to run on')
+if __name__ == '__main__':
+    try:
+        threads = int(sys.argv[1])
+    except IndexError:
+        sys.exit('Specify a number of threads to run on')
 
-# define parameters
-monos = 'ab'
-max_pol = 5
-ins = 2 # number of input metabolites in each set
-envs = 100 # number of different sets of ins to choose
-outs = 5 # number of biomass precursors in each biomass reaction
-orgs = 100 # number of different sets of outs to choose
+    # define parameters
+    monos = 'ab'
+    max_pol = 5
+    ins = 2 # number of input metabolites in each set
+    envs = 100 # number of different sets of ins to choose
+    outs = 5 # number of biomass precursors in each biomass reaction
+    orgs = 100 # number of different sets of outs to choose
 
-# create the universal networks
-SCN = scn.CreateNetwork(monos, max_pol)
-export_model = scn.make_cobra_model(
-    SCN.met_list, 
-    SCN.rxn_list, 
-    allow_export = True
-)
-no_export_model = scn.make_cobra_model(
-    SCN.met_list, 
-    SCN.rxn_list, 
-    allow_export = False
-)
+    # create the universal networks
+    SCN = scn.CreateNetwork(monos, max_pol)
+    export_model = scn.make_cobra_model(
+        SCN.met_list, 
+        SCN.rxn_list, 
+        allow_export = True
+    )
+    no_export_model = scn.make_cobra_model(
+        SCN.met_list, 
+        SCN.rxn_list, 
+        allow_export = False
+    )
 
-# just in case we're trying a particularly large number of biomass reactions,
-# run the function in parallel since each biomass reaction can be handled
-# completely independently of the others
-pool = mp.Pool(threads)
-exp_data_bits = pool.map(
-    prune_many_times,
-    # same arguments every time for orgs times
-    [[export_model, ins, outs, envs] for bm in range(orgs)]
-)
-no_exp_data_bits = pool.map(
-    prune_many_times,
-    # same arguments every time for orgs times
-    [[no_export_model, ins, outs, envs] for bm in range(orgs)]
-)
-# concatenate all the dataframes and write to output
-exp_data = pd.concat(exp_data_bits)
-exp_data.to_csv('data/figure_4_export_data.csv')
-no_exp_data = pd.concat(no_exp_data_bits)
-no_exp_data.to_csv(f'data/figure_4_no_export_data.csv')
+    # just in case we're trying a particularly large number of biomass reactions,
+    # run the function in parallel since each biomass reaction can be handled
+    # completely independently of the others
+    pool = mp.Pool(threads)
+    exp_data_bits = pool.map(
+        prune_many_times,
+        # same arguments every time for orgs times
+        [[export_model, ins, outs, envs] for bm in range(orgs)]
+    )
+    no_exp_data_bits = pool.map(
+        prune_many_times,
+        # same arguments every time for orgs times
+        [[no_export_model, ins, outs, envs] for bm in range(orgs)]
+    )
+    # concatenate all the dataframes and write to output
+    exp_data = pd.concat(exp_data_bits)
+    exp_data.to_csv('data/figure_4_export_data.csv')
+    no_exp_data = pd.concat(no_exp_data_bits)
+    no_exp_data.to_csv(f'data/figure_4_no_export_data.csv')
