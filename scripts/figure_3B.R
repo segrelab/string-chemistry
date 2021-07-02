@@ -4,7 +4,7 @@
 library(pheatmap)
 
 S <- read.csv("data/figure_3B_data.csv", header = F)
-png("data/figure_2B.png", height = 2000, width = 2000, res = 600)
+png("data/figure_3B.png", height = 2000, width = 2000, res = 600)
 pheatmap(
   S, 
   # don't cluster anything
