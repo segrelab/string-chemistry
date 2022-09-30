@@ -4,7 +4,7 @@ decorator==4.4.2
 depinfo==1.5.3
 editdistance==0.5.3
 future==0.18.2
-joblib==0.14.1
+joblib==1.2.0
 kiwisolver==1.2.0
 llvmlite==0.35.0
 matplotlib==3.2.1
