@@ -2,6 +2,8 @@
 
 Tools for creating string chemistry networks and doing flux-balance analysis on them. All scripts have a summary of what they do in the first few lines, and I've given more detailed descriptions of a few key ones below. The package itself is in string\_chem\_net.py, and everything else just uses the package in various ways. Nearly every script expects there to be another directory called `data` in the same directory as `scripts`, and that you're calling the script from that directory (rather than `scripts`). Every script should print the command-line arguments it expects if you run it without any arguments.
 
+If you use ARCHNET, cite [the associated paper](https://link.springer.com/article/10.1007/s00239-021-10018-0).
+
 ## The `ARCHNET` package
 Contains a class for generating arbitrary string chemistry networks and several functions for maniuplating them and turning them into [COBRApy models](https://cobrapy.readthedocs.io/en/latest/index.html) for FBA.
 
